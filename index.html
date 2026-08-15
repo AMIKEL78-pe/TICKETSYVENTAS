@@ -5359,17 +5359,35 @@ function iaGuardarApiKey(){
   if(!input) return;
   var key = input.value.trim();
   if(!key){ alert('Ingresa tu API Key de Anthropic antes de guardar.'); return; }
-  if(!key.startsWith('sk-ant-')){ alert('La API Key debe comenzar con "sk-ant-". Verifica que sea correcta.'); return; }
+  /* Detectar si el campo muestra la versión enmascarada (contiene el caracter …) */
+  if(key.indexOf('…') !== -1){
+    alert('El campo muestra la key ya guardada. Para cambiarla, borra el contenido e ingresa la nueva key completa.');
+    return;
+  }
+  if(!key.startsWith('sk-ant-')){
+    alert('La API Key debe comenzar con "sk-ant-". Cópiala exactamente desde console.anthropic.com/settings/keys');
+    return;
+  }
   try{ localStorage.setItem(IA_KEY_STORAGE, key); }catch(e){}
-  input.value = key.slice(0,12)+'…'+key.slice(-4); /* mostrar parcialmente */
+  input.value = key.slice(0,14)+'…'+key.slice(-4);
   if(ok){ ok.style.display='block'; setTimeout(function(){ ok.style.display='none'; },3000); }
 }
 
 function iaInit(){
-  /* Cargar API key guardada y mostrarla parcialmente */
+  /* Mostrar estado de API key sin pre-poblar el input (evita re-guardado de version enmascarada) */
   var savedKey = iaGetApiKey();
   var input = document.getElementById('iaApiKeyInput');
-  if(input && savedKey) input.value = savedKey.slice(0,12)+'…'+savedKey.slice(-4);
+  var ok    = document.getElementById('iaApiKeyOk');
+  if(input){
+    input.value = '';          /* siempre vacio — usuario debe pegar la key completa para cambiarla */
+    input.placeholder = savedKey ? 'Key guardada (' + savedKey.slice(0,14) + '…' + savedKey.slice(-4) + '). Pega una nueva para cambiarla.' : 'sk-ant-api03-…';
+  }
+  if(ok && savedKey){
+    ok.textContent = '✓ API Key configurada: ' + savedKey.slice(0,14) + '…' + savedKey.slice(-4);
+    ok.style.display = 'block';
+  } else if(ok){
+    ok.style.display = 'none';
+  }
 
   /* Poblar selectores desde tickets importados */
   var t = STATE.tickets.raw;
