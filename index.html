@@ -600,6 +600,81 @@ License: MIT
   .rent-config{background:var(--surface-alt);border:1.5px solid var(--border);border-radius:8px;padding:12px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:18px;}
   .rent-config label{font-size:12px;font-weight:600;color:var(--ink-muted);}
   .rent-config input[type=number]{width:80px;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:12.5px;text-align:center;}
+  /* ── Módulos nuevos: dots de color ── */
+  .module-btn[data-mod="fallas"] .dot{background:#EF4444;}
+  .module-btn[data-mod="fallas"].active{box-shadow:0 -3px 0 0 #EF4444 inset;}
+  .module-btn[data-mod="licencias"] .dot{background:#8B5CF6;}
+  .module-btn[data-mod="licencias"].active{box-shadow:0 -3px 0 0 #8B5CF6 inset;}
+  .module-btn[data-mod="ia"] .dot{background:#10B981;}
+  .module-btn[data-mod="ia"].active{box-shadow:0 -3px 0 0 #10B981 inset;}
+
+  /* ── Recurrencia de Fallas ── */
+  .fallas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:22px;}
+  .fallas-card{background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;border-left:4px solid #EF4444;}
+  .fallas-card.ok{border-left-color:#10B981;}
+  .fallas-card.warn{border-left-color:#F59E0B;}
+  .fallas-card.crit{border-left-color:#EF4444;}
+  .fallas-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+  .fallas-activo{font-size:13px;font-weight:800;color:var(--navy);}
+  .fallas-badge{font-size:10px;font-weight:800;padding:2px 9px;border-radius:20px;}
+  .fallas-badge.ok{background:#D1FAE5;color:#065F46;}
+  .fallas-badge.warn{background:#FEF3C7;color:#92400E;}
+  .fallas-badge.crit{background:#FEE2E2;color:#991B1B;}
+  .fallas-row{display:flex;justify-content:space-between;font-size:11.5px;padding:2px 0;color:var(--ink-muted);}
+  .fallas-row strong{color:var(--ink);}
+  .fallas-config{background:var(--surface-alt);border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin-bottom:18px;}
+  .fallas-config label{font-size:12px;font-weight:600;}
+  .fallas-config input[type=number]{width:54px;padding:3px 6px;border:1.5px solid var(--border);border-radius:5px;text-align:center;font-size:12px;}
+
+  /* ── Inventario de Licencias ── */
+  .lic-alert-bar{background:linear-gradient(135deg,#FEE2E2,#FEF3C7);border:1.5px solid #FBBF24;border-radius:10px;padding:14px 18px;margin-bottom:18px;display:none;}
+  .lic-alert-bar.visible{display:block;}
+  .lic-alert-title{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:#92400E;margin-bottom:8px;}
+  .lic-alert-list{display:flex;flex-wrap:wrap;gap:8px;}
+  .lic-alert-item{background:#fff;border:1px solid #FBBF24;border-radius:6px;padding:5px 10px;font-size:11.5px;}
+  .lic-alert-item.vencida{border-color:#EF4444;background:#FFF1F2;}
+  .lic-tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:18px;}
+  .lic-tab{padding:8px 16px;font-size:12.5px;font-weight:600;color:var(--ink-muted);background:none;border:none;border-bottom:2.5px solid transparent;cursor:pointer;margin-bottom:-2px;}
+  .lic-tab.active{color:#8B5CF6;border-bottom-color:#8B5CF6;}
+  .lic-panel{display:none;} .lic-panel.active{display:block;}
+  .lic-form{background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:18px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:18px;}
+  .lic-form-field{display:flex;flex-direction:column;gap:4px;}
+  .lic-form-field label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-muted);}
+  .lic-form-field input,.lic-form-field select,.lic-form-field textarea{padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:12.5px;font-family:'Inter',sans-serif;}
+  .lic-form-field textarea{resize:vertical;min-height:56px;}
+  .lic-dias-badge{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:20px;}
+  .lic-dias-ok{background:#D1FAE5;color:#065F46;}
+  .lic-dias-warn{background:#FEF3C7;color:#92400E;}
+  .lic-dias-crit{background:#FEE2E2;color:#991B1B;}
+  .lic-dias-venc{background:#F3F4F6;color:#6B7280;}
+
+  /* ── Diagnóstico IA ── */
+  .ia-layout{display:grid;grid-template-columns:320px 1fr;gap:18px;align-items:flex-start;}
+  @media(max-width:860px){.ia-layout{grid-template-columns:1fr;}}
+  .ia-panel-izq{display:flex;flex-direction:column;gap:12px;}
+  .ia-form-card{background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:16px;}
+  .ia-form-label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-muted);margin-bottom:4px;display:block;}
+  .ia-select,.ia-input{width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:12.5px;font-family:'Inter',sans-serif;box-sizing:border-box;margin-bottom:10px;}
+  .ia-textarea{width:100%;min-height:100px;padding:9px 11px;border:1.5px solid var(--border);border-radius:7px;font-size:12.5px;font-family:'Inter',sans-serif;resize:vertical;box-sizing:border-box;}
+  .ia-btn-send{width:100%;padding:10px;background:#10B981;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;margin-top:8px;transition:background .15s;}
+  .ia-btn-send:hover{background:#059669;}
+  .ia-btn-send:disabled{background:#94A3B8;cursor:not-allowed;}
+  .ia-chat{background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:16px;min-height:420px;display:flex;flex-direction:column;gap:12px;}
+  .ia-chat-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--ink-muted);text-align:center;gap:8px;}
+  .ia-chat-empty .icon{font-size:36px;}
+  .ia-msg{border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.6;max-width:100%;}
+  .ia-msg.user{background:#EFF6FF;border:1px solid #BFDBFE;align-self:flex-end;}
+  .ia-msg.assistant{background:#F0FDF4;border:1px solid #A7F3D0;align-self:flex-start;white-space:pre-wrap;}
+  .ia-msg.error{background:#FEF2F2;border:1px solid #FECACA;color:#991B1B;}
+  .ia-loading{display:flex;align-items:center;gap:8px;color:var(--ink-muted);font-size:12.5px;padding:8px;}
+  .ia-typing span{display:inline-block;width:7px;height:7px;background:#10B981;border-radius:50%;animation:ia-blink 1.2s infinite;}
+  .ia-typing span:nth-child(2){animation-delay:.2s;}
+  .ia-typing span:nth-child(3){animation-delay:.4s;}
+  @keyframes ia-blink{0%,80%,100%{opacity:0;}40%{opacity:1;}}
+  .ia-ctx-tag{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;background:#EFF6FF;color:#1D4ED8;border-radius:5px;padding:2px 8px;margin:2px;}
+  .ia-historial-item{border:1px solid var(--border);border-radius:8px;padding:10px 12px;background:#FAFBFC;cursor:pointer;font-size:12px;transition:background .12s;}
+  .ia-historial-item:hover{background:#EFF6FF;}
+  .ia-historial-ts{font-size:10px;color:var(--ink-muted);margin-top:3px;}
 </style>
 </head>
 <body>
@@ -662,6 +737,15 @@ License: MIT
   </button>
   <button class="module-btn" data-mod="rentabilidad" onclick="switchModule('rentabilidad')">
     <span class="dot"></span> Rentabilidad
+  </button>
+  <button class="module-btn" data-mod="fallas" onclick="switchModule('fallas')">
+    <span class="dot"></span> Recurrencia de Fallas
+  </button>
+  <button class="module-btn" data-mod="licencias" onclick="switchModule('licencias')">
+    <span class="dot"></span> Licencias / Software
+  </button>
+  <button class="module-btn" data-mod="ia" onclick="switchModule('ia')">
+    <span class="dot"></span> Diagnóstico IA
   </button>
 </div>
 
@@ -1361,6 +1445,84 @@ License: MIT
       </div>
     </section>
 
+
+    <!-- ======================= MÓDULO: RECURRENCIA DE FALLAS ======================= -->
+    <section id="mod-fallas" class="module">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <h2>Recurrencia de Fallas por Equipo</h2>
+          <p>Activos con mayor número de fallas · Costo acumulado de soporte · Recomendación de reemplazo</p>
+        </div>
+        <div class="import-group">
+          <span class="file-status" id="fallasStatus">Importa Tickets de Servicio para ver el análisis</span>
+          <button class="btn btn-ghost" onclick="exportSectionAsHtml('fallasContent','Recurrencia de Fallas','fallas_equipo')">⭳ Exportar HTML</button>
+        </div>
+      </div>
+      <div id="fallasContent">
+        <div class="empty-state"><div class="icon">🔧</div><h4>Sin datos</h4><p>Importa un CSV en <strong>Tickets de Servicio</strong> para ver el análisis de fallas por equipo.</p></div>
+      </div>
+    </section>
+
+    <!-- ======================= MÓDULO: INVENTARIO DE LICENCIAS ======================= -->
+    <section id="mod-licencias" class="module">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <h2>Inventario de Licencias y Software</h2>
+          <p>Registro de licencias por cliente · Alertas de vencimiento · Control de renovaciones</p>
+        </div>
+        <div class="import-group">
+          <span class="file-status" id="licStatus" style="display:none;"></span>
+          <button class="btn btn-ghost" onclick="exportSectionAsHtml('licContent','Inventario de Licencias','licencias_software')">⭳ Exportar HTML</button>
+          <button class="btn btn-primary" style="background:#8B5CF6;" onclick="licShowPanel('nueva')">+ Nueva Licencia</button>
+        </div>
+      </div>
+      <div id="licContent">
+        <div class="empty-state"><div class="icon">📦</div><h4>Sin licencias registradas</h4><p>Usa el botón <strong>"+ Nueva Licencia"</strong> para comenzar el inventario.</p></div>
+      </div>
+    </section>
+
+    <!-- ======================= MÓDULO: DIAGNÓSTICO IA ======================= -->
+    <section id="mod-ia" class="module">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <h2>Asistente de Diagnóstico Técnico IA</h2>
+          <p>Describe el síntoma · El asistente sugiere causas y pasos de resolución · Contexto de tickets similares</p>
+        </div>
+        <div class="import-group">
+          <button class="btn btn-ghost" onclick="iaNuevaConsulta()">✕ Nueva consulta</button>
+        </div>
+      </div>
+      <div class="ia-layout" id="iaLayout">
+        <!-- Panel izquierdo: formulario -->
+        <div class="ia-panel-izq">
+          <div class="ia-form-card">
+            <label class="ia-form-label">Cliente</label>
+            <select class="ia-select" id="iaCliente"><option value="">— Todos / Sin filtrar —</option></select>
+            <label class="ia-form-label">Tipo de equipo</label>
+            <select class="ia-select" id="iaTipoEquipo"><option value="">— Todos —</option></select>
+            <label class="ia-form-label">Marca</label>
+            <select class="ia-select" id="iaMarca"><option value="">— Todas —</option></select>
+            <label class="ia-form-label">Describe el síntoma o problema</label>
+            <textarea class="ia-textarea" id="iaSintoma" placeholder="Ej: La laptop no enciende, hace un clic al presionar el botón de encendido pero la pantalla permanece apagada..."></textarea>
+            <button class="ia-btn-send" id="iaBtnEnviar" onclick="iaEnviar()">🤖 Diagnosticar con IA</button>
+          </div>
+          <!-- Historial de consultas -->
+          <div class="ia-form-card" id="iaHistorialPanel" style="display:none;">
+            <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-muted);margin-bottom:8px;">📋 Consultas recientes</div>
+            <div id="iaHistorialList"></div>
+          </div>
+        </div>
+        <!-- Panel derecho: chat -->
+        <div class="ia-chat" id="iaChat">
+          <div class="ia-chat-empty">
+            <div class="icon">🤖</div>
+            <strong>Asistente de Diagnóstico Técnico</strong>
+            <p style="font-size:12px;max-width:280px;">Selecciona el equipo, describe el síntoma y el asistente sugerirá causas probables y pasos de resolución basados en el historial de tickets.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
   </div>
 </main>
 
@@ -1568,11 +1730,17 @@ function switchModule(mod){
   document.getElementById('mod-clientes').classList.toggle('active', mod==='clientes');
   document.getElementById('mod-informes').classList.toggle('active', mod==='informes');
   document.getElementById('mod-rentabilidad').classList.toggle('active', mod==='rentabilidad');
+  document.getElementById('mod-fallas').classList.toggle('active', mod==='fallas');
+  document.getElementById('mod-licencias').classList.toggle('active', mod==='licencias');
+  document.getElementById('mod-ia').classList.toggle('active', mod==='ia');
   if(mod==='informes')     informesInit();
   if(mod==='activos')      activosInit();
   if(mod==='clientes')     clientesInit();
   if(mod==='ejecutivo')    ejInit();
   if(mod==='rentabilidad') rentInit();
+  if(mod==='fallas')       fallasInit();
+  if(mod==='licencias')    licenciasInit();
+  if(mod==='ia')           iaInit();
 }
 
 /* ============================================================
@@ -4867,6 +5035,473 @@ handleFile = function(evt, mod){
     if(rentEl && rentEl.classList.contains('active')) rentInit();
   }, 400);
 };
+/* ============================================================
+   MÓDULO: RECURRENCIA DE FALLAS POR EQUIPO
+   Fuente: STATE.tickets.raw — agrupa por N° Activo
+   Calcula: n° fallas, horas soporte, costo, recomendación
+============================================================ */
+
+var _fallasUmbralWarn = 3;  /* fallas para "Observación" */
+var _fallasUmbralCrit = 7;  /* fallas para "Reemplazar"  */
+
+function fallasInit(){
+  var t = STATE.tickets.raw;
+  var statusEl = document.getElementById('fallasStatus');
+  var container = document.getElementById('fallasContent');
+  if(!container) return;
+  if(!t.length){
+    if(statusEl) statusEl.textContent = 'Importa Tickets de Servicio para ver el análisis';
+    container.innerHTML = '<div class="empty-state"><div class="icon">🔧</div><h4>Sin datos</h4><p>Importa un CSV en <strong>Tickets de Servicio</strong>.</p></div>';
+    return;
+  }
+  if(statusEl) statusEl.textContent = t.length + ' tickets analizados';
+  fallasRender(t);
+}
+
+function fallasRender(t){
+  var container = document.getElementById('fallasContent');
+  if(!container) return;
+
+  /* Agrupar por N° Activo */
+  var mapa = {};
+  t.forEach(function(r){
+    var activo = (r.nActivo||'').trim();
+    if(!activo) return;
+    if(!mapa[activo]) mapa[activo] = {activo:activo, cliente:(r.cliente||'').trim(), tipoEquipo:(r.tipoEquipo||'').trim(), marca:(r.marca||'').trim(), fallas:0, horasSeg:0, ultimaFalla:null};
+    var d = mapa[activo];
+    d.fallas++;
+    d.horasSeg += r.duracionSeg||0;
+    if(r.fechaInicio){ var f=r.fechaInicio instanceof Date?r.fechaInicio:new Date(r.fechaInicio); if(!d.ultimaFalla||f>d.ultimaFalla) d.ultimaFalla=f; }
+  });
+
+  var equipos = Object.values(mapa).sort(function(a,b){ return b.fallas - a.fallas; });
+  if(!equipos.length){
+    container.innerHTML = '<div class="empty-state"><div class="icon">✅</div><h4>Sin activos con N° registrado</h4><p>Los tickets importados no tienen campo "N° Activo" con datos.</p></div>';
+    return;
+  }
+
+  var tarifa = _rentTarifaHora||35;
+  var nCrit = equipos.filter(function(e){ return e.fallas>=_fallasUmbralCrit; }).length;
+  var nWarn = equipos.filter(function(e){ return e.fallas>=_fallasUmbralWarn && e.fallas<_fallasUmbralCrit; }).length;
+
+  /* KPIs */
+  var html = '<div class="kpi-grid" style="margin-bottom:18px;">'
+    + renderKpiCard({label:'Activos con fallas',    value:equipos.length, sub:'con N° Activo registrado', cls:'navy'})
+    + renderKpiCard({label:'🔴 Para reemplazar',    value:nCrit, sub:'>= '+_fallasUmbralCrit+' fallas', cls:nCrit>0?'red':''})
+    + renderKpiCard({label:'🟡 En observación',     value:nWarn, sub:_fallasUmbralWarn+'–'+(+_fallasUmbralCrit-1)+' fallas', cls:''})
+    + renderKpiCard({label:'Total horas soporte',   value:(equipos.reduce(function(s,e){return s+e.horasSeg;},0)/3600).toFixed(1)+' h', sub:'en mantenimiento de activos', cls:''})
+    + '</div>';
+
+  /* Configuración de umbrales */
+  html += '<div class="fallas-config">'
+    +'<span style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-muted);">⚙ Umbrales:</span>'
+    +'<label style="font-size:12px;">🟡 Observación desde <input type="number" value="'+_fallasUmbralWarn+'" min="1" max="50" onchange="_fallasUmbralWarn=+this.value;fallasRender(STATE.tickets.raw);" style="width:54px;padding:3px 6px;border:1.5px solid var(--border);border-radius:5px;text-align:center;font-size:12px;"> fallas</label>'
+    +'<label style="font-size:12px;">🔴 Reemplazar desde <input type="number" value="'+_fallasUmbralCrit+'" min="2" max="100" onchange="_fallasUmbralCrit=+this.value;fallasRender(STATE.tickets.raw);" style="width:54px;padding:3px 6px;border:1.5px solid var(--border);border-radius:5px;text-align:center;font-size:12px;"> fallas</label>'
+    +'<span style="font-size:11.5px;color:var(--ink-muted);">Tarifa interna: S/ '+tarifa+'/h</span>'
+    +'</div>';
+
+  /* Tabla completa */
+  html += '<div class="table-card"><div class="table-scroll"><table class="ej-table"><thead><tr>'
+    +'<th>Estado</th><th>N° Activo</th><th>Cliente</th><th>Tipo / Marca</th>'
+    +'<th>Fallas</th><th>Horas soporte</th><th>Costo est. S/</th><th>Última falla</th>'
+    +'</tr></thead><tbody>';
+
+  equipos.forEach(function(e){
+    var nivel = e.fallas>=_fallasUmbralCrit?'crit':e.fallas>=_fallasUmbralWarn?'warn':'ok';
+    var badgeTxt = nivel==='crit'?'🔴 Reemplazar':nivel==='warn'?'🟡 Observación':'🟢 OK';
+    var horas = (e.horasSeg/3600).toFixed(1);
+    var costo = (e.horasSeg/3600)*tarifa;
+    html += '<tr>'
+      +'<td><span class="fallas-badge '+nivel+'">'+badgeTxt+'</span></td>'
+      +'<td><strong style="color:var(--navy);">'+escapeHtml(e.activo)+'</strong></td>'
+      +'<td>'+escapeHtml(e.cliente||'—')+'</td>'
+      +'<td>'+escapeHtml((e.tipoEquipo||'—')+' · '+(e.marca||'—'))+'</td>'
+      +'<td><strong style="color:'+(nivel==='crit'?'#EF4444':nivel==='warn'?'#F59E0B':'var(--ink)')+';">'+e.fallas+'</strong></td>'
+      +'<td>'+horas+' h</td>'
+      +'<td>'+fmtMoneyCompact(costo,'PEN')+'</td>'
+      +'<td>'+(e.ultimaFalla?fmtDate(e.ultimaFalla):'—')+'</td>'
+      +'</tr>';
+  });
+  html += '</tbody></table></div></div>';
+  container.innerHTML = html;
+}
+
+/* ============================================================
+   MÓDULO: INVENTARIO DE LICENCIAS Y SOFTWARE
+   Persistencia: localStorage  coseinco_licencias_v1
+   Vistas: Alertas · Por cliente · Inventario completo
+============================================================ */
+
+var LIC_KEY = 'coseinco_licencias_v1';
+var _licTabActiva = 'alertas';
+var _licNextId = 1;
+
+function licCargar(){ try{ return JSON.parse(localStorage.getItem(LIC_KEY)||'[]'); }catch(e){ return []; } }
+function licGuardar(lista){ try{ localStorage.setItem(LIC_KEY, JSON.stringify(lista)); }catch(e){} }
+function licGetId(){ return 'LIC-'+String(_licNextId++).padStart(4,'0'); }
+
+function licenciasInit(){
+  var lista = licCargar();
+  /* Sincronizar _licNextId */
+  lista.forEach(function(l){ var n=parseInt((l.id||'').replace('LIC-',''),10); if(n>=_licNextId) _licNextId=n+1; });
+  licRender();
+}
+
+function licRender(){
+  var lista = licCargar();
+  var container = document.getElementById('licContent');
+  if(!container) return;
+
+  var hoy = new Date(); hoy.setHours(0,0,0,0);
+  /* Calcular días restantes */
+  lista.forEach(function(l){
+    var f = l.fechaVencimiento ? new Date(l.fechaVencimiento) : null;
+    l._dias = f ? Math.round((f-hoy)/86400000) : null;
+  });
+
+  var vencidas = lista.filter(function(l){ return l._dias!==null && l._dias<0; });
+  var prox30   = lista.filter(function(l){ return l._dias!==null && l._dias>=0 && l._dias<=30; });
+  var prox90   = lista.filter(function(l){ return l._dias!==null && l._dias>30 && l._dias<=90; });
+
+  var html = '';
+
+  /* Barra de alertas */
+  if(vencidas.length || prox30.length){
+    html += '<div class="lic-alert-bar visible">'
+      +'<div class="lic-alert-title">⚠ '+(vencidas.length?vencidas.length+' licencia(s) VENCIDA(S)':'')+
+         (vencidas.length&&prox30.length?' · ':'')+
+         (prox30.length?prox30.length+' vence(n) en ≤30 días':'')+'</div>'
+      +'<div class="lic-alert-list">';
+    vencidas.concat(prox30).slice(0,8).forEach(function(l){
+      html += '<div class="lic-alert-item'+(l._dias<0?' vencida':'')+'">'+escapeHtml(l.software)
+        +' · '+escapeHtml(l.cliente)
+        +(l._dias<0?' <strong>Vencida</strong>':' <strong>'+l._dias+'d</strong>')+'</div>';
+    });
+    html += '</div></div>';
+  }
+
+  /* Sub-tabs */
+  html += '<div class="lic-tabs">'
+    +'<button class="lic-tab'+(_licTabActiva==='alertas'?' active':'')+'" onclick="licShowPanel(\'alertas\')">🔔 Alertas ('+(vencidas.length+prox30.length+prox90.length)+')</button>'
+    +'<button class="lic-tab'+(_licTabActiva==='inventario'?' active':'')+'" onclick="licShowPanel(\'inventario\')">📋 Inventario completo ('+lista.length+')</button>'
+    +'<button class="lic-tab'+(_licTabActiva==='nueva'?' active':'')+'" onclick="licShowPanel(\'nueva\')">➕ Nueva licencia</button>'
+    +'</div>';
+
+  /* Panel Alertas */
+  html += '<div class="lic-panel'+(_licTabActiva==='alertas'?' active':'')+'" id="lic-panel-alertas">';
+  if(!vencidas.length && !prox30.length && !prox90.length){
+    html += '<div class="empty-state"><div class="icon">✅</div><h4>Todo en orden</h4><p>Ninguna licencia vencida ni próxima a vencer en los próximos 90 días.</p></div>';
+  } else {
+    html += licTablaAlerta('🔴 Vencidas', vencidas)
+          + licTablaAlerta('🟡 Vencen en ≤ 30 días', prox30)
+          + licTablaAlerta('🟢 Vencen en 31–90 días', prox90);
+  }
+  html += '</div>';
+
+  /* Panel Inventario */
+  html += '<div class="lic-panel'+(_licTabActiva==='inventario'?' active':'')+'" id="lic-panel-inventario">';
+  if(!lista.length){
+    html += '<div class="empty-state"><div class="icon">📦</div><h4>Sin licencias registradas</h4><p>Agrega licencias con el botón "+ Nueva Licencia".</p></div>';
+  } else {
+    html += licTablaCompleta(lista);
+  }
+  html += '</div>';
+
+  /* Panel Nueva licencia */
+  html += '<div class="lic-panel'+(_licTabActiva==='nueva'?' active':'')+'" id="lic-panel-nueva">'
+    +'<div class="lic-form">'
+    +'<div class="lic-form-field"><label>Cliente *</label><input type="text" id="licNCliente" placeholder="Nombre del cliente" list="licClientesList"><datalist id="licClientesList">'
+    +Array.from(new Set(STATE.ventas.raw.map(function(r){return r.cliente||'';}).filter(Boolean))).sort().map(function(c){return '<option value="'+escapeHtml(c)+'">';}).join('')
+    +'</datalist></div>'
+    +'<div class="lic-form-field"><label>Software / Producto *</label><input type="text" id="licNSoftware" placeholder="Ej: Microsoft Office 365"></div>'
+    +'<div class="lic-form-field"><label>Tipo de licencia</label><select id="licNTipo"><option value="Anual">Anual</option><option value="Mensual">Mensual</option><option value="Perpetua">Perpetua</option><option value="Suscripción">Suscripción</option><option value="OEM">OEM</option></select></div>'
+    +'<div class="lic-form-field"><label>Cantidad de puestos</label><input type="number" id="licNCantidad" value="1" min="1"></div>'
+    +'<div class="lic-form-field"><label>Fecha de inicio</label><input type="date" id="licNInicio"></div>'
+    +'<div class="lic-form-field"><label>Fecha de vencimiento</label><input type="date" id="licNVenc"></div>'
+    +'<div class="lic-form-field"><label>Costo de renovación S/</label><input type="number" id="licNCosto" placeholder="0.00" step="0.01" min="0"></div>'
+    +'<div class="lic-form-field"><label>Proveedor</label><input type="text" id="licNProveedor" placeholder="Ej: Microsoft Partner"></div>'
+    +'<div class="lic-form-field" style="grid-column:1/-1;"><label>Notas</label><textarea id="licNNotas" placeholder="Número de licencia, contacto, detalles adicionales..."></textarea></div>'
+    +'<div class="lic-form-field" style="grid-column:1/-1;display:flex;gap:10px;">'
+    +'<button class="btn btn-primary" style="background:#8B5CF6;" onclick="licGuardarNueva()">Guardar Licencia</button>'
+    +'<button class="btn btn-ghost" onclick="licShowPanel(\'inventario\')">Cancelar</button>'
+    +'</div></div></div>';
+
+  container.innerHTML = html;
+}
+
+function licTablaAlerta(titulo, lista){
+  if(!lista.length) return '';
+  var html = '<div class="ej-section"><h3>'+titulo+'</h3><div class="line"></div></div>'
+    +'<div class="table-card"><div class="table-scroll"><table class="ej-table"><thead><tr>'
+    +'<th>Estado</th><th>Software</th><th>Cliente</th><th>Tipo</th><th>Vencimiento</th><th>Renovación S/</th><th></th>'
+    +'</tr></thead><tbody>';
+  lista.forEach(function(l){
+    var diasTxt = l._dias<0 ? 'Vencida hace '+Math.abs(l._dias)+'d' : 'En '+l._dias+' días';
+    var cls = l._dias<0?'lic-dias-venc':l._dias<=30?'lic-dias-crit':'lic-dias-warn';
+    html += '<tr>'
+      +'<td><span class="lic-dias-badge '+cls+'">'+diasTxt+'</span></td>'
+      +'<td><strong>'+escapeHtml(l.software||'—')+'</strong></td>'
+      +'<td>'+escapeHtml(l.cliente||'—')+'</td>'
+      +'<td>'+escapeHtml(l.tipo||'—')+'</td>'
+      +'<td>'+(l.fechaVencimiento||'—')+'</td>'
+      +'<td>'+(l.costo>0?fmtMoneyCompact(l.costo,'PEN'):'—')+'</td>'
+      +'<td><button onclick="licEliminar(\''+l.id+'\')" style="font-size:11px;color:#EF4444;background:none;border:none;cursor:pointer;">✕</button></td>'
+      +'</tr>';
+  });
+  html += '</tbody></table></div></div>';
+  return html;
+}
+
+function licTablaCompleta(lista){
+  var hoy = new Date(); hoy.setHours(0,0,0,0);
+  var html = '<div class="table-card"><div class="table-scroll"><table class="ej-table"><thead><tr>'
+    +'<th>ID</th><th>Software</th><th>Cliente</th><th>Tipo</th><th>Cantidad</th>'
+    +'<th>Inicio</th><th>Vencimiento</th><th>Días restantes</th><th>Costo S/</th><th></th>'
+    +'</tr></thead><tbody>';
+  lista.sort(function(a,b){ return (a._dias??99999)-(b._dias??99999); }).forEach(function(l){
+    var cls = l._dias===null?'':l._dias<0?'lic-dias-venc':l._dias<=30?'lic-dias-crit':l._dias<=90?'lic-dias-warn':'lic-dias-ok';
+    var diasTxt = l._dias===null?'—':l._dias<0?'Vencida':l._dias+' días';
+    html += '<tr>'
+      +'<td style="font-size:10.5px;color:var(--ink-muted);">'+escapeHtml(l.id)+'</td>'
+      +'<td><strong>'+escapeHtml(l.software||'—')+'</strong>'+(l.notas?'<div style="font-size:10.5px;color:var(--ink-muted);">'+escapeHtml(l.notas.slice(0,40))+'</div>':'')+'</td>'
+      +'<td>'+escapeHtml(l.cliente||'—')+'</td>'
+      +'<td>'+escapeHtml(l.tipo||'—')+'</td>'
+      +'<td>'+escapeHtml(String(l.cantidad||1))+'</td>'
+      +'<td>'+(l.fechaInicio||'—')+'</td>'
+      +'<td>'+(l.fechaVencimiento||'—')+'</td>'
+      +'<td><span class="lic-dias-badge '+cls+'">'+diasTxt+'</span></td>'
+      +'<td>'+(l.costo>0?fmtMoneyCompact(l.costo,'PEN'):'—')+'</td>'
+      +'<td><button onclick="licEliminar(\''+l.id+'\')" style="font-size:11px;color:#EF4444;background:none;border:none;cursor:pointer;">✕</button></td>'
+      +'</tr>';
+  });
+  html += '</tbody></table></div></div>';
+  return html;
+}
+
+function licShowPanel(tab){
+  _licTabActiva = tab;
+  licRender();
+}
+
+function licGuardarNueva(){
+  var cliente  = (document.getElementById('licNCliente')?.value||'').trim();
+  var software = (document.getElementById('licNSoftware')?.value||'').trim();
+  if(!cliente || !software){ alert('Cliente y Software son campos obligatorios.'); return; }
+  var lista = licCargar();
+  lista.push({
+    id: licGetId(),
+    cliente:          cliente,
+    software:         software,
+    tipo:             document.getElementById('licNTipo')?.value||'Anual',
+    cantidad:         parseInt(document.getElementById('licNCantidad')?.value||'1',10),
+    fechaInicio:      document.getElementById('licNInicio')?.value||'',
+    fechaVencimiento: document.getElementById('licNVenc')?.value||'',
+    costo:            parseFloat(document.getElementById('licNCosto')?.value||'0')||0,
+    proveedor:        (document.getElementById('licNProveedor')?.value||'').trim(),
+    notas:            (document.getElementById('licNNotas')?.value||'').trim()
+  });
+  licGuardar(lista);
+  var statusEl = document.getElementById('licStatus');
+  if(statusEl){ statusEl.textContent = lista.length+' licencias registradas'; statusEl.style.display=''; }
+  _licTabActiva = 'inventario';
+  licRender();
+}
+
+function licEliminar(id){
+  if(!confirm('¿Eliminar esta licencia?')) return;
+  var lista = licCargar().filter(function(l){ return l.id!==id; });
+  licGuardar(lista);
+  licRender();
+}
+
+/* ============================================================
+   MÓDULO: ASISTENTE DE DIAGNÓSTICO TÉCNICO IA
+   Usa Claude API claude-sonnet-4-6
+   Contexto: historial de tickets similares en STATE.tickets.raw
+============================================================ */
+
+var _iaHistorial = [];   /* historial de consultas de esta sesión */
+var _iaChatMsgs  = [];   /* mensajes del chat actual */
+
+function iaInit(){
+  /* Poblar selectores desde tickets importados */
+  var t = STATE.tickets.raw;
+  var clientes    = Array.from(new Set(t.map(function(r){return r.cliente||'';}    ).filter(Boolean))).sort();
+  var tipoEquipos = Array.from(new Set(t.map(function(r){return r.tipoEquipo||'';}).filter(Boolean))).sort();
+  var marcas      = Array.from(new Set(t.map(function(r){return r.marca||'';      }).filter(Boolean))).sort();
+
+  function llenarSelect(id, valores, first){
+    var sel = document.getElementById(id);
+    if(!sel) return;
+    sel.innerHTML = '<option value="">'+first+'</option>'
+      +valores.map(function(v){return '<option value="'+escapeHtml(v)+'">'+escapeHtml(v)+'</option>';}).join('');
+  }
+  llenarSelect('iaCliente',    clientes,    '— Todos / Sin filtrar —');
+  llenarSelect('iaTipoEquipo', tipoEquipos, '— Todos —');
+  llenarSelect('iaMarca',      marcas,      '— Todas —');
+  iaRenderHistorial();
+}
+
+function iaNuevaConsulta(){
+  _iaChatMsgs = [];
+  var chat = document.getElementById('iaChat');
+  if(chat) chat.innerHTML = '<div class="ia-chat-empty"><div class="icon">🤖</div><strong>Asistente de Diagnóstico Técnico</strong><p style="font-size:12px;max-width:280px;">Describe el síntoma y el asistente sugerirá causas y pasos de resolución.</p></div>';
+  var sint = document.getElementById('iaSintoma');
+  if(sint) sint.value = '';
+}
+
+function iaRenderHistorial(){
+  var panel = document.getElementById('iaHistorialPanel');
+  var lista = document.getElementById('iaHistorialList');
+  if(!panel||!lista) return;
+  if(!_iaHistorial.length){ panel.style.display='none'; return; }
+  panel.style.display='';
+  lista.innerHTML = _iaHistorial.slice(0,5).map(function(h,i){
+    return '<div class="ia-historial-item" onclick="iaCargarHistorial('+i+')">'
+      +'<div>'+escapeHtml(h.sintoma.slice(0,60))+(h.sintoma.length>60?'…':'')+'</div>'
+      +'<div class="ia-historial-ts">'+h.ts+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function iaCargarHistorial(idx){
+  var h = _iaHistorial[idx];
+  if(!h) return;
+  _iaChatMsgs = h.msgs.slice();
+  iaRenderChat();
+  var sint = document.getElementById('iaSintoma');
+  if(sint) sint.value = h.sintoma;
+}
+
+function iaRenderChat(){
+  var chat = document.getElementById('iaChat');
+  if(!chat) return;
+  if(!_iaChatMsgs.length){
+    chat.innerHTML = '<div class="ia-chat-empty"><div class="icon">🤖</div><strong>Asistente listo</strong><p style="font-size:12px;">Describe el síntoma y presiona "Diagnosticar".</p></div>';
+    return;
+  }
+  chat.innerHTML = _iaChatMsgs.map(function(m){
+    return '<div class="ia-msg '+m.role+'">'+(m.role==='user'?'<strong>🔧 Técnico:</strong> ':'')+escapeHtml(m.content)+'</div>';
+  }).join('');
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function iaObtenerContexto(sintoma, cliente, tipoEquipo, marca){
+  var t = STATE.tickets.raw;
+  if(!t.length) return '';
+  /* Buscar tickets similares por palabras clave del síntoma y filtros */
+  var palabras = sintoma.toLowerCase().split(/\s+/).filter(function(p){ return p.length>3; });
+  var similares = t.filter(function(r){
+    if(cliente    && (r.cliente||'').toLowerCase().indexOf(cliente.toLowerCase())===-1) return false;
+    if(tipoEquipo && (r.tipoEquipo||'').toLowerCase().indexOf(tipoEquipo.toLowerCase())===-1) return false;
+    if(marca      && (r.marca||'').toLowerCase().indexOf(marca.toLowerCase())===-1) return false;
+    var desc = ((r.tipoServicio||'')+' '+(r.estadoTicket||'')+' '+(r.nActivo||'')).toLowerCase();
+    return palabras.some(function(p){ return desc.indexOf(p)!==-1; });
+  }).slice(0,5);
+
+  if(!similares.length) return '';
+  return '\n\nCONTEXTO — Tickets similares del historial:\n'
+    + similares.map(function(r,i){
+        return (i+1)+'. ['+escapeHtml(r.estadoTicket||'?')+'] '+escapeHtml(r.tipoServicio||'?')
+          +' en '+escapeHtml(r.tipoEquipo||'?')+' '+escapeHtml(r.marca||'?')
+          +' · Cliente: '+escapeHtml(r.cliente||'?')
+          +' · Duración: '+escapeHtml(r.duracionStr||'?');
+      }).join('\n');
+}
+
+async function iaEnviar(){
+  var sintoma    = (document.getElementById('iaSintoma')?.value||'').trim();
+  var cliente    = (document.getElementById('iaCliente')?.value||'').trim();
+  var tipoEquipo = (document.getElementById('iaTipoEquipo')?.value||'').trim();
+  var marca      = (document.getElementById('iaMarca')?.value||'').trim();
+
+  if(!sintoma){ alert('Describe el síntoma antes de enviar.'); return; }
+
+  var btn = document.getElementById('iaBtnEnviar');
+  if(btn) btn.disabled = true;
+
+  /* Construir mensaje del usuario */
+  var userContent = 'Síntoma reportado: '+sintoma;
+  if(cliente)    userContent += '\nCliente: '+cliente;
+  if(tipoEquipo) userContent += '\nTipo de equipo: '+tipoEquipo;
+  if(marca)      userContent += '\nMarca: '+marca;
+  userContent += iaObtenerContexto(sintoma, cliente, tipoEquipo, marca);
+
+  _iaChatMsgs.push({role:'user', content:sintoma+(cliente?' · '+cliente:'')+(tipoEquipo?' · '+tipoEquipo:'')});
+
+  /* Mostrar indicador de carga */
+  var chat = document.getElementById('iaChat');
+  if(chat){
+    iaRenderChat();
+    chat.insertAdjacentHTML('beforeend',
+      '<div class="ia-loading"><div class="ia-typing"><span></span><span></span><span></span></div> El asistente está analizando...</div>');
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  try{
+    var messages = _iaChatMsgs.slice(0,-1).filter(function(m){return m.role==='assistant';}).length > 0
+      ? _iaChatMsgs.slice(0,-1).map(function(m){return {role:m.role==='user'?'user':'assistant', content:m.content};})
+      : [];
+    messages.push({role:'user', content:userContent});
+
+    var response = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:1000,
+        system:'Eres un técnico de soporte TI senior especializado en diagnóstico de equipos y software. '
+          +'Tu rol es analizar síntomas de fallas técnicas reportadas por técnicos de campo y proporcionar:\n'
+          +'1. Las 3 causas más probables del problema (ordenadas por probabilidad)\n'
+          +'2. Pasos de diagnóstico para confirmar la causa\n'
+          +'3. Solución recomendada paso a paso\n'
+          +'4. Tiempo estimado de resolución\n'
+          +'5. Si el equipo debería considerarse para reemplazo\n\n'
+          +'Sé concreto, técnico y práctico. Usa formato claro con secciones. '
+          +'Si hay contexto de tickets históricos similares, úsalo para calibrar tu diagnóstico. '
+          +'Responde siempre en español.',
+        messages:messages
+      })
+    });
+
+    var data = await response.json();
+    var texto = (data.content||[]).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
+    if(!texto && data.error) texto = 'Error de la API: '+(data.error.message||JSON.stringify(data.error));
+
+    /* Quitar indicador de carga */
+    var loading = chat ? chat.querySelector('.ia-loading') : null;
+    if(loading) loading.remove();
+
+    _iaChatMsgs.push({role:'assistant', content:texto});
+    iaRenderChat();
+
+    /* Guardar en historial de sesión */
+    var ahora = new Date();
+    _iaHistorial.unshift({
+      sintoma: sintoma,
+      ts: ahora.toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'})+' '+fmtDate(ahora),
+      msgs: _iaChatMsgs.slice()
+    });
+    if(_iaHistorial.length>10) _iaHistorial.pop();
+    iaRenderHistorial();
+
+  }catch(err){
+    var loading2 = chat ? chat.querySelector('.ia-loading') : null;
+    if(loading2) loading2.remove();
+    _iaChatMsgs.push({role:'error', content:'Error al conectar con la IA: '+err.message+'. Verifica tu conexión.'});
+    iaRenderChat();
+  }
+
+  if(btn) btn.disabled = false;
+}
+
+/* Enter en textarea envía (Shift+Enter = salto de línea) */
+document.addEventListener('keydown', function(e){
+  if(e.key==='Enter' && !e.shiftKey && document.activeElement && document.activeElement.id==='iaSintoma'){
+    e.preventDefault();
+    iaEnviar();
+  }
+});
 function exportSectionAsHtml(contentElId, sectionTitle, filenamePrefix){
   var srcEl = document.getElementById(contentElId);
   if(!srcEl || srcEl.querySelector('.empty-state')){
