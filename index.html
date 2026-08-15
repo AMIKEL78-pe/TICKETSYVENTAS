@@ -605,8 +605,6 @@ License: MIT
   .module-btn[data-mod="fallas"].active{box-shadow:0 -3px 0 0 #EF4444 inset;}
   .module-btn[data-mod="licencias"] .dot{background:#8B5CF6;}
   .module-btn[data-mod="licencias"].active{box-shadow:0 -3px 0 0 #8B5CF6 inset;}
-  .module-btn[data-mod="ia"] .dot{background:#10B981;}
-  .module-btn[data-mod="ia"].active{box-shadow:0 -3px 0 0 #10B981 inset;}
 
   /* ── Recurrencia de Fallas ── */
   .fallas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:22px;}
@@ -648,43 +646,34 @@ License: MIT
   .lic-dias-crit{background:#FEE2E2;color:#991B1B;}
   .lic-dias-venc{background:#F3F4F6;color:#6B7280;}
 
-  /* ── API Key card en módulo IA ── */
-  .ia-apikey-card{background:#1E293B;border-radius:10px;padding:14px 16px;margin-bottom:12px;}
-  .ia-apikey-card label{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#94A3B8;margin-bottom:6px;}
-  .ia-apikey-row{display:flex;gap:6px;align-items:center;}
-  .ia-apikey-input{flex:1;padding:7px 10px;background:#0F172A;border:1.5px solid #334155;border-radius:7px;color:#F1F5F9;font-size:12px;font-family:'Inter',sans-serif;}
-  .ia-apikey-input:focus{outline:2px solid #10B981;border-color:#10B981;}
-  .ia-apikey-btn{padding:7px 12px;background:#10B981;color:#fff;border:none;border-radius:7px;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap;}
-  .ia-apikey-btn:hover{background:#059669;}
-  .ia-apikey-ok{font-size:10.5px;color:#6EE7B7;margin-top:5px;display:none;}
-  .ia-apikey-link{font-size:10px;color:#64748B;margin-top:5px;display:block;}
-  .ia-apikey-link a{color:#38BDF8;text-decoration:none;}
-  .ia-layout{display:grid;grid-template-columns:320px 1fr;gap:18px;align-items:flex-start;}
-  @media(max-width:860px){.ia-layout{grid-template-columns:1fr;}}
-  .ia-panel-izq{display:flex;flex-direction:column;gap:12px;}
-  .ia-form-card{background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:16px;}
-  .ia-form-label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-muted);margin-bottom:4px;display:block;}
-  .ia-select,.ia-input{width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:12.5px;font-family:'Inter',sans-serif;box-sizing:border-box;margin-bottom:10px;}
-  .ia-textarea{width:100%;min-height:100px;padding:9px 11px;border:1.5px solid var(--border);border-radius:7px;font-size:12.5px;font-family:'Inter',sans-serif;resize:vertical;box-sizing:border-box;}
-  .ia-btn-send{width:100%;padding:10px;background:#10B981;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;margin-top:8px;transition:background .15s;}
-  .ia-btn-send:hover{background:#059669;}
-  .ia-btn-send:disabled{background:#94A3B8;cursor:not-allowed;}
-  .ia-chat{background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:16px;min-height:420px;display:flex;flex-direction:column;gap:12px;}
-  .ia-chat-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--ink-muted);text-align:center;gap:8px;}
-  .ia-chat-empty .icon{font-size:36px;}
-  .ia-msg{border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.6;max-width:100%;}
-  .ia-msg.user{background:#EFF6FF;border:1px solid #BFDBFE;align-self:flex-end;}
-  .ia-msg.assistant{background:#F0FDF4;border:1px solid #A7F3D0;align-self:flex-start;white-space:pre-wrap;}
-  .ia-msg.error{background:#FEF2F2;border:1px solid #FECACA;color:#991B1B;}
-  .ia-loading{display:flex;align-items:center;gap:8px;color:var(--ink-muted);font-size:12.5px;padding:8px;}
-  .ia-typing span{display:inline-block;width:7px;height:7px;background:#10B981;border-radius:50%;animation:ia-blink 1.2s infinite;}
-  .ia-typing span:nth-child(2){animation-delay:.2s;}
-  .ia-typing span:nth-child(3){animation-delay:.4s;}
-  @keyframes ia-blink{0%,80%,100%{opacity:0;}40%{opacity:1;}}
-  .ia-ctx-tag{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;background:#EFF6FF;color:#1D4ED8;border-radius:5px;padding:2px 8px;margin:2px;}
-  .ia-historial-item{border:1px solid var(--border);border-radius:8px;padding:10px 12px;background:#FAFBFC;cursor:pointer;font-size:12px;transition:background .12s;}
-  .ia-historial-item:hover{background:#EFF6FF;}
-  .ia-historial-ts{font-size:10px;color:var(--ink-muted);margin-top:3px;}
+
+  /* ── Control de SLA ── */
+  .module-btn[data-mod="sla"] .dot{background:#EF4444;}
+  .module-btn[data-mod="sla"].active{box-shadow:0 -3px 0 0 #EF4444 inset;}
+  .sla-config{background:var(--navy);color:#F1F5F9;border-radius:10px;padding:14px 18px;margin-bottom:18px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;}
+  .sla-config-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#94A3B8;width:100%;margin-bottom:2px;}
+  .sla-config-field{display:flex;flex-direction:column;gap:3px;}
+  .sla-config-field label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#94A3B8;}
+  .sla-config-field input{width:70px;padding:5px 8px;background:#1E293B;border:1.5px solid #334155;border-radius:6px;color:#F1F5F9;font-size:12.5px;text-align:center;}
+  .sla-config-field input:focus{outline:2px solid #EF4444;border-color:#EF4444;}
+  .sla-config-field span{font-size:10px;color:#64748B;}
+  .sla-config-sep{width:1px;background:#334155;height:40px;margin:0 4px;}
+  .sla-semaforo{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:20px;}
+  .sla-verde  {background:#D1FAE5;color:#065F46;}
+  .sla-amarillo{background:#FEF3C7;color:#92400E;}
+  .sla-rojo   {background:#FEE2E2;color:#991B1B;}
+  .sla-gris   {background:#F3F4F6;color:#6B7280;}
+  .sla-bar-bg {height:6px;background:#E9ECF0;border-radius:3px;overflow:hidden;min-width:60px;}
+  .sla-bar    {height:100%;border-radius:3px;transition:width .3s;}
+  .sla-riesgo-card{background:#FFF1F2;border:1.5px solid #FECACA;border-radius:10px;padding:14px 18px;margin-bottom:18px;}
+  .sla-riesgo-title{font-size:12px;font-weight:800;color:#991B1B;margin-bottom:10px;}
+  .sla-riesgo-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #FEE2E2;font-size:12px;}
+  .sla-riesgo-item:last-child{border-bottom:none;}
+  .sla-riesgo-horas{font-weight:800;color:#EF4444;min-width:60px;}
+  .sla-tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:18px;}
+  .sla-tab{padding:8px 16px;font-size:12.5px;font-weight:600;color:var(--ink-muted);background:none;border:none;border-bottom:2.5px solid transparent;cursor:pointer;margin-bottom:-2px;transition:all .15s;}
+  .sla-tab.active{color:#EF4444;border-bottom-color:#EF4444;}
+  .sla-panel{display:none;} .sla-panel.active{display:block;}
 </style>
 </head>
 <body>
@@ -754,8 +743,8 @@ License: MIT
   <button class="module-btn" data-mod="licencias" onclick="switchModule('licencias')">
     <span class="dot"></span> Licencias / Software
   </button>
-  <button class="module-btn" data-mod="ia" onclick="switchModule('ia')">
-    <span class="dot"></span> Diagnóstico IA
+  <button class="module-btn" data-mod="sla" onclick="switchModule('sla')">
+    <span class="dot"></span> Control de SLA
   </button>
 </div>
 
@@ -1491,62 +1480,26 @@ License: MIT
       </div>
     </section>
 
-    <!-- ======================= MÓDULO: DIAGNÓSTICO IA ======================= -->
-    <section id="mod-ia" class="module">
+
+    <!-- ======================= MÓDULO: CONTROL DE SLA ======================= -->
+    <section id="mod-sla" class="module">
       <div class="toolbar">
         <div class="toolbar-left">
-          <h2>Asistente de Diagnóstico Técnico IA</h2>
-          <p>Describe el síntoma · El asistente sugiere causas y pasos de resolución · Contexto de tickets similares</p>
+          <h2>Control de SLA</h2>
+          <p>Cumplimiento de tiempos de resolución por cliente · Tickets en riesgo · Semáforo de acuerdos</p>
         </div>
         <div class="import-group">
-          <button class="btn btn-ghost" onclick="iaNuevaConsulta()">✕ Nueva consulta</button>
+          <span class="file-status" id="slaStatus">Importa Tickets de Servicio para ver el análisis</span>
+          <button class="btn btn-ghost" onclick="exportSectionAsHtml('slaContent','Control de SLA','sla_reporte')">⭳ Exportar HTML</button>
         </div>
       </div>
-      <div class="ia-layout" id="iaLayout">
-        <!-- Panel izquierdo: formulario -->
-        <div class="ia-panel-izq">
-          <!-- Configuración API Key -->
-          <div class="ia-apikey-card">
-            <label>🔑 Anthropic API Key</label>
-            <div class="ia-apikey-row">
-              <input type="password" class="ia-apikey-input" id="iaApiKeyInput"
-                placeholder="sk-ant-api03-..." autocomplete="off"
-                onkeydown="if(event.key==='Enter') iaGuardarApiKey()">
-              <button class="ia-apikey-btn" onclick="iaGuardarApiKey()">Guardar</button>
-            </div>
-            <div class="ia-apikey-ok" id="iaApiKeyOk">✓ API Key guardada correctamente</div>
-            <span class="ia-apikey-link">
-              Se guarda solo en tu navegador (localStorage).
-              <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">Obtener API Key →</a>
-            </span>
-          </div>
-          <div class="ia-form-card">
-            <label class="ia-form-label">Cliente</label>
-            <select class="ia-select" id="iaCliente"><option value="">— Todos / Sin filtrar —</option></select>
-            <label class="ia-form-label">Tipo de equipo</label>
-            <select class="ia-select" id="iaTipoEquipo"><option value="">— Todos —</option></select>
-            <label class="ia-form-label">Marca</label>
-            <select class="ia-select" id="iaMarca"><option value="">— Todas —</option></select>
-            <label class="ia-form-label">Describe el síntoma o problema</label>
-            <textarea class="ia-textarea" id="iaSintoma" placeholder="Ej: La laptop no enciende, hace un clic al presionar el botón de encendido pero la pantalla permanece apagada..."></textarea>
-            <button class="ia-btn-send" id="iaBtnEnviar" onclick="iaEnviar()">🤖 Diagnosticar con IA</button>
-          </div>
-          <!-- Historial de consultas -->
-          <div class="ia-form-card" id="iaHistorialPanel" style="display:none;">
-            <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-muted);margin-bottom:8px;">📋 Consultas recientes</div>
-            <div id="iaHistorialList"></div>
-          </div>
-        </div>
-        <!-- Panel derecho: chat -->
-        <div class="ia-chat" id="iaChat">
-          <div class="ia-chat-empty">
-            <div class="icon">🤖</div>
-            <strong>Asistente de Diagnóstico Técnico</strong>
-            <p style="font-size:12px;max-width:280px;">Selecciona el equipo, describe el síntoma y el asistente sugerirá causas probables y pasos de resolución basados en el historial de tickets.</p>
-          </div>
+      <div id="slaContent">
+        <div class="empty-state"><div class="icon">📋</div><h4>Sin datos</h4>
+          <p>Importa un CSV en <strong>Tickets de Servicio</strong> para ver el análisis de cumplimiento de SLA.</p>
         </div>
       </div>
     </section>
+
 
   </div>
 </main>
@@ -1757,7 +1710,7 @@ function switchModule(mod){
   document.getElementById('mod-rentabilidad').classList.toggle('active', mod==='rentabilidad');
   document.getElementById('mod-fallas').classList.toggle('active', mod==='fallas');
   document.getElementById('mod-licencias').classList.toggle('active', mod==='licencias');
-  document.getElementById('mod-ia').classList.toggle('active', mod==='ia');
+  document.getElementById('mod-sla').classList.toggle('active', mod==='sla');
   if(mod==='informes')     informesInit();
   if(mod==='activos')      activosInit();
   if(mod==='clientes')     clientesInit();
@@ -1765,7 +1718,7 @@ function switchModule(mod){
   if(mod==='rentabilidad') rentInit();
   if(mod==='fallas')       fallasInit();
   if(mod==='licencias')    licenciasInit();
-  if(mod==='ia')           iaInit();
+  if(mod==='sla')         slaInit();
 }
 
 /* ============================================================
@@ -5345,242 +5298,236 @@ function licEliminar(id){
    Contexto: historial de tickets similares en STATE.tickets.raw
 ============================================================ */
 
-var IA_KEY_STORAGE = 'coseinco_ia_apikey_v1';
-var _iaHistorial   = [];   /* historial de consultas de esta sesión */
-var _iaChatMsgs    = [];   /* mensajes del chat actual */
+/* ============================================================
+   CONTROL DE SLA — Cumplimiento de tiempos de resolución
+   Fuente: STATE.tickets.raw
+   Umbrales configurables por tipo de servicio (horas).
+   Semáforo por cliente: Verde ≥90% · Amarillo ≥70% · Rojo <70%
+============================================================ */
 
-function iaGetApiKey(){
-  try{ return localStorage.getItem(IA_KEY_STORAGE)||''; }catch(e){ return ''; }
+/* ============================================================
+   CONTROL DE SLA — v2 (reescritura robusta)
+   Fuente: STATE.tickets.raw
+   Umbrales por tipo de servicio, guardados en localStorage.
+   Siempre muestra contenido aunque no haya datos.
+============================================================ */
+
+var SLA_KEY      = 'coseinco_sla_v1';
+var _slaTabActiva= 'clientes';
+var SLA_DEFAULT  = {remoto:8, presencial:24, taller:48, otro:24};
+
+function slaCargarConfig(){
+  try{ var r=JSON.parse(localStorage.getItem(SLA_KEY)||'null'); if(r&&r.remoto) return r; }catch(e){}
+  return Object.assign({},SLA_DEFAULT);
+}
+function slaGuardarConfig(cfg){
+  try{ localStorage.setItem(SLA_KEY,JSON.stringify(cfg)); }catch(e){}
 }
 
-function iaGuardarApiKey(){
-  var input = document.getElementById('iaApiKeyInput');
-  var ok    = document.getElementById('iaApiKeyOk');
-  if(!input) return;
-  var key = input.value.trim();
-  if(!key){ alert('Ingresa tu API Key de Anthropic antes de guardar.'); return; }
-  /* Detectar si el campo muestra la versión enmascarada (contiene el caracter …) */
-  if(key.indexOf('…') !== -1){
-    alert('El campo muestra la key ya guardada. Para cambiarla, borra el contenido e ingresa la nueva key completa.');
-    return;
-  }
-  if(!key.startsWith('sk-ant-')){
-    alert('La API Key debe comenzar con "sk-ant-". Cópiala exactamente desde console.anthropic.com/settings/keys');
-    return;
-  }
-  try{ localStorage.setItem(IA_KEY_STORAGE, key); }catch(e){}
-  input.value = key.slice(0,14)+'…'+key.slice(-4);
-  if(ok){ ok.style.display='block'; setTimeout(function(){ ok.style.display='none'; },3000); }
+function slaTipoKey(ts){
+  var t=(ts||'').toLowerCase().replace(/[áéíóú]/g,function(c){return{á:'a',é:'e',í:'i',ó:'o',ú:'u'}[c]||c;});
+  if(/remot|telef|telema/.test(t)) return 'remoto';
+  if(/presenc|campo|visita/.test(t)) return 'presencial';
+  if(/taller|labor|bench/.test(t)) return 'taller';
+  return 'otro';
 }
 
-function iaInit(){
-  /* Mostrar estado de API key sin pre-poblar el input (evita re-guardado de version enmascarada) */
-  var savedKey = iaGetApiKey();
-  var input = document.getElementById('iaApiKeyInput');
-  var ok    = document.getElementById('iaApiKeyOk');
-  if(input){
-    input.value = '';          /* siempre vacio — usuario debe pegar la key completa para cambiarla */
-    input.placeholder = savedKey ? 'Key guardada (' + savedKey.slice(0,14) + '…' + savedKey.slice(-4) + '). Pega una nueva para cambiarla.' : 'sk-ant-api03-…';
-  }
-  if(ok && savedKey){
-    ok.textContent = '✓ API Key configurada: ' + savedKey.slice(0,14) + '…' + savedKey.slice(-4);
-    ok.style.display = 'block';
-  } else if(ok){
-    ok.style.display = 'none';
-  }
-
-  /* Poblar selectores desde tickets importados */
-  var t = STATE.tickets.raw;
-  var clientes    = Array.from(new Set(t.map(function(r){return r.cliente||'';}    ).filter(Boolean))).sort();
-  var tipoEquipos = Array.from(new Set(t.map(function(r){return r.tipoEquipo||'';}).filter(Boolean))).sort();
-  var marcas      = Array.from(new Set(t.map(function(r){return r.marca||'';      }).filter(Boolean))).sort();
-
-  function llenarSelect(id, valores, first){
-    var sel = document.getElementById(id);
-    if(!sel) return;
-    sel.innerHTML = '<option value="">'+first+'</option>'
-      +valores.map(function(v){return '<option value="'+escapeHtml(v)+'">'+escapeHtml(v)+'</option>';}).join('');
-  }
-  llenarSelect('iaCliente',    clientes,    '— Todos / Sin filtrar —');
-  llenarSelect('iaTipoEquipo', tipoEquipos, '— Todos —');
-  llenarSelect('iaMarca',      marcas,      '— Todas —');
-  iaRenderHistorial();
-}
-
-function iaNuevaConsulta(){
-  _iaChatMsgs = [];
-  var chat = document.getElementById('iaChat');
-  if(chat) chat.innerHTML = '<div class="ia-chat-empty"><div class="icon">🤖</div><strong>Asistente de Diagnóstico Técnico</strong><p style="font-size:12px;max-width:280px;">Describe el síntoma y el asistente sugerirá causas y pasos de resolución.</p></div>';
-  var sint = document.getElementById('iaSintoma');
-  if(sint) sint.value = '';
-}
-
-function iaRenderHistorial(){
-  var panel = document.getElementById('iaHistorialPanel');
-  var lista = document.getElementById('iaHistorialList');
-  if(!panel||!lista) return;
-  if(!_iaHistorial.length){ panel.style.display='none'; return; }
-  panel.style.display='';
-  lista.innerHTML = _iaHistorial.slice(0,5).map(function(h,i){
-    return '<div class="ia-historial-item" onclick="iaCargarHistorial('+i+')">'
-      +'<div>'+escapeHtml(h.sintoma.slice(0,60))+(h.sintoma.length>60?'…':'')+'</div>'
-      +'<div class="ia-historial-ts">'+h.ts+'</div>'
-      +'</div>';
-  }).join('');
-}
-
-function iaCargarHistorial(idx){
-  var h = _iaHistorial[idx];
-  if(!h) return;
-  _iaChatMsgs = h.msgs.slice();
-  iaRenderChat();
-  var sint = document.getElementById('iaSintoma');
-  if(sint) sint.value = h.sintoma;
-}
-
-function iaRenderChat(){
-  var chat = document.getElementById('iaChat');
-  if(!chat) return;
-  if(!_iaChatMsgs.length){
-    chat.innerHTML = '<div class="ia-chat-empty"><div class="icon">🤖</div><strong>Asistente listo</strong><p style="font-size:12px;">Describe el síntoma y presiona "Diagnosticar".</p></div>';
-    return;
-  }
-  chat.innerHTML = _iaChatMsgs.map(function(m){
-    return '<div class="ia-msg '+m.role+'">'+(m.role==='user'?'<strong>🔧 Técnico:</strong> ':'')+escapeHtml(m.content)+'</div>';
-  }).join('');
-  chat.scrollTop = chat.scrollHeight;
-}
-
-function iaObtenerContexto(sintoma, cliente, tipoEquipo, marca){
-  var t = STATE.tickets.raw;
-  if(!t.length) return '';
-  /* Buscar tickets similares por palabras clave del síntoma y filtros */
-  var palabras = sintoma.toLowerCase().split(/\s+/).filter(function(p){ return p.length>3; });
-  var similares = t.filter(function(r){
-    if(cliente    && (r.cliente||'').toLowerCase().indexOf(cliente.toLowerCase())===-1) return false;
-    if(tipoEquipo && (r.tipoEquipo||'').toLowerCase().indexOf(tipoEquipo.toLowerCase())===-1) return false;
-    if(marca      && (r.marca||'').toLowerCase().indexOf(marca.toLowerCase())===-1) return false;
-    var desc = ((r.tipoServicio||'')+' '+(r.estadoTicket||'')+' '+(r.nActivo||'')).toLowerCase();
-    return palabras.some(function(p){ return desc.indexOf(p)!==-1; });
-  }).slice(0,5);
-
-  if(!similares.length) return '';
-  return '\n\nCONTEXTO — Tickets similares del historial:\n'
-    + similares.map(function(r,i){
-        return (i+1)+'. ['+escapeHtml(r.estadoTicket||'?')+'] '+escapeHtml(r.tipoServicio||'?')
-          +' en '+escapeHtml(r.tipoEquipo||'?')+' '+escapeHtml(r.marca||'?')
-          +' · Cliente: '+escapeHtml(r.cliente||'?')
-          +' · Duración: '+escapeHtml(r.duracionStr||'?');
-      }).join('\n');
-}
-
-async function iaEnviar(){
-  var sintoma    = (document.getElementById('iaSintoma')?.value||'').trim();
-  var cliente    = (document.getElementById('iaCliente')?.value||'').trim();
-  var tipoEquipo = (document.getElementById('iaTipoEquipo')?.value||'').trim();
-  var marca      = (document.getElementById('iaMarca')?.value||'').trim();
-
-  if(!sintoma){ alert('Describe el síntoma antes de enviar.'); return; }
-
-  /* Verificar API key */
-  var apiKey = iaGetApiKey();
-  if(!apiKey){
-    var chat = document.getElementById('iaChat');
-    if(chat) chat.insertAdjacentHTML('beforeend',
-      '<div class="ia-msg error">⚠ Ingresa tu <strong>Anthropic API Key</strong> en el panel izquierdo y guárdala antes de usar el asistente.</div>');
-    return;
-  }
-
-  var btn = document.getElementById('iaBtnEnviar');
-  if(btn) btn.disabled = true;
-
-  /* Construir mensaje del usuario */
-  var userContent = 'Síntoma reportado: '+sintoma;
-  if(cliente)    userContent += '\nCliente: '+cliente;
-  if(tipoEquipo) userContent += '\nTipo de equipo: '+tipoEquipo;
-  if(marca)      userContent += '\nMarca: '+marca;
-  userContent += iaObtenerContexto(sintoma, cliente, tipoEquipo, marca);
-
-  _iaChatMsgs.push({role:'user', content:sintoma+(cliente?' · '+cliente:'')+(tipoEquipo?' · '+tipoEquipo:'')});
-
-  /* Mostrar indicador de carga */
-  var chat = document.getElementById('iaChat');
-  if(chat){
-    iaRenderChat();
-    chat.insertAdjacentHTML('beforeend',
-      '<div class="ia-loading"><div class="ia-typing"><span></span><span></span><span></span></div> El asistente está analizando...</div>');
-    chat.scrollTop = chat.scrollHeight;
-  }
-
+function slaHoras(ticket){
   try{
-    var messages = _iaChatMsgs.slice(0,-1).filter(function(m){return m.role==='assistant';}).length > 0
-      ? _iaChatMsgs.slice(0,-1).map(function(m){return {role:m.role==='user'?'user':'assistant', content:m.content};})
-      : [];
-    messages.push({role:'user', content:userContent});
-
-    var response = await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version':'2023-06-01',
-        'anthropic-dangerous-direct-browser-access':'true'
-      },
-      body:JSON.stringify({
-        model:'claude-sonnet-4-6',
-        max_tokens:1000,
-        system:'Eres un técnico de soporte TI senior especializado en diagnóstico de equipos y software. '
-          +'Tu rol es analizar síntomas de fallas técnicas reportadas por técnicos de campo y proporcionar:\n'
-          +'1. Las 3 causas más probables del problema (ordenadas por probabilidad)\n'
-          +'2. Pasos de diagnóstico para confirmar la causa\n'
-          +'3. Solución recomendada paso a paso\n'
-          +'4. Tiempo estimado de resolución\n'
-          +'5. Si el equipo debería considerarse para reemplazo\n\n'
-          +'Sé concreto, técnico y práctico. Usa formato claro con secciones. '
-          +'Si hay contexto de tickets históricos similares, úsalo para calibrar tu diagnóstico. '
-          +'Responde siempre en español.',
-        messages:messages
-      })
-    });
-
-    var data = await response.json();
-    var texto = (data.content||[]).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
-    if(!texto && data.error) texto = 'Error de la API: '+(data.error.message||JSON.stringify(data.error));
-
-    /* Quitar indicador de carga */
-    var loading = chat ? chat.querySelector('.ia-loading') : null;
-    if(loading) loading.remove();
-
-    _iaChatMsgs.push({role:'assistant', content:texto});
-    iaRenderChat();
-
-    /* Guardar en historial de sesión */
-    var ahora = new Date();
-    _iaHistorial.unshift({
-      sintoma: sintoma,
-      ts: ahora.toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'})+' '+fmtDate(ahora),
-      msgs: _iaChatMsgs.slice()
-    });
-    if(_iaHistorial.length>10) _iaHistorial.pop();
-    iaRenderHistorial();
-
-  }catch(err){
-    var loading2 = chat ? chat.querySelector('.ia-loading') : null;
-    if(loading2) loading2.remove();
-    _iaChatMsgs.push({role:'error', content:'Error al conectar con la IA: '+err.message+'. Verifica tu conexión.'});
-    iaRenderChat();
-  }
-
-  if(btn) btn.disabled = false;
+    var ini = ticket.fechaInicio instanceof Date ? ticket.fechaInicio : new Date(ticket.fechaInicio);
+    if(!ini||isNaN(ini.getTime())) return null;
+    var fin = ticket.fechaFin instanceof Date ? ticket.fechaFin : (ticket.fechaFin?new Date(ticket.fechaFin):null);
+    var ref = (fin&&!isNaN(fin.getTime())) ? fin : new Date();
+    var h = (ref-ini)/3600000;
+    return (isNaN(h)||h<0) ? null : h;
+  }catch(e){ return null; }
 }
 
-/* Enter en textarea envía (Shift+Enter = salto de línea) */
-document.addEventListener('keydown', function(e){
-  if(e.key==='Enter' && !e.shiftKey && document.activeElement && document.activeElement.id==='iaSintoma'){
-    e.preventDefault();
-    iaEnviar();
-  }
-});
+function slaEsCerrado(ticket){
+  var e=(ticket.estadoTicket||'').toLowerCase();
+  return /cerr|resuel|finish|complet|done/.test(e);
+}
+
+function slaActualizarUmbral(tipo,val){
+  var cfg=slaCargarConfig();
+  cfg[tipo]=Math.max(1,parseInt(val,10)||1);
+  slaGuardarConfig(cfg);
+  slaRender();
+}
+
+function slaShowTab(tab){ _slaTabActiva=tab; slaRender(); }
+
+function slaInit(){
+  var el=document.getElementById('slaContent');
+  if(!el){ console.warn('slaContent not found'); return; }
+  slaRender();
+}
+
+function slaRender(){
+  var el=document.getElementById('slaContent');
+  if(!el) return;
+
+  var cfg=slaCargarConfig();
+  var tickets=STATE.tickets.raw||[];
+
+  /* — clasificar — */
+  var cerrados=[], abiertos=[];
+  tickets.forEach(function(r){
+    var h=slaHoras(r);
+    var u=cfg[slaTipoKey(r.tipoServicio)]||cfg.otro;
+    var cumple=(h!==null)?(h<=u):null;
+    var obj={nroTicket:r.nroTicket||'—',estadoTicket:r.estadoTicket||'',
+             tipoServicio:r.tipoServicio||'',cliente:(r.cliente||'Sin cliente').trim(),
+             tecnico:r.tecnico||'—',fechaInicio:r.fechaInicio,
+             _h:h,_u:u,_cumple:cumple};
+    if(slaEsCerrado(r)) cerrados.push(obj); else abiertos.push(obj);
+  });
+
+  var nTotal=cerrados.length;
+  var nOk   =cerrados.filter(function(r){return r._cumple===true;}).length;
+  var nFuera=cerrados.filter(function(r){return r._cumple===false;}).length;
+  var nSinF =cerrados.filter(function(r){return r._cumple===null;}).length;
+  var pct   =nTotal>0?Math.round(nOk/nTotal*100):null;
+  var pctColor=pct===null?'#94A3B8':pct>=90?'#10B981':pct>=70?'#F59E0B':'#EF4444';
+
+  var enRiesgo=abiertos.filter(function(r){return r._h!==null&&r._h>r._u;})
+    .sort(function(a,b){return (b._h-b._u)-(a._h-a._u);});
+
+  /* — config panel — */
+  var tipos=[['remoto','Remoto / Telefónico'],['presencial','Presencial / Campo'],
+             ['taller','Taller / Laboratorio'],['otro','Otros']];
+  var cfgHtml='<div class="sla-config">'
+    +'<div class="sla-config-title">⚙ Umbrales máximos de resolución por tipo de servicio (horas)</div>'
+    +tipos.map(function(tp){
+      return '<div class="sla-config-field"><label>'+tp[1]+'</label>'
+        +'<input type="number" value="'+cfg[tp[0]]+'" min="1" max="720" '
+        +'onchange="slaActualizarUmbral(\''+tp[0]+'\',this.value)">'
+        +'<span>h</span></div>';
+    }).join('<div class="sla-config-sep"></div>')
+    +'</div>';
+
+  /* — KPIs — */
+  var kpiHtml='<div class="kpi-grid" style="margin-bottom:18px;">'
+    +'<div class="kpi-card"><div class="kpi-label">Tickets cerrados</div>'
+    +'<div class="kpi-value">'+nTotal+'</div>'
+    +'<div class="kpi-sub">'+(nSinF?nSinF+' sin fecha':'analizados')+'</div></div>'
+    +'<div class="kpi-card"><div class="kpi-label">% Cumplimiento</div>'
+    +'<div class="kpi-value" style="color:'+pctColor+';">'+(pct!==null?pct+'%':'—')+'</div>'
+    +'<div class="kpi-sub">tickets cerrados</div></div>'
+    +'<div class="kpi-card"><div class="kpi-label">✅ Dentro del SLA</div>'
+    +'<div class="kpi-value">'+nOk+'</div>'
+    +'<div class="kpi-sub">resueltos en tiempo</div></div>'
+    +'<div class="kpi-card"><div class="kpi-label">❌ Fuera del SLA</div>'
+    +'<div class="kpi-value" style="color:'+(nFuera?'#EF4444':'var(--ink)')+';">'+nFuera+'</div>'
+    +'<div class="kpi-sub">excedieron umbral</div></div>'
+    +'<div class="kpi-card"><div class="kpi-label">⚠ Abiertos en riesgo</div>'
+    +'<div class="kpi-value" style="color:'+(enRiesgo.length?'#EF4444':'var(--ink)')+';">'+enRiesgo.length+'</div>'
+    +'<div class="kpi-sub">superaron SLA sin cerrar</div></div>'
+    +'</div>';
+
+  /* — tabs — */
+  var tabsHtml='<div class="sla-tabs">'
+    +[['clientes','🏢 Por cliente'],['riesgo','🚨 En riesgo ('+enRiesgo.length+')'],['detalle','📋 Incumplimientos']]
+    .map(function(t){return '<button class="sla-tab'+(_slaTabActiva===t[0]?' active':'')+
+      '" onclick="slaShowTab(\''+t[0]+'\')">'+t[1]+'</button>';}).join('')
+    +'</div>';
+
+  /* — paneles — */
+  var panels=[
+    ['clientes', slaRenderClientes(cerrados)],
+    ['riesgo',   slaRenderRiesgo(enRiesgo)],
+    ['detalle',  slaRenderDetalle(cerrados.filter(function(r){return r._cumple===false;}))]
+  ].map(function(p){
+    return '<div class="sla-panel'+(_slaTabActiva===p[0]?' active':'')+'" id="sla-panel-'+p[0]+'">'+p[1]+'</div>';
+  }).join('');
+
+  el.innerHTML = cfgHtml+kpiHtml+tabsHtml+panels;
+}
+
+function slaRenderClientes(cerrados){
+  if(!cerrados.length) return '<div class="empty-state"><div class="icon">📋</div>'
+    +'<h4>Sin tickets cerrados</h4><p>Importa tickets para ver el análisis por cliente.</p></div>';
+
+  var mapa={};
+  cerrados.forEach(function(r){
+    var c=r.cliente;
+    if(!mapa[c]) mapa[c]={ok:0,fuera:0,total:0,hExtra:0};
+    mapa[c].total++;
+    if(r._cumple===true)  mapa[c].ok++;
+    else if(r._cumple===false){ mapa[c].fuera++; mapa[c].hExtra+=r._h-r._u; }
+  });
+
+  var rows=Object.keys(mapa).map(function(c){
+    var d=mapa[c];
+    var p=Math.round(d.ok/d.total*100);
+    var nivel=p>=90?'verde':p>=70?'amarillo':'rojo';
+    var emoji=p>=90?'🟢':p>=70?'🟡':'🔴';
+    var lbl=p>=90?'Cumpliendo':p>=70?'En riesgo':'Incumpliendo';
+    var col=p>=90?'#10B981':p>=70?'#F59E0B':'#EF4444';
+    return {c:c,p:p,nivel:nivel,emoji:emoji,lbl:lbl,col:col,d:d};
+  }).sort(function(a,b){return a.p-b.p;});
+
+  return '<div class="table-card"><div class="table-scroll"><table class="ej-table"><thead><tr>'
+    +'<th>Estado</th><th>Cliente</th><th>Total</th><th>✅ Dentro</th><th>❌ Fuera</th>'
+    +'<th>% Cumplimiento</th><th>Horas extra</th></tr></thead><tbody>'
+    +rows.map(function(r){return '<tr>'
+      +'<td><span class="sla-semaforo sla-'+r.nivel+'">'+r.emoji+' '+r.lbl+'</span></td>'
+      +'<td><strong>'+escapeHtml(r.c)+'</strong></td>'
+      +'<td>'+r.d.total+'</td>'
+      +'<td style="color:#10B981;font-weight:700;">'+r.d.ok+'</td>'
+      +'<td style="color:'+(r.d.fuera?'#EF4444':'inherit')+';font-weight:700;">'+r.d.fuera+'</td>'
+      +'<td><div style="display:flex;align-items:center;gap:6px;">'
+      +'<div class="sla-bar-bg"><div class="sla-bar" style="width:'+r.p+'%;background:'+r.col+';"></div></div>'
+      +'<span style="font-weight:800;color:'+r.col+';">'+r.p+'%</span></div></td>'
+      +'<td style="color:'+(r.d.hExtra>0?'#EF4444':'var(--ink-muted)')+';">'
+      +(r.d.hExtra>0?'+'+r.d.hExtra.toFixed(1)+' h':'—')+'</td>'
+      +'</tr>';}).join('')
+    +'</tbody></table></div></div>';
+}
+
+function slaRenderRiesgo(enRiesgo){
+  if(!enRiesgo.length) return '<div class="empty-state"><div class="icon">✅</div>'
+    +'<h4>Sin tickets en riesgo</h4><p>Todos los tickets abiertos están dentro del SLA.</p></div>';
+  return '<div style="margin-bottom:10px;font-size:12.5px;color:var(--ink-muted);">'
+    +'Tickets <strong>abiertos</strong> que ya superaron el tiempo máximo de resolución.</div>'
+    +'<div class="table-card"><div class="table-scroll"><table class="ej-table"><thead><tr>'
+    +'<th>Ticket</th><th>Cliente</th><th>Técnico</th><th>Tipo</th>'
+    +'<th>Horas transcurridas</th><th>Umbral</th><th>Exceso</th></tr></thead><tbody>'
+    +enRiesgo.map(function(r){
+      var ex=(r._h-r._u).toFixed(1);
+      return '<tr style="'+(parseFloat(ex)>r._u?'background:#FFF1F2;':'')+'">'
+        +'<td><strong>'+escapeHtml(r.nroTicket)+'</strong></td>'
+        +'<td>'+escapeHtml(r.cliente)+'</td>'
+        +'<td>'+escapeHtml(r.tecnico)+'</td>'
+        +'<td>'+escapeHtml(r.tipoServicio)+'</td>'
+        +'<td style="color:#EF4444;font-weight:700;">'+r._h.toFixed(1)+' h</td>'
+        +'<td style="color:var(--ink-muted);">'+r._u+' h</td>'
+        +'<td style="color:#EF4444;font-weight:800;">+'+ex+' h</td></tr>';
+    }).join('')
+    +'</tbody></table></div></div>';
+}
+
+function slaRenderDetalle(fuera){
+  if(!fuera.length) return '<div class="empty-state"><div class="icon">🏆</div>'
+    +'<h4>Sin incumplimientos</h4><p>Todos los tickets cerrados cumplieron el SLA.</p></div>';
+  return '<div style="margin-bottom:10px;font-size:12.5px;color:var(--ink-muted);">'
+    +fuera.length+' tickets cerrados excedieron el SLA.</div>'
+    +'<div class="table-card"><div class="table-scroll"><table class="ej-table"><thead><tr>'
+    +'<th>Ticket</th><th>Cliente</th><th>Técnico</th><th>Tipo</th>'
+    +'<th>Horas</th><th>Umbral</th><th>Exceso</th></tr></thead><tbody>'
+    +fuera.sort(function(a,b){return (b._h-b._u)-(a._h-a._u);}).map(function(r){
+      return '<tr>'
+        +'<td><strong>'+escapeHtml(r.nroTicket)+'</strong></td>'
+        +'<td>'+escapeHtml(r.cliente)+'</td>'
+        +'<td>'+escapeHtml(r.tecnico)+'</td>'
+        +'<td>'+escapeHtml(r.tipoServicio)+'</td>'
+        +'<td style="font-weight:700;">'+r._h.toFixed(1)+' h</td>'
+        +'<td style="color:var(--ink-muted);">'+r._u+' h</td>'
+        +'<td style="color:#EF4444;font-weight:800;">+'+(r._h-r._u).toFixed(1)+' h</td></tr>';
+    }).join('')
+    +'</tbody></table></div></div>';
+}
+
 function exportSectionAsHtml(contentElId, sectionTitle, filenamePrefix){
   var srcEl = document.getElementById(contentElId);
   if(!srcEl || srcEl.querySelector('.empty-state')){
