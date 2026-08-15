@@ -648,7 +648,17 @@ License: MIT
   .lic-dias-crit{background:#FEE2E2;color:#991B1B;}
   .lic-dias-venc{background:#F3F4F6;color:#6B7280;}
 
-  /* ── Diagnóstico IA ── */
+  /* ── API Key card en módulo IA ── */
+  .ia-apikey-card{background:#1E293B;border-radius:10px;padding:14px 16px;margin-bottom:12px;}
+  .ia-apikey-card label{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#94A3B8;margin-bottom:6px;}
+  .ia-apikey-row{display:flex;gap:6px;align-items:center;}
+  .ia-apikey-input{flex:1;padding:7px 10px;background:#0F172A;border:1.5px solid #334155;border-radius:7px;color:#F1F5F9;font-size:12px;font-family:'Inter',sans-serif;}
+  .ia-apikey-input:focus{outline:2px solid #10B981;border-color:#10B981;}
+  .ia-apikey-btn{padding:7px 12px;background:#10B981;color:#fff;border:none;border-radius:7px;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap;}
+  .ia-apikey-btn:hover{background:#059669;}
+  .ia-apikey-ok{font-size:10.5px;color:#6EE7B7;margin-top:5px;display:none;}
+  .ia-apikey-link{font-size:10px;color:#64748B;margin-top:5px;display:block;}
+  .ia-apikey-link a{color:#38BDF8;text-decoration:none;}
   .ia-layout{display:grid;grid-template-columns:320px 1fr;gap:18px;align-items:flex-start;}
   @media(max-width:860px){.ia-layout{grid-template-columns:1fr;}}
   .ia-panel-izq{display:flex;flex-direction:column;gap:12px;}
@@ -1495,6 +1505,21 @@ License: MIT
       <div class="ia-layout" id="iaLayout">
         <!-- Panel izquierdo: formulario -->
         <div class="ia-panel-izq">
+          <!-- Configuración API Key -->
+          <div class="ia-apikey-card">
+            <label>🔑 Anthropic API Key</label>
+            <div class="ia-apikey-row">
+              <input type="password" class="ia-apikey-input" id="iaApiKeyInput"
+                placeholder="sk-ant-api03-..." autocomplete="off"
+                onkeydown="if(event.key==='Enter') iaGuardarApiKey()">
+              <button class="ia-apikey-btn" onclick="iaGuardarApiKey()">Guardar</button>
+            </div>
+            <div class="ia-apikey-ok" id="iaApiKeyOk">✓ API Key guardada correctamente</div>
+            <span class="ia-apikey-link">
+              Se guarda solo en tu navegador (localStorage).
+              <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">Obtener API Key →</a>
+            </span>
+          </div>
           <div class="ia-form-card">
             <label class="ia-form-label">Cliente</label>
             <select class="ia-select" id="iaCliente"><option value="">— Todos / Sin filtrar —</option></select>
@@ -5320,10 +5345,32 @@ function licEliminar(id){
    Contexto: historial de tickets similares en STATE.tickets.raw
 ============================================================ */
 
-var _iaHistorial = [];   /* historial de consultas de esta sesión */
-var _iaChatMsgs  = [];   /* mensajes del chat actual */
+var IA_KEY_STORAGE = 'coseinco_ia_apikey_v1';
+var _iaHistorial   = [];   /* historial de consultas de esta sesión */
+var _iaChatMsgs    = [];   /* mensajes del chat actual */
+
+function iaGetApiKey(){
+  try{ return localStorage.getItem(IA_KEY_STORAGE)||''; }catch(e){ return ''; }
+}
+
+function iaGuardarApiKey(){
+  var input = document.getElementById('iaApiKeyInput');
+  var ok    = document.getElementById('iaApiKeyOk');
+  if(!input) return;
+  var key = input.value.trim();
+  if(!key){ alert('Ingresa tu API Key de Anthropic antes de guardar.'); return; }
+  if(!key.startsWith('sk-ant-')){ alert('La API Key debe comenzar con "sk-ant-". Verifica que sea correcta.'); return; }
+  try{ localStorage.setItem(IA_KEY_STORAGE, key); }catch(e){}
+  input.value = key.slice(0,12)+'…'+key.slice(-4); /* mostrar parcialmente */
+  if(ok){ ok.style.display='block'; setTimeout(function(){ ok.style.display='none'; },3000); }
+}
 
 function iaInit(){
+  /* Cargar API key guardada y mostrarla parcialmente */
+  var savedKey = iaGetApiKey();
+  var input = document.getElementById('iaApiKeyInput');
+  if(input && savedKey) input.value = savedKey.slice(0,12)+'…'+savedKey.slice(-4);
+
   /* Poblar selectores desde tickets importados */
   var t = STATE.tickets.raw;
   var clientes    = Array.from(new Set(t.map(function(r){return r.cliente||'';}    ).filter(Boolean))).sort();
@@ -5417,6 +5464,15 @@ async function iaEnviar(){
 
   if(!sintoma){ alert('Describe el síntoma antes de enviar.'); return; }
 
+  /* Verificar API key */
+  var apiKey = iaGetApiKey();
+  if(!apiKey){
+    var chat = document.getElementById('iaChat');
+    if(chat) chat.insertAdjacentHTML('beforeend',
+      '<div class="ia-msg error">⚠ Ingresa tu <strong>Anthropic API Key</strong> en el panel izquierdo y guárdala antes de usar el asistente.</div>');
+    return;
+  }
+
   var btn = document.getElementById('iaBtnEnviar');
   if(btn) btn.disabled = true;
 
@@ -5446,7 +5502,12 @@ async function iaEnviar(){
 
     var response = await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
       body:JSON.stringify({
         model:'claude-sonnet-4-6',
         max_tokens:1000,
