@@ -601,79 +601,9 @@ License: MIT
   .rent-config label{font-size:12px;font-weight:600;color:var(--ink-muted);}
   .rent-config input[type=number]{width:80px;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:12.5px;text-align:center;}
   /* ── Módulos nuevos: dots de color ── */
-  .module-btn[data-mod="fallas"] .dot{background:#EF4444;}
-  .module-btn[data-mod="fallas"].active{box-shadow:0 -3px 0 0 #EF4444 inset;}
-  .module-btn[data-mod="licencias"] .dot{background:#8B5CF6;}
-  .module-btn[data-mod="licencias"].active{box-shadow:0 -3px 0 0 #8B5CF6 inset;}
-
-  /* ── Recurrencia de Fallas ── */
-  .fallas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:22px;}
-  .fallas-card{background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;border-left:4px solid #EF4444;}
-  .fallas-card.ok{border-left-color:#10B981;}
-  .fallas-card.warn{border-left-color:#F59E0B;}
-  .fallas-card.crit{border-left-color:#EF4444;}
-  .fallas-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
-  .fallas-activo{font-size:13px;font-weight:800;color:var(--navy);}
-  .fallas-badge{font-size:10px;font-weight:800;padding:2px 9px;border-radius:20px;}
-  .fallas-badge.ok{background:#D1FAE5;color:#065F46;}
-  .fallas-badge.warn{background:#FEF3C7;color:#92400E;}
-  .fallas-badge.crit{background:#FEE2E2;color:#991B1B;}
-  .fallas-row{display:flex;justify-content:space-between;font-size:11.5px;padding:2px 0;color:var(--ink-muted);}
-  .fallas-row strong{color:var(--ink);}
-  .fallas-config{background:var(--surface-alt);border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin-bottom:18px;}
-  .fallas-config label{font-size:12px;font-weight:600;}
-  .fallas-config input[type=number]{width:54px;padding:3px 6px;border:1.5px solid var(--border);border-radius:5px;text-align:center;font-size:12px;}
-
-  /* ── Inventario de Licencias ── */
-  .lic-alert-bar{background:linear-gradient(135deg,#FEE2E2,#FEF3C7);border:1.5px solid #FBBF24;border-radius:10px;padding:14px 18px;margin-bottom:18px;display:none;}
-  .lic-alert-bar.visible{display:block;}
-  .lic-alert-title{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:#92400E;margin-bottom:8px;}
-  .lic-alert-list{display:flex;flex-wrap:wrap;gap:8px;}
-  .lic-alert-item{background:#fff;border:1px solid #FBBF24;border-radius:6px;padding:5px 10px;font-size:11.5px;}
-  .lic-alert-item.vencida{border-color:#EF4444;background:#FFF1F2;}
-  .lic-tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:18px;}
-  .lic-tab{padding:8px 16px;font-size:12.5px;font-weight:600;color:var(--ink-muted);background:none;border:none;border-bottom:2.5px solid transparent;cursor:pointer;margin-bottom:-2px;}
-  .lic-tab.active{color:#8B5CF6;border-bottom-color:#8B5CF6;}
-  .lic-panel{display:none;} .lic-panel.active{display:block;}
-  .lic-form{background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:18px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:18px;}
-  .lic-form-field{display:flex;flex-direction:column;gap:4px;}
-  .lic-form-field label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-muted);}
-  .lic-form-field input,.lic-form-field select,.lic-form-field textarea{padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:12.5px;font-family:'Inter',sans-serif;}
-  .lic-form-field textarea{resize:vertical;min-height:56px;}
-  .lic-dias-badge{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:20px;}
-  .lic-dias-ok{background:#D1FAE5;color:#065F46;}
-  .lic-dias-warn{background:#FEF3C7;color:#92400E;}
-  .lic-dias-crit{background:#FEE2E2;color:#991B1B;}
-  .lic-dias-venc{background:#F3F4F6;color:#6B7280;}
+  /* ── Comparativa de Períodos ── */
 
 
-  /* ── Control de SLA ── */
-  .module-btn[data-mod="sla"] .dot{background:#EF4444;}
-  .module-btn[data-mod="sla"].active{box-shadow:0 -3px 0 0 #EF4444 inset;}
-  .sla-config{background:var(--navy);color:#F1F5F9;border-radius:10px;padding:14px 18px;margin-bottom:18px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;}
-  .sla-config-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#94A3B8;width:100%;margin-bottom:2px;}
-  .sla-config-field{display:flex;flex-direction:column;gap:3px;}
-  .sla-config-field label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#94A3B8;}
-  .sla-config-field input{width:70px;padding:5px 8px;background:#1E293B;border:1.5px solid #334155;border-radius:6px;color:#F1F5F9;font-size:12.5px;text-align:center;}
-  .sla-config-field input:focus{outline:2px solid #EF4444;border-color:#EF4444;}
-  .sla-config-field span{font-size:10px;color:#64748B;}
-  .sla-config-sep{width:1px;background:#334155;height:40px;margin:0 4px;}
-  .sla-semaforo{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:20px;}
-  .sla-verde  {background:#D1FAE5;color:#065F46;}
-  .sla-amarillo{background:#FEF3C7;color:#92400E;}
-  .sla-rojo   {background:#FEE2E2;color:#991B1B;}
-  .sla-gris   {background:#F3F4F6;color:#6B7280;}
-  .sla-bar-bg {height:6px;background:#E9ECF0;border-radius:3px;overflow:hidden;min-width:60px;}
-  .sla-bar    {height:100%;border-radius:3px;transition:width .3s;}
-  .sla-riesgo-card{background:#FFF1F2;border:1.5px solid #FECACA;border-radius:10px;padding:14px 18px;margin-bottom:18px;}
-  .sla-riesgo-title{font-size:12px;font-weight:800;color:#991B1B;margin-bottom:10px;}
-  .sla-riesgo-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #FEE2E2;font-size:12px;}
-  .sla-riesgo-item:last-child{border-bottom:none;}
-  .sla-riesgo-horas{font-weight:800;color:#EF4444;min-width:60px;}
-  .sla-tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:18px;}
-  .sla-tab{padding:8px 16px;font-size:12.5px;font-weight:600;color:var(--ink-muted);background:none;border:none;border-bottom:2.5px solid transparent;cursor:pointer;margin-bottom:-2px;transition:all .15s;}
-  .sla-tab.active{color:#EF4444;border-bottom-color:#EF4444;}
-  .sla-panel{display:none;} .sla-panel.active{display:block;}
 </style>
 </head>
 <body>
@@ -693,8 +623,18 @@ License: MIT
   <button class="odoo-sync-btn" onclick="odooOpenModal()" title="Configurar credenciales de Odoo" style="padding:9px 11px;font-size:13px;" id="odooBtnCfg">⚙</button>
   <!-- Separador visual -->
   <div class="backup-sep"></div>
+  <!-- Indicador sesión guardada -->
+  <div class="save-session-indicator" id="sessionIndicator" style="display:none;">
+    <strong id="sessionIndicatorTxt">✓ Sesión guardada</strong>
+    <span id="sessionIndicatorTs"></span>
+  </div>
+  <!-- Botón Guardar sesión -->
+  <button class="save-session-btn" id="btnGuardarSesion" onclick="guardarSesion(true)" title="Guarda todos los datos cargados en el navegador — se restauran automáticamente al reabrir la página">
+    💾 Guardar sesión
+  </button>
+  <div class="backup-sep"></div>
   <!-- Botón Exportar -->
-  <button class="backup-btn" onclick="backupExportar()" title="Descarga todos los datos del dashboard en un archivo .json para usar en otra computadora">
+  <button class="backup-btn" onclick="backupExportar()"  title="Descarga todos los datos del dashboard en un archivo .json para usar en otra computadora">
     ⭳ Exportar datos
   </button>
   <!-- Botón Importar (dispara el input file oculto) -->
@@ -736,15 +676,6 @@ License: MIT
   </button>
   <button class="module-btn" data-mod="rentabilidad" onclick="switchModule('rentabilidad')">
     <span class="dot"></span> Rentabilidad
-  </button>
-  <button class="module-btn" data-mod="fallas" onclick="switchModule('fallas')">
-    <span class="dot"></span> Recurrencia de Fallas
-  </button>
-  <button class="module-btn" data-mod="licencias" onclick="switchModule('licencias')">
-    <span class="dot"></span> Licencias / Software
-  </button>
-  <button class="module-btn" data-mod="sla" onclick="switchModule('sla')">
-    <span class="dot"></span> Control de SLA
   </button>
 </div>
 
@@ -1337,6 +1268,12 @@ License: MIT
         <select id="inf-tiposervicio" class="inf-select" onchange="informesRender()">
           <option value="">Todos</option>
         </select>
+        <span class="inf-filter-label">Estado de Pedido</span>
+        <select id="inf-estadopedido" class="inf-select" onchange="informesRender()">
+          <option value="">Todos</option>
+          <option value="cotizacion">Cotización</option>
+          <option value="ordenes">Órdenes de venta</option>
+        </select>
         <button class="btn btn-ghost" style="margin-left:4px;" onclick="informesLimpiarFiltros()">Limpiar filtros</button>
       </div>
 
@@ -1445,61 +1382,6 @@ License: MIT
     </section>
 
 
-    <!-- ======================= MÓDULO: RECURRENCIA DE FALLAS ======================= -->
-    <section id="mod-fallas" class="module">
-      <div class="toolbar">
-        <div class="toolbar-left">
-          <h2>Recurrencia de Fallas por Equipo</h2>
-          <p>Activos con mayor número de fallas · Costo acumulado de soporte · Recomendación de reemplazo</p>
-        </div>
-        <div class="import-group">
-          <span class="file-status" id="fallasStatus">Importa Tickets de Servicio para ver el análisis</span>
-          <button class="btn btn-ghost" onclick="exportSectionAsHtml('fallasContent','Recurrencia de Fallas','fallas_equipo')">⭳ Exportar HTML</button>
-        </div>
-      </div>
-      <div id="fallasContent">
-        <div class="empty-state"><div class="icon">🔧</div><h4>Sin datos</h4><p>Importa un CSV en <strong>Tickets de Servicio</strong> para ver el análisis de fallas por equipo.</p></div>
-      </div>
-    </section>
-
-    <!-- ======================= MÓDULO: INVENTARIO DE LICENCIAS ======================= -->
-    <section id="mod-licencias" class="module">
-      <div class="toolbar">
-        <div class="toolbar-left">
-          <h2>Inventario de Licencias y Software</h2>
-          <p>Registro de licencias por cliente · Alertas de vencimiento · Control de renovaciones</p>
-        </div>
-        <div class="import-group">
-          <span class="file-status" id="licStatus" style="display:none;"></span>
-          <button class="btn btn-ghost" onclick="exportSectionAsHtml('licContent','Inventario de Licencias','licencias_software')">⭳ Exportar HTML</button>
-          <button class="btn btn-primary" style="background:#8B5CF6;" onclick="licShowPanel('nueva')">+ Nueva Licencia</button>
-        </div>
-      </div>
-      <div id="licContent">
-        <div class="empty-state"><div class="icon">📦</div><h4>Sin licencias registradas</h4><p>Usa el botón <strong>"+ Nueva Licencia"</strong> para comenzar el inventario.</p></div>
-      </div>
-    </section>
-
-
-    <!-- ======================= MÓDULO: CONTROL DE SLA ======================= -->
-    <section id="mod-sla" class="module">
-      <div class="toolbar">
-        <div class="toolbar-left">
-          <h2>Control de SLA</h2>
-          <p>Cumplimiento de tiempos de resolución por cliente · Tickets en riesgo · Semáforo de acuerdos</p>
-        </div>
-        <div class="import-group">
-          <span class="file-status" id="slaStatus">Importa Tickets de Servicio para ver el análisis</span>
-          <button class="btn btn-ghost" onclick="exportSectionAsHtml('slaContent','Control de SLA','sla_reporte')">⭳ Exportar HTML</button>
-        </div>
-      </div>
-      <div id="slaContent">
-        <div class="empty-state"><div class="icon">📋</div><h4>Sin datos</h4>
-          <p>Importa un CSV en <strong>Tickets de Servicio</strong> para ver el análisis de cumplimiento de SLA.</p>
-        </div>
-      </div>
-    </section>
-
 
   </div>
 </main>
@@ -1560,6 +1442,25 @@ function tickClock(){
 tickClock();
 /* Pipeline carga desde CSV importado — sin localStorage */
 trLoad();
+
+/* ── Auto-restaurar sesión guardada ── */
+(function(){
+  try {
+    var restaurado = restaurarSesion();
+    if(restaurado){
+      /* Re-inicializar el módulo activo si tiene datos */
+      setTimeout(function(){
+        var modActivo = document.querySelector('.module.active');
+        if(modActivo){
+          var mid = modActivo.id||'';
+          if(mid==='mod-ejecutivo')   ejInit();
+          if(mid==='mod-rentabilidad') rentInit();
+        }
+      }, 100);
+    }
+  } catch(e){ console.warn('[Startup] Error al restaurar sesión:', e); }
+})();
+
 
 /* ============================================================
    UTILIDADES: FECHAS, SEMANA ISO, DURACIÓN
@@ -1708,17 +1609,11 @@ function switchModule(mod){
   document.getElementById('mod-clientes').classList.toggle('active', mod==='clientes');
   document.getElementById('mod-informes').classList.toggle('active', mod==='informes');
   document.getElementById('mod-rentabilidad').classList.toggle('active', mod==='rentabilidad');
-  document.getElementById('mod-fallas').classList.toggle('active', mod==='fallas');
-  document.getElementById('mod-licencias').classList.toggle('active', mod==='licencias');
-  document.getElementById('mod-sla').classList.toggle('active', mod==='sla');
   if(mod==='informes')     informesInit();
   if(mod==='activos')      activosInit();
   if(mod==='clientes')     clientesInit();
   if(mod==='ejecutivo')    ejInit();
   if(mod==='rentabilidad') rentInit();
-  if(mod==='fallas')       fallasInit();
-  if(mod==='licencias')    licenciasInit();
-  if(mod==='sla')         slaInit();
 }
 
 /* ============================================================
@@ -1829,7 +1724,7 @@ function handleFile(evt, mod){
               nActivo: r.nActivo || '',
               fechaInicio: fIni,
               fechaFin: fFin,
-              anio: iso ? iso.year : null,
+              anio: fIni ? fIni.getFullYear() : null,
               mes: fIni ? (fIni.getMonth()+1) : null,
               semana: iso ? iso.week : null,
               duracionStr: r.duracionStr || '00:00:00',
@@ -1854,7 +1749,7 @@ function handleFile(evt, mod){
               pedido: r.pedido || '',
               estadoPedido: (r.estadoPedido||'').trim() || 'Sin estado',
               fechaPedido: f,
-              anio: iso ? iso.year : null,
+              anio: f ? f.getFullYear() : null,
               mes: f ? (f.getMonth()+1) : null,
               semana: iso ? iso.week : null,
               vendedor: (r.vendedor||'').trim() || 'Sin asignar',
@@ -2222,7 +2117,7 @@ function msToggleAll(key){
   if(allCb) allCb.checked = true;
   msUpdateTrigger(key);
   var mod = (key.indexOf('vf-')===0)?'ventas':(key.indexOf('ej-')===0)?'ejecutivo':(key.indexOf('rent-')===0)?'rentabilidad':'tickets';
-  if(mod==='ejecutivo') setTimeout(ejRenderFromState, 0);
+  if(mod==='ejecutivo')   setTimeout(ejRenderFromState, 0);
   else if(mod==='rentabilidad') setTimeout(rentRenderFromState, 0);
   else onFilterChange(mod);
 }
@@ -2235,7 +2130,7 @@ function msCbChange(key){
   msUpdateTrigger(key);
   /* Detectar módulo por prefijo del key */
   var mod = (key.indexOf('vf-')===0)?'ventas':(key.indexOf('ej-')===0)?'ejecutivo':(key.indexOf('rent-')===0)?'rentabilidad':'tickets';
-  if(mod==='ejecutivo') setTimeout(ejRenderFromState, 0);
+  if(mod==='ejecutivo')   setTimeout(ejRenderFromState, 0);
   else if(mod==='rentabilidad') setTimeout(rentRenderFromState, 0);
   else onFilterChange(mod);
 }
@@ -2289,7 +2184,7 @@ function msRemoveTag(key, value){
   if(allCb) allCb.checked = !anyChecked;
   msUpdateTrigger(key);
   var mod = (key.indexOf('vf-')===0)?'ventas':(key.indexOf('ej-')===0)?'ejecutivo':(key.indexOf('rent-')===0)?'rentabilidad':'tickets';
-  if(mod==='ejecutivo') setTimeout(ejRenderFromState, 0);
+  if(mod==='ejecutivo')   setTimeout(ejRenderFromState, 0);
   else if(mod==='rentabilidad') setTimeout(rentRenderFromState, 0);
   else onFilterChange(mod);
 }
@@ -3302,7 +3197,7 @@ function odooMapRow(rec,tagNames){
   }
   return {
     pedido:rec.name||'',estadoPedido:estadoPedido,fechaPedido:fechaDate,
-    anio:iso?iso.year:null,mes:fechaDate?(fechaDate.getUTCMonth()+1):null,semana:iso?iso.week:null,
+    anio:fechaDate?fechaDate.getUTCFullYear():null,mes:fechaDate?(fechaDate.getUTCMonth()+1):null,semana:iso?iso.week:null,
     vendedor:String(vendedor).trim()||'Sin asignar',cliente:String(cliente).trim()||'Sin cliente',
     categoria:categoria,total:typeof rec.amount_total==='number'?rec.amount_total:0,
     moneda:moneda||'\u2014',_odooId:rec.id,_odooState:rec.state
@@ -5019,513 +4914,93 @@ handleFile = function(evt, mod){
    Calcula: n° fallas, horas soporte, costo, recomendación
 ============================================================ */
 
-var _fallasUmbralWarn = 3;  /* fallas para "Observación" */
-var _fallasUmbralCrit = 7;  /* fallas para "Reemplazar"  */
-
-function fallasInit(){
-  var t = STATE.tickets.raw;
-  var statusEl = document.getElementById('fallasStatus');
-  var container = document.getElementById('fallasContent');
-  if(!container) return;
-  if(!t.length){
-    if(statusEl) statusEl.textContent = 'Importa Tickets de Servicio para ver el análisis';
-    container.innerHTML = '<div class="empty-state"><div class="icon">🔧</div><h4>Sin datos</h4><p>Importa un CSV en <strong>Tickets de Servicio</strong>.</p></div>';
-    return;
-  }
-  if(statusEl) statusEl.textContent = t.length + ' tickets analizados';
-  fallasRender(t);
-}
-
-function fallasRender(t){
-  var container = document.getElementById('fallasContent');
-  if(!container) return;
-
-  /* Agrupar por N° Activo */
-  var mapa = {};
-  t.forEach(function(r){
-    var activo = (r.nActivo||'').trim();
-    if(!activo) return;
-    if(!mapa[activo]) mapa[activo] = {activo:activo, cliente:(r.cliente||'').trim(), tipoEquipo:(r.tipoEquipo||'').trim(), marca:(r.marca||'').trim(), fallas:0, horasSeg:0, ultimaFalla:null};
-    var d = mapa[activo];
-    d.fallas++;
-    d.horasSeg += r.duracionSeg||0;
-    if(r.fechaInicio){ var f=r.fechaInicio instanceof Date?r.fechaInicio:new Date(r.fechaInicio); if(!d.ultimaFalla||f>d.ultimaFalla) d.ultimaFalla=f; }
-  });
-
-  var equipos = Object.values(mapa).sort(function(a,b){ return b.fallas - a.fallas; });
-  if(!equipos.length){
-    container.innerHTML = '<div class="empty-state"><div class="icon">✅</div><h4>Sin activos con N° registrado</h4><p>Los tickets importados no tienen campo "N° Activo" con datos.</p></div>';
-    return;
-  }
-
-  var tarifa = _rentTarifaHora||35;
-  var nCrit = equipos.filter(function(e){ return e.fallas>=_fallasUmbralCrit; }).length;
-  var nWarn = equipos.filter(function(e){ return e.fallas>=_fallasUmbralWarn && e.fallas<_fallasUmbralCrit; }).length;
-
-  /* KPIs */
-  var html = '<div class="kpi-grid" style="margin-bottom:18px;">'
-    + renderKpiCard({label:'Activos con fallas',    value:equipos.length, sub:'con N° Activo registrado', cls:'navy'})
-    + renderKpiCard({label:'🔴 Para reemplazar',    value:nCrit, sub:'>= '+_fallasUmbralCrit+' fallas', cls:nCrit>0?'red':''})
-    + renderKpiCard({label:'🟡 En observación',     value:nWarn, sub:_fallasUmbralWarn+'–'+(+_fallasUmbralCrit-1)+' fallas', cls:''})
-    + renderKpiCard({label:'Total horas soporte',   value:(equipos.reduce(function(s,e){return s+e.horasSeg;},0)/3600).toFixed(1)+' h', sub:'en mantenimiento de activos', cls:''})
-    + '</div>';
-
-  /* Configuración de umbrales */
-  html += '<div class="fallas-config">'
-    +'<span style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-muted);">⚙ Umbrales:</span>'
-    +'<label style="font-size:12px;">🟡 Observación desde <input type="number" value="'+_fallasUmbralWarn+'" min="1" max="50" onchange="_fallasUmbralWarn=+this.value;fallasRender(STATE.tickets.raw);" style="width:54px;padding:3px 6px;border:1.5px solid var(--border);border-radius:5px;text-align:center;font-size:12px;"> fallas</label>'
-    +'<label style="font-size:12px;">🔴 Reemplazar desde <input type="number" value="'+_fallasUmbralCrit+'" min="2" max="100" onchange="_fallasUmbralCrit=+this.value;fallasRender(STATE.tickets.raw);" style="width:54px;padding:3px 6px;border:1.5px solid var(--border);border-radius:5px;text-align:center;font-size:12px;"> fallas</label>'
-    +'<span style="font-size:11.5px;color:var(--ink-muted);">Tarifa interna: S/ '+tarifa+'/h</span>'
-    +'</div>';
-
-  /* Tabla completa */
-  html += '<div class="table-card"><div class="table-scroll"><table class="ej-table"><thead><tr>'
-    +'<th>Estado</th><th>N° Activo</th><th>Cliente</th><th>Tipo / Marca</th>'
-    +'<th>Fallas</th><th>Horas soporte</th><th>Costo est. S/</th><th>Última falla</th>'
-    +'</tr></thead><tbody>';
-
-  equipos.forEach(function(e){
-    var nivel = e.fallas>=_fallasUmbralCrit?'crit':e.fallas>=_fallasUmbralWarn?'warn':'ok';
-    var badgeTxt = nivel==='crit'?'🔴 Reemplazar':nivel==='warn'?'🟡 Observación':'🟢 OK';
-    var horas = (e.horasSeg/3600).toFixed(1);
-    var costo = (e.horasSeg/3600)*tarifa;
-    html += '<tr>'
-      +'<td><span class="fallas-badge '+nivel+'">'+badgeTxt+'</span></td>'
-      +'<td><strong style="color:var(--navy);">'+escapeHtml(e.activo)+'</strong></td>'
-      +'<td>'+escapeHtml(e.cliente||'—')+'</td>'
-      +'<td>'+escapeHtml((e.tipoEquipo||'—')+' · '+(e.marca||'—'))+'</td>'
-      +'<td><strong style="color:'+(nivel==='crit'?'#EF4444':nivel==='warn'?'#F59E0B':'var(--ink)')+';">'+e.fallas+'</strong></td>'
-      +'<td>'+horas+' h</td>'
-      +'<td>'+fmtMoneyCompact(costo,'PEN')+'</td>'
-      +'<td>'+(e.ultimaFalla?fmtDate(e.ultimaFalla):'—')+'</td>'
-      +'</tr>';
-  });
-  html += '</tbody></table></div></div>';
-  container.innerHTML = html;
-}
-
 /* ============================================================
-   MÓDULO: INVENTARIO DE LICENCIAS Y SOFTWARE
-   Persistencia: localStorage  coseinco_licencias_v1
-   Vistas: Alertas · Por cliente · Inventario completo
+   PERSISTENCIA DE SESIÓN — Guarda tickets y ventas en localStorage
+   para restaurarlos automáticamente al reabrir la página.
+   Claves: coseinco_session_tickets_v1 / coseinco_session_ventas_v1
 ============================================================ */
 
-var LIC_KEY = 'coseinco_licencias_v1';
-var _licTabActiva = 'alertas';
-var _licNextId = 1;
+var SESSION_T_KEY = 'coseinco_session_tickets_v1';
+var SESSION_V_KEY = 'coseinco_session_ventas_v1';
+var SESSION_TS_KEY= 'coseinco_session_ts_v1';
 
-function licCargar(){ try{ return JSON.parse(localStorage.getItem(LIC_KEY)||'[]'); }catch(e){ return []; } }
-function licGuardar(lista){ try{ localStorage.setItem(LIC_KEY, JSON.stringify(lista)); }catch(e){} }
-function licGetId(){ return 'LIC-'+String(_licNextId++).padStart(4,'0'); }
-
-function licenciasInit(){
-  var lista = licCargar();
-  /* Sincronizar _licNextId */
-  lista.forEach(function(l){ var n=parseInt((l.id||'').replace('LIC-',''),10); if(n>=_licNextId) _licNextId=n+1; });
-  licRender();
-}
-
-function licRender(){
-  var lista = licCargar();
-  var container = document.getElementById('licContent');
-  if(!container) return;
-
-  var hoy = new Date(); hoy.setHours(0,0,0,0);
-  /* Calcular días restantes */
-  lista.forEach(function(l){
-    var f = l.fechaVencimiento ? new Date(l.fechaVencimiento) : null;
-    l._dias = f ? Math.round((f-hoy)/86400000) : null;
-  });
-
-  var vencidas = lista.filter(function(l){ return l._dias!==null && l._dias<0; });
-  var prox30   = lista.filter(function(l){ return l._dias!==null && l._dias>=0 && l._dias<=30; });
-  var prox90   = lista.filter(function(l){ return l._dias!==null && l._dias>30 && l._dias<=90; });
-
-  var html = '';
-
-  /* Barra de alertas */
-  if(vencidas.length || prox30.length){
-    html += '<div class="lic-alert-bar visible">'
-      +'<div class="lic-alert-title">⚠ '+(vencidas.length?vencidas.length+' licencia(s) VENCIDA(S)':'')+
-         (vencidas.length&&prox30.length?' · ':'')+
-         (prox30.length?prox30.length+' vence(n) en ≤30 días':'')+'</div>'
-      +'<div class="lic-alert-list">';
-    vencidas.concat(prox30).slice(0,8).forEach(function(l){
-      html += '<div class="lic-alert-item'+(l._dias<0?' vencida':'')+'">'+escapeHtml(l.software)
-        +' · '+escapeHtml(l.cliente)
-        +(l._dias<0?' <strong>Vencida</strong>':' <strong>'+l._dias+'d</strong>')+'</div>';
-    });
-    html += '</div></div>';
+function guardarSesion(manual){
+  try {
+    if(STATE.tickets.raw.length) localStorage.setItem(SESSION_T_KEY, JSON.stringify(STATE.tickets.raw));
+    if(STATE.ventas.raw.length)  localStorage.setItem(SESSION_V_KEY, JSON.stringify(STATE.ventas.raw));
+    var ts = new Date().toLocaleString('es-PE',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    localStorage.setItem(SESSION_TS_KEY, ts);
+    /* Actualizar UI */
+    var ind=document.getElementById('sessionIndicator');
+    var indTxt=document.getElementById('sessionIndicatorTxt');
+    var indTs=document.getElementById('sessionIndicatorTs');
+    var btn=document.getElementById('btnGuardarSesion');
+    if(ind) ind.style.display='';
+    if(indTxt) indTxt.textContent=(STATE.tickets.raw.length?STATE.tickets.raw.length+' tickets':'')+(STATE.tickets.raw.length&&STATE.ventas.raw.length?' · ':'')+(STATE.ventas.raw.length?STATE.ventas.raw.length+' pedidos':'');
+    if(indTs) indTs.textContent='Guardado '+ts;
+    if(btn && manual){ btn.textContent='✓ Guardado'; setTimeout(function(){ btn.textContent='💾 Guardar sesión'; },2500); }
+    console.log('[Sesión] Datos guardados:', ts);
+  } catch(e) {
+    console.warn('[Sesión] Error al guardar:', e.message);
+    if(e.name==='QuotaExceededError') alert('El navegador no tiene espacio suficiente para guardar todos los datos.\nIntenta usar "Exportar datos" como respaldo.');
   }
+}
 
-  /* Sub-tabs */
-  html += '<div class="lic-tabs">'
-    +'<button class="lic-tab'+(_licTabActiva==='alertas'?' active':'')+'" onclick="licShowPanel(\'alertas\')">🔔 Alertas ('+(vencidas.length+prox30.length+prox90.length)+')</button>'
-    +'<button class="lic-tab'+(_licTabActiva==='inventario'?' active':'')+'" onclick="licShowPanel(\'inventario\')">📋 Inventario completo ('+lista.length+')</button>'
-    +'<button class="lic-tab'+(_licTabActiva==='nueva'?' active':'')+'" onclick="licShowPanel(\'nueva\')">➕ Nueva licencia</button>'
-    +'</div>';
-
-  /* Panel Alertas */
-  html += '<div class="lic-panel'+(_licTabActiva==='alertas'?' active':'')+'" id="lic-panel-alertas">';
-  if(!vencidas.length && !prox30.length && !prox90.length){
-    html += '<div class="empty-state"><div class="icon">✅</div><h4>Todo en orden</h4><p>Ninguna licencia vencida ni próxima a vencer en los próximos 90 días.</p></div>';
-  } else {
-    html += licTablaAlerta('🔴 Vencidas', vencidas)
-          + licTablaAlerta('🟡 Vencen en ≤ 30 días', prox30)
-          + licTablaAlerta('🟢 Vencen en 31–90 días', prox90);
+function restaurarSesion(){
+  try {
+    var restaurado = false;
+    var tRaw = localStorage.getItem(SESSION_T_KEY);
+    if(tRaw){
+      var tickets = JSON.parse(tRaw);
+      tickets.forEach(function(r){
+        if(r.fechaInicio) r.fechaInicio = new Date(r.fechaInicio);
+        if(r.fechaFin)    r.fechaFin    = new Date(r.fechaFin);
+      });
+      STATE.tickets.raw = tickets;
+      restaurado = true;
+    }
+    var vRaw = localStorage.getItem(SESSION_V_KEY);
+    if(vRaw){
+      var ventas = JSON.parse(vRaw);
+      ventas.forEach(function(r){
+        if(r.fechaPedido) r.fechaPedido = new Date(r.fechaPedido);
+      });
+      STATE.ventas.raw = ventas;
+      restaurado = true;
+    }
+    if(restaurado){
+      var ts = localStorage.getItem(SESSION_TS_KEY)||'—';
+      /* Actualizar filtros y render */
+      if(STATE.tickets.raw.length){ buildFilterOptions('tickets'); applyFilters('tickets'); }
+      if(STATE.ventas.raw.length) { buildFilterOptions('ventas');  applyFilters('ventas');  }
+      /* Indicador en header */
+      var ind=document.getElementById('sessionIndicator');
+      var indTxt=document.getElementById('sessionIndicatorTxt');
+      var indTs=document.getElementById('sessionIndicatorTs');
+      if(ind) ind.style.display='';
+      if(indTxt) indTxt.textContent=(STATE.tickets.raw.length||0)+' tickets · '+(STATE.ventas.raw.length||0)+' pedidos';
+      if(indTs) indTs.textContent='Restaurado: '+ts;
+      /* Status en tabs de tickets y ventas */
+      var tSt=document.getElementById('ticketsStatus');
+      if(tSt && STATE.tickets.raw.length) tSt.textContent=STATE.tickets.raw.length+' tickets (sesión guardada)';
+      var vSt=document.getElementById('ventasStatus');
+      if(vSt && STATE.ventas.raw.length) vSt.textContent=STATE.ventas.raw.length+' pedidos (sesión guardada)';
+      console.log('[Sesión] Datos restaurados desde:', ts);
+    }
+    return restaurado;
+  } catch(e) {
+    console.warn('[Sesión] Error al restaurar:', e.message);
+    return false;
   }
-  html += '</div>';
-
-  /* Panel Inventario */
-  html += '<div class="lic-panel'+(_licTabActiva==='inventario'?' active':'')+'" id="lic-panel-inventario">';
-  if(!lista.length){
-    html += '<div class="empty-state"><div class="icon">📦</div><h4>Sin licencias registradas</h4><p>Agrega licencias con el botón "+ Nueva Licencia".</p></div>';
-  } else {
-    html += licTablaCompleta(lista);
-  }
-  html += '</div>';
-
-  /* Panel Nueva licencia */
-  html += '<div class="lic-panel'+(_licTabActiva==='nueva'?' active':'')+'" id="lic-panel-nueva">'
-    +'<div class="lic-form">'
-    +'<div class="lic-form-field"><label>Cliente *</label><input type="text" id="licNCliente" placeholder="Nombre del cliente" list="licClientesList"><datalist id="licClientesList">'
-    +Array.from(new Set(STATE.ventas.raw.map(function(r){return r.cliente||'';}).filter(Boolean))).sort().map(function(c){return '<option value="'+escapeHtml(c)+'">';}).join('')
-    +'</datalist></div>'
-    +'<div class="lic-form-field"><label>Software / Producto *</label><input type="text" id="licNSoftware" placeholder="Ej: Microsoft Office 365"></div>'
-    +'<div class="lic-form-field"><label>Tipo de licencia</label><select id="licNTipo"><option value="Anual">Anual</option><option value="Mensual">Mensual</option><option value="Perpetua">Perpetua</option><option value="Suscripción">Suscripción</option><option value="OEM">OEM</option></select></div>'
-    +'<div class="lic-form-field"><label>Cantidad de puestos</label><input type="number" id="licNCantidad" value="1" min="1"></div>'
-    +'<div class="lic-form-field"><label>Fecha de inicio</label><input type="date" id="licNInicio"></div>'
-    +'<div class="lic-form-field"><label>Fecha de vencimiento</label><input type="date" id="licNVenc"></div>'
-    +'<div class="lic-form-field"><label>Costo de renovación S/</label><input type="number" id="licNCosto" placeholder="0.00" step="0.01" min="0"></div>'
-    +'<div class="lic-form-field"><label>Proveedor</label><input type="text" id="licNProveedor" placeholder="Ej: Microsoft Partner"></div>'
-    +'<div class="lic-form-field" style="grid-column:1/-1;"><label>Notas</label><textarea id="licNNotas" placeholder="Número de licencia, contacto, detalles adicionales..."></textarea></div>'
-    +'<div class="lic-form-field" style="grid-column:1/-1;display:flex;gap:10px;">'
-    +'<button class="btn btn-primary" style="background:#8B5CF6;" onclick="licGuardarNueva()">Guardar Licencia</button>'
-    +'<button class="btn btn-ghost" onclick="licShowPanel(\'inventario\')">Cancelar</button>'
-    +'</div></div></div>';
-
-  container.innerHTML = html;
 }
 
-function licTablaAlerta(titulo, lista){
-  if(!lista.length) return '';
-  var html = '<div class="ej-section"><h3>'+titulo+'</h3><div class="line"></div></div>'
-    +'<div class="table-card"><div class="table-scroll"><table class="ej-table"><thead><tr>'
-    +'<th>Estado</th><th>Software</th><th>Cliente</th><th>Tipo</th><th>Vencimiento</th><th>Renovación S/</th><th></th>'
-    +'</tr></thead><tbody>';
-  lista.forEach(function(l){
-    var diasTxt = l._dias<0 ? 'Vencida hace '+Math.abs(l._dias)+'d' : 'En '+l._dias+' días';
-    var cls = l._dias<0?'lic-dias-venc':l._dias<=30?'lic-dias-crit':'lic-dias-warn';
-    html += '<tr>'
-      +'<td><span class="lic-dias-badge '+cls+'">'+diasTxt+'</span></td>'
-      +'<td><strong>'+escapeHtml(l.software||'—')+'</strong></td>'
-      +'<td>'+escapeHtml(l.cliente||'—')+'</td>'
-      +'<td>'+escapeHtml(l.tipo||'—')+'</td>'
-      +'<td>'+(l.fechaVencimiento||'—')+'</td>'
-      +'<td>'+(l.costo>0?fmtMoneyCompact(l.costo,'PEN'):'—')+'</td>'
-      +'<td><button onclick="licEliminar(\''+l.id+'\')" style="font-size:11px;color:#EF4444;background:none;border:none;cursor:pointer;">✕</button></td>'
-      +'</tr>';
-  });
-  html += '</tbody></table></div></div>';
-  return html;
-}
-
-function licTablaCompleta(lista){
-  var hoy = new Date(); hoy.setHours(0,0,0,0);
-  var html = '<div class="table-card"><div class="table-scroll"><table class="ej-table"><thead><tr>'
-    +'<th>ID</th><th>Software</th><th>Cliente</th><th>Tipo</th><th>Cantidad</th>'
-    +'<th>Inicio</th><th>Vencimiento</th><th>Días restantes</th><th>Costo S/</th><th></th>'
-    +'</tr></thead><tbody>';
-  lista.sort(function(a,b){ return (a._dias??99999)-(b._dias??99999); }).forEach(function(l){
-    var cls = l._dias===null?'':l._dias<0?'lic-dias-venc':l._dias<=30?'lic-dias-crit':l._dias<=90?'lic-dias-warn':'lic-dias-ok';
-    var diasTxt = l._dias===null?'—':l._dias<0?'Vencida':l._dias+' días';
-    html += '<tr>'
-      +'<td style="font-size:10.5px;color:var(--ink-muted);">'+escapeHtml(l.id)+'</td>'
-      +'<td><strong>'+escapeHtml(l.software||'—')+'</strong>'+(l.notas?'<div style="font-size:10.5px;color:var(--ink-muted);">'+escapeHtml(l.notas.slice(0,40))+'</div>':'')+'</td>'
-      +'<td>'+escapeHtml(l.cliente||'—')+'</td>'
-      +'<td>'+escapeHtml(l.tipo||'—')+'</td>'
-      +'<td>'+escapeHtml(String(l.cantidad||1))+'</td>'
-      +'<td>'+(l.fechaInicio||'—')+'</td>'
-      +'<td>'+(l.fechaVencimiento||'—')+'</td>'
-      +'<td><span class="lic-dias-badge '+cls+'">'+diasTxt+'</span></td>'
-      +'<td>'+(l.costo>0?fmtMoneyCompact(l.costo,'PEN'):'—')+'</td>'
-      +'<td><button onclick="licEliminar(\''+l.id+'\')" style="font-size:11px;color:#EF4444;background:none;border:none;cursor:pointer;">✕</button></td>'
-      +'</tr>';
-  });
-  html += '</tbody></table></div></div>';
-  return html;
-}
-
-function licShowPanel(tab){
-  _licTabActiva = tab;
-  licRender();
-}
-
-function licGuardarNueva(){
-  var cliente  = (document.getElementById('licNCliente')?.value||'').trim();
-  var software = (document.getElementById('licNSoftware')?.value||'').trim();
-  if(!cliente || !software){ alert('Cliente y Software son campos obligatorios.'); return; }
-  var lista = licCargar();
-  lista.push({
-    id: licGetId(),
-    cliente:          cliente,
-    software:         software,
-    tipo:             document.getElementById('licNTipo')?.value||'Anual',
-    cantidad:         parseInt(document.getElementById('licNCantidad')?.value||'1',10),
-    fechaInicio:      document.getElementById('licNInicio')?.value||'',
-    fechaVencimiento: document.getElementById('licNVenc')?.value||'',
-    costo:            parseFloat(document.getElementById('licNCosto')?.value||'0')||0,
-    proveedor:        (document.getElementById('licNProveedor')?.value||'').trim(),
-    notas:            (document.getElementById('licNNotas')?.value||'').trim()
-  });
-  licGuardar(lista);
-  var statusEl = document.getElementById('licStatus');
-  if(statusEl){ statusEl.textContent = lista.length+' licencias registradas'; statusEl.style.display=''; }
-  _licTabActiva = 'inventario';
-  licRender();
-}
-
-function licEliminar(id){
-  if(!confirm('¿Eliminar esta licencia?')) return;
-  var lista = licCargar().filter(function(l){ return l.id!==id; });
-  licGuardar(lista);
-  licRender();
-}
-
-/* ============================================================
-   MÓDULO: ASISTENTE DE DIAGNÓSTICO TÉCNICO IA
-   Usa Claude API claude-sonnet-4-6
-   Contexto: historial de tickets similares en STATE.tickets.raw
-============================================================ */
-
-/* ============================================================
-   CONTROL DE SLA — Cumplimiento de tiempos de resolución
-   Fuente: STATE.tickets.raw
-   Umbrales configurables por tipo de servicio (horas).
-   Semáforo por cliente: Verde ≥90% · Amarillo ≥70% · Rojo <70%
-============================================================ */
-
-/* ============================================================
-   CONTROL DE SLA — v2 (reescritura robusta)
-   Fuente: STATE.tickets.raw
-   Umbrales por tipo de servicio, guardados en localStorage.
-   Siempre muestra contenido aunque no haya datos.
-============================================================ */
-
-var SLA_KEY      = 'coseinco_sla_v1';
-var _slaTabActiva= 'clientes';
-var SLA_DEFAULT  = {remoto:8, presencial:24, taller:48, otro:24};
-
-function slaCargarConfig(){
-  try{ var r=JSON.parse(localStorage.getItem(SLA_KEY)||'null'); if(r&&r.remoto) return r; }catch(e){}
-  return Object.assign({},SLA_DEFAULT);
-}
-function slaGuardarConfig(cfg){
-  try{ localStorage.setItem(SLA_KEY,JSON.stringify(cfg)); }catch(e){}
-}
-
-function slaTipoKey(ts){
-  var t=(ts||'').toLowerCase().replace(/[áéíóú]/g,function(c){return{á:'a',é:'e',í:'i',ó:'o',ú:'u'}[c]||c;});
-  if(/remot|telef|telema/.test(t)) return 'remoto';
-  if(/presenc|campo|visita/.test(t)) return 'presencial';
-  if(/taller|labor|bench/.test(t)) return 'taller';
-  return 'otro';
-}
-
-function slaHoras(ticket){
-  try{
-    var ini = ticket.fechaInicio instanceof Date ? ticket.fechaInicio : new Date(ticket.fechaInicio);
-    if(!ini||isNaN(ini.getTime())) return null;
-    var fin = ticket.fechaFin instanceof Date ? ticket.fechaFin : (ticket.fechaFin?new Date(ticket.fechaFin):null);
-    var ref = (fin&&!isNaN(fin.getTime())) ? fin : new Date();
-    var h = (ref-ini)/3600000;
-    return (isNaN(h)||h<0) ? null : h;
-  }catch(e){ return null; }
-}
-
-function slaEsCerrado(ticket){
-  var e=(ticket.estadoTicket||'').toLowerCase();
-  return /cerr|resuel|finish|complet|done/.test(e);
-}
-
-function slaActualizarUmbral(tipo,val){
-  var cfg=slaCargarConfig();
-  cfg[tipo]=Math.max(1,parseInt(val,10)||1);
-  slaGuardarConfig(cfg);
-  slaRender();
-}
-
-function slaShowTab(tab){ _slaTabActiva=tab; slaRender(); }
-
-function slaInit(){
-  var el=document.getElementById('slaContent');
-  if(!el){ console.warn('slaContent not found'); return; }
-  slaRender();
-}
-
-function slaRender(){
-  var el=document.getElementById('slaContent');
-  if(!el) return;
-
-  var cfg=slaCargarConfig();
-  var tickets=STATE.tickets.raw||[];
-
-  /* — clasificar — */
-  var cerrados=[], abiertos=[];
-  tickets.forEach(function(r){
-    var h=slaHoras(r);
-    var u=cfg[slaTipoKey(r.tipoServicio)]||cfg.otro;
-    var cumple=(h!==null)?(h<=u):null;
-    var obj={nroTicket:r.nroTicket||'—',estadoTicket:r.estadoTicket||'',
-             tipoServicio:r.tipoServicio||'',cliente:(r.cliente||'Sin cliente').trim(),
-             tecnico:r.tecnico||'—',fechaInicio:r.fechaInicio,
-             _h:h,_u:u,_cumple:cumple};
-    if(slaEsCerrado(r)) cerrados.push(obj); else abiertos.push(obj);
-  });
-
-  var nTotal=cerrados.length;
-  var nOk   =cerrados.filter(function(r){return r._cumple===true;}).length;
-  var nFuera=cerrados.filter(function(r){return r._cumple===false;}).length;
-  var nSinF =cerrados.filter(function(r){return r._cumple===null;}).length;
-  var pct   =nTotal>0?Math.round(nOk/nTotal*100):null;
-  var pctColor=pct===null?'#94A3B8':pct>=90?'#10B981':pct>=70?'#F59E0B':'#EF4444';
-
-  var enRiesgo=abiertos.filter(function(r){return r._h!==null&&r._h>r._u;})
-    .sort(function(a,b){return (b._h-b._u)-(a._h-a._u);});
-
-  /* — config panel — */
-  var tipos=[['remoto','Remoto / Telefónico'],['presencial','Presencial / Campo'],
-             ['taller','Taller / Laboratorio'],['otro','Otros']];
-  var cfgHtml='<div class="sla-config">'
-    +'<div class="sla-config-title">⚙ Umbrales máximos de resolución por tipo de servicio (horas)</div>'
-    +tipos.map(function(tp){
-      return '<div class="sla-config-field"><label>'+tp[1]+'</label>'
-        +'<input type="number" value="'+cfg[tp[0]]+'" min="1" max="720" '
-        +'onchange="slaActualizarUmbral(\''+tp[0]+'\',this.value)">'
-        +'<span>h</span></div>';
-    }).join('<div class="sla-config-sep"></div>')
-    +'</div>';
-
-  /* — KPIs — */
-  var kpiHtml='<div class="kpi-grid" style="margin-bottom:18px;">'
-    +'<div class="kpi-card"><div class="kpi-label">Tickets cerrados</div>'
-    +'<div class="kpi-value">'+nTotal+'</div>'
-    +'<div class="kpi-sub">'+(nSinF?nSinF+' sin fecha':'analizados')+'</div></div>'
-    +'<div class="kpi-card"><div class="kpi-label">% Cumplimiento</div>'
-    +'<div class="kpi-value" style="color:'+pctColor+';">'+(pct!==null?pct+'%':'—')+'</div>'
-    +'<div class="kpi-sub">tickets cerrados</div></div>'
-    +'<div class="kpi-card"><div class="kpi-label">✅ Dentro del SLA</div>'
-    +'<div class="kpi-value">'+nOk+'</div>'
-    +'<div class="kpi-sub">resueltos en tiempo</div></div>'
-    +'<div class="kpi-card"><div class="kpi-label">❌ Fuera del SLA</div>'
-    +'<div class="kpi-value" style="color:'+(nFuera?'#EF4444':'var(--ink)')+';">'+nFuera+'</div>'
-    +'<div class="kpi-sub">excedieron umbral</div></div>'
-    +'<div class="kpi-card"><div class="kpi-label">⚠ Abiertos en riesgo</div>'
-    +'<div class="kpi-value" style="color:'+(enRiesgo.length?'#EF4444':'var(--ink)')+';">'+enRiesgo.length+'</div>'
-    +'<div class="kpi-sub">superaron SLA sin cerrar</div></div>'
-    +'</div>';
-
-  /* — tabs — */
-  var tabsHtml='<div class="sla-tabs">'
-    +[['clientes','🏢 Por cliente'],['riesgo','🚨 En riesgo ('+enRiesgo.length+')'],['detalle','📋 Incumplimientos']]
-    .map(function(t){return '<button class="sla-tab'+(_slaTabActiva===t[0]?' active':'')+
-      '" onclick="slaShowTab(\''+t[0]+'\')">'+t[1]+'</button>';}).join('')
-    +'</div>';
-
-  /* — paneles — */
-  var panels=[
-    ['clientes', slaRenderClientes(cerrados)],
-    ['riesgo',   slaRenderRiesgo(enRiesgo)],
-    ['detalle',  slaRenderDetalle(cerrados.filter(function(r){return r._cumple===false;}))]
-  ].map(function(p){
-    return '<div class="sla-panel'+(_slaTabActiva===p[0]?' active':'')+'" id="sla-panel-'+p[0]+'">'+p[1]+'</div>';
-  }).join('');
-
-  el.innerHTML = cfgHtml+kpiHtml+tabsHtml+panels;
-}
-
-function slaRenderClientes(cerrados){
-  if(!cerrados.length) return '<div class="empty-state"><div class="icon">📋</div>'
-    +'<h4>Sin tickets cerrados</h4><p>Importa tickets para ver el análisis por cliente.</p></div>';
-
-  var mapa={};
-  cerrados.forEach(function(r){
-    var c=r.cliente;
-    if(!mapa[c]) mapa[c]={ok:0,fuera:0,total:0,hExtra:0};
-    mapa[c].total++;
-    if(r._cumple===true)  mapa[c].ok++;
-    else if(r._cumple===false){ mapa[c].fuera++; mapa[c].hExtra+=r._h-r._u; }
-  });
-
-  var rows=Object.keys(mapa).map(function(c){
-    var d=mapa[c];
-    var p=Math.round(d.ok/d.total*100);
-    var nivel=p>=90?'verde':p>=70?'amarillo':'rojo';
-    var emoji=p>=90?'🟢':p>=70?'🟡':'🔴';
-    var lbl=p>=90?'Cumpliendo':p>=70?'En riesgo':'Incumpliendo';
-    var col=p>=90?'#10B981':p>=70?'#F59E0B':'#EF4444';
-    return {c:c,p:p,nivel:nivel,emoji:emoji,lbl:lbl,col:col,d:d};
-  }).sort(function(a,b){return a.p-b.p;});
-
-  return '<div class="table-card"><div class="table-scroll"><table class="ej-table"><thead><tr>'
-    +'<th>Estado</th><th>Cliente</th><th>Total</th><th>✅ Dentro</th><th>❌ Fuera</th>'
-    +'<th>% Cumplimiento</th><th>Horas extra</th></tr></thead><tbody>'
-    +rows.map(function(r){return '<tr>'
-      +'<td><span class="sla-semaforo sla-'+r.nivel+'">'+r.emoji+' '+r.lbl+'</span></td>'
-      +'<td><strong>'+escapeHtml(r.c)+'</strong></td>'
-      +'<td>'+r.d.total+'</td>'
-      +'<td style="color:#10B981;font-weight:700;">'+r.d.ok+'</td>'
-      +'<td style="color:'+(r.d.fuera?'#EF4444':'inherit')+';font-weight:700;">'+r.d.fuera+'</td>'
-      +'<td><div style="display:flex;align-items:center;gap:6px;">'
-      +'<div class="sla-bar-bg"><div class="sla-bar" style="width:'+r.p+'%;background:'+r.col+';"></div></div>'
-      +'<span style="font-weight:800;color:'+r.col+';">'+r.p+'%</span></div></td>'
-      +'<td style="color:'+(r.d.hExtra>0?'#EF4444':'var(--ink-muted)')+';">'
-      +(r.d.hExtra>0?'+'+r.d.hExtra.toFixed(1)+' h':'—')+'</td>'
-      +'</tr>';}).join('')
-    +'</tbody></table></div></div>';
-}
-
-function slaRenderRiesgo(enRiesgo){
-  if(!enRiesgo.length) return '<div class="empty-state"><div class="icon">✅</div>'
-    +'<h4>Sin tickets en riesgo</h4><p>Todos los tickets abiertos están dentro del SLA.</p></div>';
-  return '<div style="margin-bottom:10px;font-size:12.5px;color:var(--ink-muted);">'
-    +'Tickets <strong>abiertos</strong> que ya superaron el tiempo máximo de resolución.</div>'
-    +'<div class="table-card"><div class="table-scroll"><table class="ej-table"><thead><tr>'
-    +'<th>Ticket</th><th>Cliente</th><th>Técnico</th><th>Tipo</th>'
-    +'<th>Horas transcurridas</th><th>Umbral</th><th>Exceso</th></tr></thead><tbody>'
-    +enRiesgo.map(function(r){
-      var ex=(r._h-r._u).toFixed(1);
-      return '<tr style="'+(parseFloat(ex)>r._u?'background:#FFF1F2;':'')+'">'
-        +'<td><strong>'+escapeHtml(r.nroTicket)+'</strong></td>'
-        +'<td>'+escapeHtml(r.cliente)+'</td>'
-        +'<td>'+escapeHtml(r.tecnico)+'</td>'
-        +'<td>'+escapeHtml(r.tipoServicio)+'</td>'
-        +'<td style="color:#EF4444;font-weight:700;">'+r._h.toFixed(1)+' h</td>'
-        +'<td style="color:var(--ink-muted);">'+r._u+' h</td>'
-        +'<td style="color:#EF4444;font-weight:800;">+'+ex+' h</td></tr>';
-    }).join('')
-    +'</tbody></table></div></div>';
-}
-
-function slaRenderDetalle(fuera){
-  if(!fuera.length) return '<div class="empty-state"><div class="icon">🏆</div>'
-    +'<h4>Sin incumplimientos</h4><p>Todos los tickets cerrados cumplieron el SLA.</p></div>';
-  return '<div style="margin-bottom:10px;font-size:12.5px;color:var(--ink-muted);">'
-    +fuera.length+' tickets cerrados excedieron el SLA.</div>'
-    +'<div class="table-card"><div class="table-scroll"><table class="ej-table"><thead><tr>'
-    +'<th>Ticket</th><th>Cliente</th><th>Técnico</th><th>Tipo</th>'
-    +'<th>Horas</th><th>Umbral</th><th>Exceso</th></tr></thead><tbody>'
-    +fuera.sort(function(a,b){return (b._h-b._u)-(a._h-a._u);}).map(function(r){
-      return '<tr>'
-        +'<td><strong>'+escapeHtml(r.nroTicket)+'</strong></td>'
-        +'<td>'+escapeHtml(r.cliente)+'</td>'
-        +'<td>'+escapeHtml(r.tecnico)+'</td>'
-        +'<td>'+escapeHtml(r.tipoServicio)+'</td>'
-        +'<td style="font-weight:700;">'+r._h.toFixed(1)+' h</td>'
-        +'<td style="color:var(--ink-muted);">'+r._u+' h</td>'
-        +'<td style="color:#EF4444;font-weight:800;">+'+(r._h-r._u).toFixed(1)+' h</td></tr>';
-    }).join('')
-    +'</tbody></table></div></div>';
+function borrarSesion(){
+  if(!confirm('¿Borrar todos los datos guardados en el navegador (tickets y pedidos)?\n\nEsta acción no elimina los respaldos exportados como .json')) return;
+  [SESSION_T_KEY, SESSION_V_KEY, SESSION_TS_KEY].forEach(function(k){ try{localStorage.removeItem(k);}catch(e){} });
+  STATE.tickets.raw=[];  STATE.ventas.raw=[];
+  var ind=document.getElementById('sessionIndicator'); if(ind) ind.style.display='none';
+  applyFilters('tickets'); applyFilters('ventas');
+  alert('Sesión borrada. Importa nuevos datos desde CSV.');
 }
 
 function exportSectionAsHtml(contentElId, sectionTitle, filenamePrefix){
@@ -5969,7 +5444,7 @@ function informesInit(){
 
 /* ── Limpiar filtros secundarios ── */
 function informesLimpiarFiltros(){
-  ['inf-anio','inf-mes','inf-semana','inf-tiposervicio'].forEach(function(id){
+  ['inf-anio','inf-mes','inf-semana','inf-tiposervicio','inf-estadopedido'].forEach(function(id){
     var el = document.getElementById(id);
     if(el) el.value = '';
   });
@@ -6182,6 +5657,553 @@ function informesRender(){
       options: Object.assign(baseBarOptions(), {indexAxis:'y', plugins:{legend:{display:false}}})
     });
   }
+
+  /* ═══════════════════════════════════════════════════════════
+     SECCIONES NUEVAS: DATOS DE VENTAS + ACTIVOS + RENTABILIDAD
+  ═══════════════════════════════════════════════════════════ */
+
+  /* ── Obtener ventas del cliente ── */
+  var clienteNorm = cli.trim().toLowerCase();
+  var ventasCli = STATE.ventas.raw.filter(function(r){
+    return (r.cliente||'').trim().toLowerCase() === clienteNorm;
+  });
+  /* Aplicar filtros de año/mes si están activos */
+  var anioF   = (document.getElementById('inf-anio')  ||{value:''}).value||'';
+  var mesF    = (document.getElementById('inf-mes')   ||{value:''}).value||'';
+  if(anioF) ventasCli = ventasCli.filter(function(r){ return String(r.anio)===anioF; });
+  if(mesF)  ventasCli = ventasCli.filter(function(r){ return String(r.mes)===mesF; });
+  var estadoPedF = (document.getElementById('inf-estadopedido')||{value:''}).value||'';
+  if(estadoPedF === 'cotizacion') ventasCli = ventasCli.filter(function(r){ return /cotiz/i.test(r.estadoPedido||''); });
+  if(estadoPedF === 'ordenes')    ventasCli = ventasCli.filter(function(r){ return /orden|venta/i.test(r.estadoPedido||''); });
+
+  /* ── SECCIÓN 1: ACTIVIDAD COMERCIAL (sin montos) ── */
+  var secHtml = '';
+  if(STATE.ventas.raw.length){
+    secHtml += '<div class="inf-section-title" style="margin-top:28px;">'
+      +'<h3>💼 Actividad Comercial</h3><div class="line"></div>'
+      +'<span style="font-size:11.5px;color:var(--ink-muted);">Resumen de servicios y pedidos del período</span></div>';
+
+    if(!ventasCli.length){
+      secHtml += '<div style="padding:14px 18px;background:var(--surface-alt);border-radius:8px;font-size:12.5px;color:var(--ink-muted);">Sin pedidos registrados para <strong>'+escapeHtml(cli)+'</strong> en este período.</div>';
+    } else {
+      /* Calcular métricas no monetarias */
+      var nPedidos  = ventasCli.length;
+      var nOrdenes  = ventasCli.filter(function(r){return /orden|venta/i.test(r.estadoPedido||'');}).length;
+      var nCotiz    = ventasCli.filter(function(r){return /cotiz/i.test(r.estadoPedido||'');}).length;
+      var nOtros    = nPedidos - nOrdenes - nCotiz;
+
+      /* Categoría más frecuente */
+      var catMap = {};
+      ventasCli.forEach(function(r){var c=r.categoria||'Sin categoría'; catMap[c]=(catMap[c]||0)+1;});
+      var catTop = Object.keys(catMap).sort(function(a,b){return catMap[b]-catMap[a];})[0]||'—';
+
+      /* Vendedor asignado */
+      var vendMap = {};
+      ventasCli.forEach(function(r){var v=r.vendedor||'Sin asignar'; vendMap[v]=(vendMap[v]||0)+1;});
+      var vendTop = Object.keys(vendMap).sort(function(a,b){return vendMap[b]-vendMap[a];})[0]||'—';
+
+      /* Último pedido */
+      var ultimoPedido = ventasCli.slice().sort(function(a,b){return (b.fechaPedido||0)-(a.fechaPedido||0);})[0];
+
+      /* KPIs sin dinero */
+      secHtml += '<div class="inf-kpi-grid" style="margin-bottom:16px;">';
+      secHtml += '<div class="inf-kpi navy"><div class="inf-kpi-label">Total de servicios</div><div class="inf-kpi-value">'+nPedidos+'</div><div class="inf-kpi-sub">registrados en el período</div></div>';
+      secHtml += '<div class="inf-kpi green"><div class="inf-kpi-label">Servicios completados</div><div class="inf-kpi-value">'+nOrdenes+'</div><div class="inf-kpi-sub">órdenes confirmadas</div></div>';
+      secHtml += '<div class="inf-kpi blue"><div class="inf-kpi-label">En proceso</div><div class="inf-kpi-value">'+nCotiz+'</div><div class="inf-kpi-sub">cotizaciones activas</div></div>';
+      secHtml += '<div class="inf-kpi purple"><div class="inf-kpi-label">Servicio principal</div><div class="inf-kpi-value" style="font-size:13px;line-height:1.3;">'+escapeHtml(catTop)+'</div><div class="inf-kpi-sub">categoría más solicitada</div></div>';
+      secHtml += '<div class="inf-kpi orange"><div class="inf-kpi-label">Ejecutivo asignado</div><div class="inf-kpi-value" style="font-size:15px;line-height:1.3;">'+escapeHtml(vendTop)+'</div><div class="inf-kpi-sub">último contacto: '+(ultimoPedido?fmtDate(ultimoPedido.fechaPedido):'—')+'</div></div>';
+      secHtml += '</div>';
+
+      /* Gráficos de categorías y estado */
+      secHtml += '<div class="charts-grid" style="margin-bottom:16px;">';
+      secHtml += '<div class="chart-card"><h4>Servicios por mes</h4><div class="chart-wrap"><canvas id="chartInfVentasMes"></canvas></div></div>';
+      secHtml += '<div class="chart-card"><h4>Servicios por categoría</h4><div class="chart-wrap"><canvas id="chartInfCategorias"></canvas></div></div>';
+      secHtml += '</div>';
+
+      /* Tabla de servicios SIN columna de monto */
+      secHtml += '<div class="inf-section-title"><h3>Detalle de servicios</h3><div class="line"></div></div>';
+      secHtml += '<div class="table-card"><div class="table-scroll"><table class="inf-table"><thead><tr>'
+        +'<th>N° Pedido</th><th>Estado</th><th>Fecha</th><th>Categoría</th><th>Ejecutivo</th>'
+        +'</tr></thead><tbody>';
+      ventasCli.slice().sort(function(a,b){return (b.fechaPedido||0)-(a.fechaPedido||0);}).slice(0,50)
+        .forEach(function(r){
+          var est = (r.estadoPedido||'').toLowerCase();
+          var badgeCls = /orden|venta/.test(est)?'cerrado':/cotiz/.test(est)?'otro':'abierto';
+          secHtml += '<tr>'
+            +'<td><strong>'+escapeHtml(r.pedido||'—')+'</strong></td>'
+            +'<td><span class="inf-badge '+badgeCls+'">'+escapeHtml(r.estadoPedido||'—')+'</span></td>'
+            +'<td style="font-size:11.5px;">'+fmtDate(r.fechaPedido)+'</td>'
+            +'<td style="font-size:11.5px;">'+escapeHtml(r.categoria||'—')+'</td>'
+            +'<td style="font-size:11.5px;">'+escapeHtml(r.vendedor||'—')+'</td>'
+            +'</tr>';
+        });
+      secHtml += '</tbody></table></div></div>';
+    }
+  }
+
+  /* ── SECCIÓN 3: INVENTARIO DE ACTIVOS ATENDIDOS ── */
+  var activoMap = {};
+  data.forEach(function(r){
+    var nac = (r.nActivo||'').trim();
+    if(!nac) return;
+    if(!activoMap[nac]) activoMap[nac]={activo:nac,tipo:r.tipoEquipo||'—',marca:r.marca||'—',fallas:0,ultimaFalla:null};
+    activoMap[nac].fallas++;
+    if(r.fechaInicio){
+      var f=r.fechaInicio instanceof Date?r.fechaInicio:new Date(r.fechaInicio);
+      if(!activoMap[nac].ultimaFalla||f>activoMap[nac].ultimaFalla) activoMap[nac].ultimaFalla=f;
+    }
+  });
+  var activosList = Object.values(activoMap).sort(function(a,b){return b.fallas-a.fallas;});
+
+  if(activosList.length){
+    secHtml += '<div class="inf-section-title" style="margin-top:28px;">'
+      +'<h3>🖥️ Inventario de activos atendidos</h3><div class="line"></div>'
+      +'<span style="font-size:11.5px;color:var(--ink-muted);">Equipos del cliente con historial de tickets</span></div>';
+    secHtml += '<div class="table-card"><div class="table-scroll"><table class="inf-table"><thead><tr>'
+      +'<th>N° Activo</th><th>Tipo</th><th>Marca</th><th>N° de incidencias</th><th>Última atención</th><th>Estado</th>'
+      +'</tr></thead><tbody>';
+    activosList.forEach(function(a){
+      var riskColor = a.fallas>=7?'#EF4444':a.fallas>=3?'#F59E0B':'#10B981';
+      var riskTxt   = a.fallas>=7?'⚠ Crítico':a.fallas>=3?'🔶 Observación':'✅ Normal';
+      secHtml += '<tr>'
+        +'<td><strong style="color:var(--navy);">'+escapeHtml(a.activo)+'</strong></td>'
+        +'<td>'+escapeHtml(a.tipo)+'</td>'
+        +'<td>'+escapeHtml(a.marca)+'</td>'
+        +'<td><span style="font-weight:800;color:'+riskColor+';">'+a.fallas+'</span></td>'
+        +'<td style="font-size:11.5px;">'+fmtDate(a.ultimaFalla)+'</td>'
+        +'<td style="font-size:11.5px;font-weight:700;color:'+riskColor+';">'+riskTxt+'</td>'
+        +'</tr>';
+    });
+    secHtml += '</tbody></table></div></div>';
+  }
+
+  /* ── SECCIÓN 4: TIEMPO POR TIPO DE SERVICIO ── */
+  var tipoDetalle = {};
+  data.forEach(function(r){
+    var t = r.tipoServicio||'Sin tipo';
+    if(!tipoDetalle[t]) tipoDetalle[t]={count:0,segTotal:0};
+    tipoDetalle[t].count++;
+    tipoDetalle[t].segTotal += r.duracionSeg||0;
+  });
+  /* Promedios COSEINCO global para comparar */
+  var globalTipoDetalle = {};
+  STATE.tickets.raw.forEach(function(r){
+    var t = r.tipoServicio||'Sin tipo';
+    if(!globalTipoDetalle[t]) globalTipoDetalle[t]={count:0,segTotal:0};
+    globalTipoDetalle[t].count++;
+    globalTipoDetalle[t].segTotal += r.duracionSeg||0;
+  });
+
+  secHtml += '<div class="inf-section-title" style="margin-top:28px;">'
+    +'<h3>⏱ Tiempo por tipo de servicio</h3><div class="line"></div>'
+    +'<span style="font-size:11.5px;color:var(--ink-muted);">Comparación del cliente vs. promedio COSEINCO</span></div>';
+  secHtml += '<div class="table-card"><div class="table-scroll"><table class="inf-table"><thead><tr>'
+    +'<th>Tipo de servicio</th><th>Tickets</th><th>Tiempo promedio cliente</th><th>Promedio COSEINCO</th><th>Diferencia</th>'
+    +'</tr></thead><tbody>';
+  Object.keys(tipoDetalle).sort().forEach(function(t){
+    var td = tipoDetalle[t];
+    var gd = globalTipoDetalle[t]||{count:0,segTotal:0};
+    var promCli    = td.count?td.segTotal/td.count:0;
+    var promGlobal = gd.count?gd.segTotal/gd.count:0;
+    var diff = promCli - promGlobal;
+    var diffColor = diff>0?'#EF4444':diff<0?'#10B981':'var(--ink-muted)';
+    var diffTxt   = diff===0?'Igual':(diff>0?'+'+(diff/3600).toFixed(2)+' h más':(-diff/3600).toFixed(2)+' h menos');
+    secHtml += '<tr>'
+      +'<td><strong>'+escapeHtml(t)+'</strong></td>'
+      +'<td>'+td.count+'</td>'
+      +'<td>'+formatSecondsToHMS(Math.round(promCli))+'</td>'
+      +'<td style="color:var(--ink-muted);">'+formatSecondsToHMS(Math.round(promGlobal))+'</td>'
+      +'<td style="font-weight:700;color:'+diffColor+';">'+diffTxt+'</td>'
+      +'</tr>';
+  });
+  secHtml += '</tbody></table></div></div>';
+
+
+  /* ═══════════════════════════════════════════════════
+     INFORMES ADICIONALES — 10 secciones para el cliente
+  ═══════════════════════════════════════════════════ */
+
+  /* ── 5. RESUMEN EJECUTIVO NARRATIVO ── */
+  (function(){
+    var nT=data.length, nCerr=cerrados.length, nPend=pendientes.length;
+    var pctRes=nT>0?Math.round(nCerr/nT*100):0;
+    var activosFrecuentes=Object.values((function(){var m={};data.forEach(function(r){if(r.nActivo){m[r.nActivo]=(m[r.nActivo]||0)+1;}});return m;})()).sort(function(a,b){return b-a;});
+    var tipoTop=(function(){var m={};data.forEach(function(r){var t=r.tipoServicio||'Sin tipo';m[t]=(m[t]||0)+1;});return Object.keys(m).sort(function(a,b){return m[b]-m[a];})[0]||'—';}());
+    var activoCrit=(function(){var m={};data.forEach(function(r){if(r.nActivo){m[r.nActivo]=(m[r.nActivo]||0)+1;}});var keys=Object.keys(m).sort(function(a,b){return m[b]-m[a];});return keys.length?{id:keys[0],cnt:m[keys[0]]}:null;}());
+    var tecTop=(function(){var m={};data.forEach(function(r){var t=r.tecnico||'—';m[t]=(m[t]||0)+1;});var k=Object.keys(m).sort(function(a,b){return m[b]-m[a];})[0]||'—';return k;}());
+    var nivelRes=pctRes>=90?'excelente nivel de resolución ('+pctRes+'%)':pctRes>=70?'buen nivel de resolución ('+pctRes+'%)':'nivel de resolución del '+pctRes+'%, que se está trabajando para mejorar';
+    var frase='Durante el período analizado se registraron <strong>'+nT+' atenciones</strong> de soporte técnico, alcanzando un <strong>'+nivelRes+'</strong>. '
+      +(nPend>0?'Al cierre del informe quedan <strong>'+nPend+' ticket(s) en proceso</strong> de resolución. ':'Todos los tickets fueron resueltos satisfactoriamente. ')
+      +'El tipo de servicio más solicitado fue <strong>'+escapeHtml(tipoTop)+'</strong>'
+      +(activoCrit?' y el activo con mayor número de atenciones fue <strong>'+escapeHtml(activoCrit.id)+'</strong> con <strong>'+activoCrit.cnt+' incidencias</strong>.':'.')
+      +' El técnico principal asignado fue <strong>'+escapeHtml(tecTop)+'</strong>.';
+    secHtml += '<div style="background:linear-gradient(135deg,#EFF6FF,#F0FDF4);border:1.5px solid #BFDBFE;border-radius:12px;padding:20px 24px;margin-top:28px;margin-bottom:18px;">'
+      +'<div style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#1D4ED8;margin-bottom:8px;">📋 Resumen ejecutivo</div>'
+      +'<p style="font-size:13.5px;color:#1E293B;line-height:1.7;margin:0;">'+frase+'</p>'
+      +'</div>';
+  })();
+
+  /* ── 6. SEMÁFORO DE SALUD IT ── */
+  (function(){
+    var activoMap={};
+    data.forEach(function(r){
+      var n=(r.nActivo||'').trim(); if(!n) return;
+      if(!activoMap[n]) activoMap[n]={id:n,tipo:r.tipoEquipo||'—',marca:r.marca||'—',fallas:0,ult:null};
+      activoMap[n].fallas++;
+      if(r.fechaInicio){var f=r.fechaInicio instanceof Date?r.fechaInicio:new Date(r.fechaInicio); if(!activoMap[n].ult||f>activoMap[n].ult) activoMap[n].ult=f;}
+    });
+    var activos=Object.values(activoMap).sort(function(a,b){return b.fallas-a.fallas;});
+    if(!activos.length) return;
+    secHtml+='<div class="inf-section-title" style="margin-top:28px;"><h3>🚦 Semáforo de salud IT</h3><div class="line"></div>'
+      +'<span style="font-size:11.5px;color:var(--ink-muted);">Estado de tus equipos según historial de incidencias</span></div>';
+    secHtml+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-bottom:18px;">';
+    activos.forEach(function(a){
+      var color=a.fallas>=7?'#EF4444':a.fallas>=3?'#F59E0B':'#10B981';
+      var bg=a.fallas>=7?'#FEF2F2':a.fallas>=3?'#FFFBEB':'#F0FDF4';
+      var icon=a.fallas>=7?'🔴':a.fallas>=3?'🟡':'🟢';
+      var lbl=a.fallas>=7?'Crítico':a.fallas>=3?'Observación':'OK';
+      secHtml+='<div style="background:'+bg+';border:2px solid '+color+';border-radius:10px;padding:14px;text-align:center;">'
+        +'<div style="font-size:28px;">'+icon+'</div>'
+        +'<div style="font-size:12px;font-weight:800;color:'+color+';margin:4px 0;">'+lbl+'</div>'
+        +'<div style="font-size:11px;font-weight:700;color:#1E293B;">'+escapeHtml(a.id)+'</div>'
+        +'<div style="font-size:10.5px;color:#64748B;">'+escapeHtml(a.tipo)+' · '+escapeHtml(a.marca)+'</div>'
+        +'<div style="font-size:10px;color:'+color+';font-weight:700;margin-top:4px;">'+a.fallas+' incidencia'+(a.fallas!==1?'s':'')+'</div>'
+        +'</div>';
+    });
+    secHtml+='</div>';
+    secHtml+='<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:18px;font-size:11.5px;">'
+      +'<span>🟢 <strong>OK</strong> — sin incidencias recientes o solo 1-2 esporádicas</span>'
+      +'<span>🟡 <strong>Observación</strong> — 3 a 6 incidencias, monitorear</span>'
+      +'<span>🔴 <strong>Crítico</strong> — 7+ incidencias, revisar o reemplazar</span>'
+      +'</div>';
+  })();
+
+  /* ── 7. TICKETS ABIERTOS ACTUALMENTE ── */
+  (function(){
+    var abiertos=data.filter(function(r){var e=(r.estadoTicket||'').toLowerCase();return !/cerr|resuel|finish|complet/.test(e);});
+    secHtml+='<div class="inf-section-title" style="margin-top:28px;"><h3>📂 Tickets en proceso actualmente</h3><div class="line"></div>'
+      +'<span style="font-size:11.5px;color:var(--ink-muted);">'+abiertos.length+' atención'+(abiertos.length!==1?'es':'')+(abiertos.length?' pendiente'+(abiertos.length!==1?'s':'')+' al cierre del informe':' pendiente')+'</span></div>';
+    if(!abiertos.length){
+      secHtml+='<div style="background:#F0FDF4;border:1.5px solid #A7F3D0;border-radius:10px;padding:16px 20px;font-size:13px;color:#065F46;font-weight:600;">✅ Todos los tickets registrados en este período fueron resueltos.</div>';
+    } else {
+      secHtml+='<div class="table-card"><div class="table-scroll"><table class="inf-table"><thead><tr>'
+        +'<th>N° Ticket</th><th>Estado</th><th>Tipo de servicio</th><th>Equipo</th><th>Técnico</th><th>Fecha inicio</th><th>Tiempo abierto</th>'
+        +'</tr></thead><tbody>';
+      abiertos.forEach(function(r){
+        var fi=r.fechaInicio instanceof Date?r.fechaInicio:new Date(r.fechaInicio);
+        var horas=!isNaN(fi.getTime())?Math.round((Date.now()-fi.getTime())/3600000):null;
+        var tiempoTxt=horas!==null?(horas<24?horas+'h':Math.round(horas/24)+'d '+Math.round(horas%24)+'h'):'—';
+        var urgColor=horas!==null&&horas>72?'color:#EF4444;font-weight:700':horas!==null&&horas>24?'color:#F59E0B;font-weight:700':'';
+        secHtml+='<tr>'
+          +'<td><strong>'+escapeHtml(r.nroTicket||'—')+'</strong></td>'
+          +'<td><span class="inf-badge abierto">'+escapeHtml(r.estadoTicket||'Abierto')+'</span></td>'
+          +'<td>'+escapeHtml(r.tipoServicio||'—')+'</td>'
+          +'<td style="font-size:11.5px;">'+escapeHtml((r.tipoEquipo||'—')+' · '+(r.marca||'—'))+'</td>'
+          +'<td>'+escapeHtml(r.tecnico||'—')+'</td>'
+          +'<td style="font-size:11.5px;">'+fmtDate(fi)+'</td>'
+          +'<td style="'+urgColor+'">'+tiempoTxt+'</td>'
+          +'</tr>';
+      });
+      secHtml+='</tbody></table></div></div>';
+    }
+  })();
+
+  /* ── 8. EVOLUCIÓN MENSUAL — ÚLTIMOS 12 MESES (todos los tickets del cliente) ── */
+  (function(){
+    var ahora=new Date();
+    var meses12=[];
+    for(var i=11;i>=0;i--){
+      var d=new Date(ahora.getFullYear(),ahora.getMonth()-i,1);
+      meses12.push({mes:d.getMonth()+1,anio:d.getFullYear(),label:MES_NOMBRES[d.getMonth()].slice(0,3)+' '+d.getFullYear()});
+    }
+    /* Usar TODOS los tickets del cliente (no solo el período filtrado) */
+    var todosCli=STATE.tickets.raw.filter(function(r){return (r.cliente||'').trim().toLowerCase()===cli.trim().toLowerCase();});
+    var conteos=meses12.map(function(m){return todosCli.filter(function(r){return r.mes===m.mes&&r.anio===m.anio;}).length;});
+    if(todosCli.length<2) return;
+    secHtml+='<div class="inf-section-title" style="margin-top:28px;"><h3>📊 Evolución de atenciones — últimos 12 meses</h3><div class="line"></div>'
+      +'<span style="font-size:11.5px;color:var(--ink-muted);">Tendencia histórica de incidencias</span></div>';
+    secHtml+='<div class="charts-grid" style="margin-bottom:18px;">'
+      +'<div class="chart-card" style="grid-column:1/-1;"><h4>Tickets por mes (historial 12 meses)</h4><div class="chart-wrap" style="height:180px;"><canvas id="chartInfEvol12"></canvas></div></div>'
+      +'</div>';
+  })();
+
+  /* ── 9. ANÁLISIS POR MARCA Y MODELO ── */
+  (function(){
+    var marcaMap={};
+    data.forEach(function(r){var m=(r.marca||'Sin marca').trim(); marcaMap[m]=(marcaMap[m]||0)+1;});
+    var marcas=Object.keys(marcaMap).sort(function(a,b){return marcaMap[b]-marcaMap[a];});
+    if(!marcas.length) return;
+    secHtml+='<div class="inf-section-title" style="margin-top:28px;"><h3>🏷️ Atenciones por marca y tipo de equipo</h3><div class="line"></div></div>';
+    secHtml+='<div class="charts-grid" style="margin-bottom:18px;">'
+      +'<div class="chart-card"><h4>Tickets por marca</h4><div class="chart-wrap"><canvas id="chartInfMarca"></canvas></div></div>'
+      +'<div class="chart-card"><h4>Tickets por tipo de equipo</h4><div class="chart-wrap"><canvas id="chartInfTipoEq"></canvas></div></div>'
+      +'</div>';
+  })();
+
+  /* ── 10. TOP 5 INCIDENCIAS MÁS FRECUENTES ── */
+  (function(){
+    var tipoMap={};
+    data.forEach(function(r){var t=(r.tipoServicio||'Sin tipo').trim(); tipoMap[t]=(tipoMap[t]||0)+1;});
+    var top5=Object.keys(tipoMap).sort(function(a,b){return tipoMap[b]-tipoMap[a];}).slice(0,5);
+    if(!top5.length) return;
+    var maxVal=tipoMap[top5[0]]||1;
+    secHtml+='<div class="inf-section-title" style="margin-top:28px;"><h3>🔝 Top 5 tipos de atención más frecuentes</h3><div class="line"></div></div>';
+    secHtml+='<div class="table-card"><div style="padding:16px 18px;">';
+    top5.forEach(function(t,i){
+      var pct=Math.round(tipoMap[t]/maxVal*100);
+      var pctTotal=data.length?Math.round(tipoMap[t]/data.length*100):0;
+      var colors=['#1A86F1','#10B981','#F59E0B','#8B5CF6','#EF4444'];
+      secHtml+='<div style="margin-bottom:14px;">'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">'
+        +'<span style="font-size:12.5px;font-weight:700;color:#1E293B;">'+(i+1)+'. '+escapeHtml(t)+'</span>'
+        +'<span style="font-size:11.5px;color:#64748B;"><strong style="color:'+colors[i]+';">'+tipoMap[t]+'</strong> tickets ('+pctTotal+'%)</span>'
+        +'</div>'
+        +'<div style="height:8px;background:#E9ECF0;border-radius:4px;overflow:hidden;">'
+        +'<div style="width:'+pct+'%;height:100%;background:'+colors[i]+';border-radius:4px;"></div>'
+        +'</div></div>';
+    });
+    secHtml+='</div></div>';
+  })();
+
+  /* ── 11. DISTRIBUCIÓN POR DÍA DE LA SEMANA ── */
+  (function(){
+    var dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    var diaCount=[0,0,0,0,0,0,0];
+    data.forEach(function(r){
+      if(r.fechaInicio){var f=r.fechaInicio instanceof Date?r.fechaInicio:new Date(r.fechaInicio);if(!isNaN(f.getTime())) diaCount[f.getDay()]++;}
+    });
+    var hasData=diaCount.some(function(v){return v>0;});
+    if(!hasData) return;
+    secHtml+='<div class="inf-section-title" style="margin-top:28px;"><h3>📅 Distribución de atenciones por día de la semana</h3><div class="line"></div>'
+      +'<span style="font-size:11.5px;color:var(--ink-muted);">Cuándo se generan más incidencias</span></div>';
+    secHtml+='<div class="charts-grid" style="margin-bottom:18px;">'
+      +'<div class="chart-card"><h4>Tickets por día</h4><div class="chart-wrap"><canvas id="chartInfDia"></canvas></div></div>'
+      +'<div class="chart-card" style="display:flex;flex-direction:column;justify-content:center;padding:16px;">';
+    var maxDia=Math.max.apply(null,diaCount);
+    dias.forEach(function(d,i){
+      var pct=maxDia>0?Math.round(diaCount[i]/maxDia*100):0;
+      var esMax=diaCount[i]===maxDia&&maxDia>0;
+      secHtml+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
+        +'<span style="width:80px;font-size:11.5px;color:#64748B;'+(esMax?'font-weight:700;color:#1E293B;':'')+'">'+d+'</span>'
+        +'<div style="flex:1;height:12px;background:#E9ECF0;border-radius:6px;overflow:hidden;">'
+        +'<div style="width:'+pct+'%;height:100%;background:'+(esMax?'#EF4444':'#1A86F1')+';border-radius:6px;"></div></div>'
+        +'<span style="font-size:11.5px;font-weight:700;min-width:24px;text-align:right;color:'+(esMax?'#EF4444':'#64748B')+';">'+diaCount[i]+'</span>'
+        +'</div>';
+    });
+    secHtml+='</div></div>';
+  })();
+
+  /* ── 12. ÍNDICE DE REINCIDENCIA ── */
+  (function(){
+    var activoRec={};
+    data.forEach(function(r){
+      var n=(r.nActivo||'').trim(); if(!n) return;
+      if(!activoRec[n]) activoRec[n]={id:n,tipo:r.tipoEquipo||'—',marca:r.marca||'—',cnt:0,fechas:[]};
+      activoRec[n].cnt++;
+      if(r.fechaInicio) activoRec[n].fechas.push(r.fechaInicio instanceof Date?r.fechaInicio:new Date(r.fechaInicio));
+    });
+    var reincidentes=Object.values(activoRec).filter(function(a){return a.cnt>=2;}).sort(function(a,b){return b.cnt-a.cnt;});
+    if(!reincidentes.length){
+      secHtml+='<div class="inf-section-title" style="margin-top:28px;"><h3>🔁 Índice de reincidencia</h3><div class="line"></div></div>'
+        +'<div style="background:#F0FDF4;border:1.5px solid #A7F3D0;border-radius:10px;padding:14px 18px;font-size:12.5px;color:#065F46;font-weight:600;">✅ Sin reincidencias detectadas en el período — cada equipo fue atendido una sola vez.</div>';
+      return;
+    }
+    secHtml+='<div class="inf-section-title" style="margin-top:28px;"><h3>🔁 Índice de reincidencia</h3><div class="line"></div>'
+      +'<span style="font-size:11.5px;color:var(--ink-muted);">Equipos que han requerido más de una atención</span></div>';
+    secHtml+='<div class="table-card"><div class="table-scroll"><table class="inf-table"><thead><tr>'
+      +'<th>Activo</th><th>Tipo / Marca</th><th>N° atenciones</th><th>Primera atención</th><th>Última atención</th><th>Recomendación</th>'
+      +'</tr></thead><tbody>';
+    reincidentes.forEach(function(a){
+      var fechaOrd=a.fechas.filter(function(f){return !isNaN(f.getTime());}).sort(function(x,y){return x-y;});
+      var primera=fechaOrd.length?fmtDate(fechaOrd[0]):'—';
+      var ultima=fechaOrd.length>1?fmtDate(fechaOrd[fechaOrd.length-1]):'—';
+      var reco=a.cnt>=7?'⚠ Evaluar reemplazo':a.cnt>=4?'🔶 Revisión profunda':a.cnt>=2?'🔵 Seguimiento preventivo':'—';
+      secHtml+='<tr>'
+        +'<td><strong style="color:var(--navy);">'+escapeHtml(a.id)+'</strong></td>'
+        +'<td style="font-size:11.5px;">'+escapeHtml(a.tipo)+' · '+escapeHtml(a.marca)+'</td>'
+        +'<td style="font-weight:800;color:'+(a.cnt>=7?'#EF4444':a.cnt>=4?'#F59E0B':'#1A86F1')+';">'+a.cnt+'</td>'
+        +'<td style="font-size:11.5px;">'+primera+'</td>'
+        +'<td style="font-size:11.5px;">'+ultima+'</td>'
+        +'<td style="font-size:11.5px;">'+reco+'</td>'
+        +'</tr>';
+    });
+    secHtml+='</tbody></table></div></div>';
+  })();
+
+  /* ── 13. LÍNEA DE TIEMPO DE ATENCIONES ── */
+  (function(){
+    var sorted=data.slice().sort(function(a,b){
+      var fa=a.fechaInicio instanceof Date?a.fechaInicio:new Date(a.fechaInicio);
+      var fb=b.fechaInicio instanceof Date?b.fechaInicio:new Date(b.fechaInicio);
+      return fa-fb;
+    }).slice(0,20);
+    if(!sorted.length) return;
+    secHtml+='<div class="inf-section-title" style="margin-top:28px;"><h3>🗓️ Línea de tiempo de atenciones</h3><div class="line"></div>'
+      +'<span style="font-size:11.5px;color:var(--ink-muted);">Cronología de las últimas '+sorted.length+' atenciones</span></div>';
+    secHtml+='<div style="position:relative;padding-left:28px;margin-bottom:18px;">';
+    secHtml+='<div style="position:absolute;left:10px;top:0;bottom:0;width:2px;background:#E2E8F0;border-radius:2px;"></div>';
+    sorted.forEach(function(r,i){
+      var fi=r.fechaInicio instanceof Date?r.fechaInicio:new Date(r.fechaInicio);
+      var esCerrado=!/abierto|proceso|pendiente/i.test(r.estadoTicket||'');
+      var dotColor=esCerrado?'#10B981':'#F59E0B';
+      secHtml+='<div style="position:relative;margin-bottom:14px;">'
+        +'<div style="position:absolute;left:-22px;top:3px;width:12px;height:12px;border-radius:50%;background:'+dotColor+';border:2px solid #fff;box-shadow:0 0 0 2px '+dotColor+';"></div>'
+        +'<div style="background:#fff;border:1px solid #E2E8F0;border-radius:8px;padding:10px 14px;">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:4px;">'
+        +'<div>'
+        +'<span style="font-size:12px;font-weight:700;color:#1E293B;">'+escapeHtml(r.tipoServicio||'Sin tipo')+'</span>'
+        +' <span style="font-size:10.5px;background:'+(esCerrado?'#D1FAE5':'#FEF3C7')+';color:'+(esCerrado?'#065F46':'#92400E')+';padding:1px 7px;border-radius:20px;font-weight:600;">'+(esCerrado?'Cerrado':'En proceso')+'</span>'
+        +'</div>'
+        +'<span style="font-size:10.5px;color:#94A3B8;">'+fmtDate(fi)+'</span>'
+        +'</div>'
+        +'<div style="font-size:11.5px;color:#64748B;margin-top:4px;">'+escapeHtml(r.tecnico||'—')+' · '+escapeHtml((r.tipoEquipo||'—')+' '+( r.marca||''))+'</div>'
+        +'</div></div>';
+    });
+    secHtml+='</div>';
+  })();
+
+  /* ── 14. ESTADO DETALLADO POR TÉCNICO ── */
+  (function(){
+    var tecMap={};
+    data.forEach(function(r){
+      var t=(r.tecnico||'Sin asignar').trim();
+      if(!tecMap[t]) tecMap[t]={nombre:t,total:0,cerrados:0,seg:0};
+      tecMap[t].total++;
+      if(!/abierto|proceso|pendiente/i.test(r.estadoTicket||'')) tecMap[t].cerrados++;
+      tecMap[t].seg+=r.duracionSeg||0;
+    });
+    var tecs=Object.values(tecMap).sort(function(a,b){return b.total-a.total;});
+    if(!tecs.length) return;
+    secHtml+='<div class="inf-section-title" style="margin-top:28px;"><h3>👤 Rendimiento por técnico asignado</h3><div class="line"></div>'
+      +'<span style="font-size:11.5px;color:var(--ink-muted);">Detalle del equipo que atendió al cliente</span></div>';
+    secHtml+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:18px;">';
+    tecs.forEach(function(tc){
+      var pctRes=tc.total>0?Math.round(tc.cerrados/tc.total*100):0;
+      var resColor=pctRes>=90?'#10B981':pctRes>=70?'#F59E0B':'#EF4444';
+      var promH=tc.total?tc.seg/tc.total/3600:0;
+      secHtml+='<div style="background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:16px;">'
+        +'<div style="font-size:13.5px;font-weight:800;color:var(--navy);margin-bottom:12px;">'+escapeHtml(tc.nombre)+'</div>'
+        +'<div style="display:flex;flex-direction:column;gap:7px;">'
+        +'<div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:#64748B;">Tickets atendidos</span><strong>'+tc.total+'</strong></div>'
+        +'<div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:#64748B;">Resueltos</span><strong style="color:#10B981;">'+tc.cerrados+'</strong></div>'
+        +'<div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:#64748B;">% Resolución</span><strong style="color:'+resColor+';">'+pctRes+'%</strong></div>'
+        +'<div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:#64748B;">Tiempo prom.</span><strong>'+promH.toFixed(1)+' h/ticket</strong></div>'
+        +'</div>'
+        +'<div style="margin-top:10px;height:6px;background:#E9ECF0;border-radius:3px;overflow:hidden;">'
+        +'<div style="width:'+pctRes+'%;height:100%;background:'+resColor+';border-radius:3px;"></div>'
+        +'</div>'
+        +'</div>';
+    });
+    secHtml+='</div>';
+  })();
+
+  /* Insertar todas las secciones nuevas en el contenido */
+  content.insertAdjacentHTML('beforeend', secHtml);
+
+  /* ── Gráficos nuevos: ventas por mes + categorías ── */
+  if(ventasCli && ventasCli.length){
+    /* Ingresos PEN por mes */
+    var vMesMap = {};
+    ventasCli.forEach(function(r){
+      var k=(r.anio||'')+'/'+(String(r.mes||'').padStart(2,'0'));
+      if(!vMesMap[k]) vMesMap[k]={pen:0,usd:0};
+      if(r.moneda==='USD') vMesMap[k].usd+=r.total||0;
+      else vMesMap[k].pen+=r.total||0;
+    });
+    var vMesKeys = Object.keys(vMesMap).sort();
+
+    /* Contar pedidos por mes (sin montos) */
+    var vConteoMes = {};
+    ventasCli.forEach(function(r){
+      var k=(r.anio||'')+'/'+(String(r.mes||'').padStart(2,'0'));
+      vConteoMes[k]=(vConteoMes[k]||0)+1;
+    });
+    var vMesKeys2 = Object.keys(vConteoMes).sort();
+
+    destroyChart('infVentasMes');
+    var ctxVM = document.getElementById('chartInfVentasMes');
+    if(ctxVM && vMesKeys2.length){
+      CHARTS.infVentasMes = new Chart(ctxVM,{
+        type:'bar',
+        data:{
+          labels:vMesKeys2.map(function(k){var p=k.split('/');return MES_NOMBRES[(parseInt(p[1])-1)]+' '+p[0];}),
+          datasets:[
+            {label:'Servicios',data:vMesKeys2.map(function(k){return vConteoMes[k];}),backgroundColor:'#1A86F1',borderRadius:4}
+          ]
+        },
+        options:Object.assign(baseBarOptions(),{plugins:{legend:{display:false}}})
+      });
+    }
+
+    /* Dona de categorías — recalcular aquí */
+    var catMapChart = {};
+    ventasCli.forEach(function(r){var c=r.categoria||'Sin categoría'; catMapChart[c]=(catMapChart[c]||0)+1;});
+    var catKeys = Object.keys(catMapChart||{});
+    destroyChart('infCategorias');
+    var ctxCat = document.getElementById('chartInfCategorias');
+    if(ctxCat && catKeys.length){
+      CHARTS.infCategorias = new Chart(ctxCat,{
+        type:'doughnut',
+        data:{
+          labels:catKeys,
+          datasets:[{data:catKeys.map(function(c){return catMapChart[c];}),backgroundColor:CHART_PALETTE,borderWidth:2,borderColor:'#fff'}]
+        },
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:12,font:{size:11}}}}}
+      });
+    }
+  }
+
+  /* ── Charts adicionales de los nuevos informes ── */
+  var clienteNormChk = cli.trim().toLowerCase();
+
+  /* Evolución 12 meses */
+  (function(){
+    var ahora=new Date();
+    var meses12=[]; for(var i=11;i>=0;i--){var d=new Date(ahora.getFullYear(),ahora.getMonth()-i,1);meses12.push({mes:d.getMonth()+1,anio:d.getFullYear(),label:MES_NOMBRES[d.getMonth()].slice(0,3)+' '+d.getFullYear()});}
+    var todosCli=STATE.tickets.raw.filter(function(r){return (r.cliente||'').trim().toLowerCase()===clienteNormChk;});
+    var conteos=meses12.map(function(m){return todosCli.filter(function(r){return r.mes===m.mes&&r.anio===m.anio;}).length;});
+    destroyChart('infEvol12');
+    var ctx=document.getElementById('chartInfEvol12');
+    if(ctx&&todosCli.length>=2) CHARTS.infEvol12=new Chart(ctx,{type:'line',data:{
+      labels:meses12.map(function(m){return m.label;}),
+      datasets:[{label:'Tickets',data:conteos,borderColor:'#8B5CF6',backgroundColor:'#8B5CF622',tension:.35,pointRadius:5,fill:true}]
+    },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1},grid:{color:'#F1F5F9'}}}}});
+  })();
+
+  /* Marca */
+  (function(){
+    var marcaMap={},tipoEqMap={};
+    var dataCur=STATE.tickets.raw.filter(function(r){return (r.cliente||'').trim().toLowerCase()===clienteNormChk;});
+    dataCur.forEach(function(r){var m=(r.marca||'Sin marca').trim();marcaMap[m]=(marcaMap[m]||0)+1; var t=(r.tipoEquipo||'Sin tipo').trim();tipoEqMap[t]=(tipoEqMap[t]||0)+1;});
+    var mKeys=Object.keys(marcaMap).sort(function(a,b){return marcaMap[b]-marcaMap[a];});
+    var tKeys=Object.keys(tipoEqMap).sort(function(a,b){return tipoEqMap[b]-tipoEqMap[a];});
+    destroyChart('infMarca');
+    var cm=document.getElementById('chartInfMarca');
+    if(cm&&mKeys.length) CHARTS.infMarca=new Chart(cm,{type:'bar',data:{
+      labels:mKeys,
+      datasets:[{label:'Tickets',data:mKeys.map(function(k){return marcaMap[k];}),backgroundColor:'#1A86F1',borderRadius:4}]
+    },options:Object.assign(baseBarOptions(),{plugins:{legend:{display:false}}})});
+    destroyChart('infTipoEq');
+    var ct=document.getElementById('chartInfTipoEq');
+    if(ct&&tKeys.length) CHARTS.infTipoEq=new Chart(ct,{type:'bar',data:{
+      labels:tKeys,
+      datasets:[{label:'Tickets',data:tKeys.map(function(k){return tipoEqMap[k];}),backgroundColor:'#10B981',borderRadius:4}]
+    },options:Object.assign(baseBarOptions(),{plugins:{legend:{display:false}}})});
+  })();
+
+  /* Día de la semana */
+  (function(){
+    var dias=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+    var diaCount=[0,0,0,0,0,0,0];
+    var dataCur=STATE.tickets.raw.filter(function(r){return (r.cliente||'').trim().toLowerCase()===clienteNormChk;});
+    dataCur.forEach(function(r){if(r.fechaInicio){var f=r.fechaInicio instanceof Date?r.fechaInicio:new Date(r.fechaInicio);if(!isNaN(f.getTime())) diaCount[f.getDay()]++;}});
+    destroyChart('infDia');
+    var cd=document.getElementById('chartInfDia');
+    if(cd&&diaCount.some(function(v){return v>0;})) CHARTS.infDia=new Chart(cd,{type:'bar',data:{
+      labels:dias,
+      datasets:[{label:'Tickets',data:diaCount,backgroundColor:diaCount.map(function(v){return v===Math.max.apply(null,diaCount)?'#EF4444':'#1A86F1';}),borderRadius:4}]
+    },options:Object.assign(baseBarOptions(),{plugins:{legend:{display:false}}})});
+  })();
 }
 
 /* ── Exportar informe como HTML autocontenido ── */
