@@ -604,6 +604,21 @@ License: MIT
   /* ── Comparativa de Períodos ── */
 
 
+  /* ── Dashboard Por Cotizar / Por Facturar ── */
+  .pxf-header{background:linear-gradient(135deg,var(--navy),#1E3A5F);color:#fff;border-radius:12px;padding:18px 22px;margin-bottom:18px;display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;}
+  .pxf-header-title{font-size:15px;font-weight:800;letter-spacing:-.3px;}
+  .pxf-header-sub{font-size:11.5px;color:rgba(255,255,255,0.65);margin-top:2px;}
+  .pxf-kpi-row{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px;}
+  .pxf-kpi{background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:14px 18px;min-width:150px;flex:1;}
+  .pxf-kpi-label{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-muted);margin-bottom:4px;}
+  .pxf-kpi-value{font-size:26px;font-weight:800;color:var(--navy);line-height:1;}
+  .pxf-kpi-sub{font-size:11px;color:var(--ink-muted);margin-top:2px;}
+  .pxf-kpi.warning .pxf-kpi-value{color:#F59E0B;}
+  .pxf-kpi.danger  .pxf-kpi-value{color:#EF4444;}
+  .pxf-kpi.success .pxf-kpi-value{color:#10B981;}
+  .pxf-table-wrap{background:#fff;border:1.5px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;}
+  .pxf-section{border:1.5px solid var(--border);border-radius:12px;padding:18px;margin-bottom:18px;background:#fff;}
+  .pxf-section-title{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-muted);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;}
 </style>
 </head>
 <body>
@@ -1074,6 +1089,15 @@ License: MIT
         </div>
       </div>
 
+      <!-- ── Dashboard: Ventas por Facturar ── -->
+      <div id="facturaPanel" style="display:none;padding:20px 0 0;">
+        <div style="margin-bottom:14px;">
+          <h3 style="margin:0;font-size:16px;font-weight:800;color:var(--navy);">💰 Ventas por Facturar</h3>
+          <p style="margin:4px 0 0;font-size:12px;color:var(--ink-muted);">Órdenes confirmadas pendientes de factura + cotizaciones activas</p>
+        </div>
+        <div id="facturaContent"></div>
+      </div>
+
     </section>
 
     <!-- ======================= MODULE 4: ACTIVOS TI ======================= -->
@@ -1456,6 +1480,8 @@ trLoad();
           if(mid==='mod-ejecutivo')   ejInit();
           if(mid==='mod-rentabilidad') rentInit();
         }
+        cotizarInit();
+        facturaInit();
       }, 100);
     }
   } catch(e){ console.warn('[Startup] Error al restaurar sesión:', e); }
@@ -1614,6 +1640,8 @@ function switchModule(mod){
   if(mod==='clientes')     clientesInit();
   if(mod==='ejecutivo')    ejInit();
   if(mod==='rentabilidad') rentInit();
+  if(mod==='tickets') setTimeout(cotizarInit,200);
+  if(mod==='ventas')  setTimeout(facturaInit,200);
 }
 
 /* ============================================================
@@ -4906,6 +4934,8 @@ handleFile = function(evt, mod){
     var rentEl = document.getElementById('mod-rentabilidad');
     if(ejEl && ejEl.classList.contains('active')) ejInit();
     if(rentEl && rentEl.classList.contains('active')) rentInit();
+    cotizarInit();
+    facturaInit();
   }, 400);
 };
 /* ============================================================
@@ -5001,6 +5031,295 @@ function borrarSesion(){
   var ind=document.getElementById('sessionIndicator'); if(ind) ind.style.display='none';
   applyFilters('tickets'); applyFilters('ventas');
   alert('Sesión borrada. Importa nuevos datos desde CSV.');
+}
+
+/* ============================================================
+   DASHBOARD: TICKETS POR COTIZAR
+   Muestra tickets cerrados que aún no tienen una cotización/
+   venta correspondiente en Ventas (cruce por cliente).
+   Se inserta como panel adicional dentro de Tickets.
+============================================================ */
+
+function cotizarInit(){
+  var el=document.getElementById('cotizarPanel');
+  if(!el) return;
+  var t=STATE.tickets.raw;
+  if(!t.length){ el.style.display='none'; return; }
+  el.style.display='';
+  cotizarRender();
+}
+
+function cotizarRender(){
+  var el=document.getElementById('cotizarContent');
+  if(!el) return;
+
+  var t=STATE.tickets.raw;
+  var v=STATE.ventas.raw;
+
+  /* Tickets cerrados */
+  var cerrados=t.filter(function(r){
+    return /cerr|resuel|finish|complet/i.test(r.estadoTicket||'');
+  });
+
+  /* Clientes que YA tienen una Orden de Venta confirmada */
+  var clientesConOrden={};
+  v.forEach(function(r){
+    if(/orden|venta/i.test(r.estadoPedido||'')){
+      clientesConOrden[(r.cliente||'').trim().toLowerCase()]=true;
+    }
+  });
+
+  /* Tickets cuyo cliente NO tiene orden confirmada aún = por cotizar */
+  var porCotizar=cerrados.filter(function(r){
+    return !clientesConOrden[(r.cliente||'').trim().toLowerCase()];
+  });
+
+  /* Agrupar por cliente */
+  var clienteMap={};
+  porCotizar.forEach(function(r){
+    var c=(r.cliente||'Sin cliente').trim();
+    if(!clienteMap[c]) clienteMap[c]={cliente:c,tickets:[],tecnico:r.tecnico||'—',ultima:null};
+    clienteMap[c].tickets.push(r);
+    var fi=r.fechaFin instanceof Date?r.fechaFin:new Date(r.fechaFin||r.fechaInicio);
+    if(!isNaN(fi.getTime())) if(!clienteMap[c].ultima||fi>clienteMap[c].ultima) clienteMap[c].ultima=fi;
+  });
+  var grupos=Object.values(clienteMap).sort(function(a,b){return b.tickets.length-a.tickets.length;});
+
+  /* Días sin cotizar (desde última atención) */
+  function diasSinCot(g){ if(!g.ultima) return null; return Math.round((Date.now()-g.ultima.getTime())/86400000); }
+
+  /* KPIs */
+  var nClientes=grupos.length;
+  var nTickets=porCotizar.length;
+  var masAntiguo=grupos.reduce(function(max,g){ var d=diasSinCot(g); return (d&&d>max)?d:max; },0);
+
+  var html='<div class="pxf-kpi-row">'
+    +'<div class="pxf-kpi '+(nClientes>0?'warning':'success')+'">'
+      +'<div class="pxf-kpi-label">Clientes a cotizar</div>'
+      +'<div class="pxf-kpi-value">'+nClientes+'</div>'
+      +'<div class="pxf-kpi-sub">sin orden de venta confirmada</div></div>'
+    +'<div class="pxf-kpi '+(nTickets>0?'warning':'success')+'">'
+      +'<div class="pxf-kpi-label">Tickets cerrados</div>'
+      +'<div class="pxf-kpi-value">'+nTickets+'</div>'
+      +'<div class="pxf-kpi-sub">listos para cotizar</div></div>'
+    +'<div class="pxf-kpi '+(masAntiguo>30?'danger':masAntiguo>14?'warning':'success')+'">'
+      +'<div class="pxf-kpi-label">Mayor antigüedad</div>'
+      +'<div class="pxf-kpi-value">'+(masAntiguo||0)+'d</div>'
+      +'<div class="pxf-kpi-sub">días sin cotización</div></div>'
+    +'<div class="pxf-kpi">'
+      +'<div class="pxf-kpi-label">Cerrados c/orden</div>'
+      +'<div class="pxf-kpi-value success" style="color:#10B981;">'+(cerrados.length-nTickets)+'</div>'
+      +'<div class="pxf-kpi-sub">ya cuentan con orden de venta</div></div>'
+    +'</div>';
+
+  if(!grupos.length){
+    html+='<div style="background:#F0FDF4;border:1.5px solid #A7F3D0;border-radius:10px;padding:16px 20px;font-size:13px;color:#065F46;font-weight:600;">✅ Todos los tickets cerrados tienen una orden de venta asociada.</div>';
+    el.innerHTML=html; return;
+  }
+
+  /* Tabla agrupada por cliente */
+  html+='<div class="pxf-table-wrap"><div class="table-scroll"><table class="ej-table"><thead><tr>'
+    +'<th>Cliente</th><th>Tickets</th><th>Técnico</th><th>Tipos de servicio</th><th>Última atención</th><th>Días sin cotiz.</th><th>Urgencia</th>'
+    +'</tr></thead><tbody>';
+  grupos.forEach(function(g){
+    var d=diasSinCot(g);
+    var urgencia=d===null?'—':d>30?'🔴 Alta':d>14?'🟡 Media':'🟢 Normal';
+    var urgColor=d===null?'':d>30?'color:#EF4444;font-weight:700;':d>14?'color:#F59E0B;font-weight:700;':'color:#10B981;';
+    var tipos=Array.from(new Set(g.tickets.map(function(r){return r.tipoServicio||'—';}))).join(', ');
+    html+='<tr>'
+      +'<td><strong>'+escapeHtml(g.cliente)+'</strong></td>'
+      +'<td style="font-weight:800;color:#1A86F1;">'+g.tickets.length+'</td>'
+      +'<td style="font-size:11.5px;">'+escapeHtml(g.tecnico)+'</td>'
+      +'<td style="font-size:11px;color:var(--ink-muted);">'+escapeHtml(tipos.slice(0,60))+'</td>'
+      +'<td style="font-size:11.5px;">'+fmtDate(g.ultima)+'</td>'
+      +'<td style="font-weight:700;'+urgColor+'">'+(d!==null?d+'d':'—')+'</td>'
+      +'<td style="'+urgColor+'">'+urgencia+'</td>'
+      +'</tr>';
+  });
+  html+='</tbody></table></div></div>';
+
+  /* Detalle por cliente expandible */
+  html+='<div class="pxf-section-title">Tickets individuales listos para cotizar</div>';
+  html+='<div class="pxf-table-wrap"><div class="table-scroll"><table class="ej-table"><thead><tr>'
+    +'<th>N° Ticket</th><th>Cliente</th><th>Tipo de servicio</th><th>Técnico</th><th>Equipo / Marca</th><th>Fecha cierre</th>'
+    +'</tr></thead><tbody>';
+  porCotizar.slice().sort(function(a,b){
+    var fa=a.fechaFin instanceof Date?a.fechaFin:new Date(a.fechaFin||0);
+    var fb=b.fechaFin instanceof Date?b.fechaFin:new Date(b.fechaFin||0);
+    return fa-fb;
+  }).forEach(function(r){
+    var ff=r.fechaFin instanceof Date?r.fechaFin:new Date(r.fechaFin||'');
+    html+='<tr>'
+      +'<td><strong>'+escapeHtml(r.nroTicket||'—')+'</strong></td>'
+      +'<td>'+escapeHtml(r.cliente||'—')+'</td>'
+      +'<td>'+escapeHtml(r.tipoServicio||'—')+'</td>'
+      +'<td>'+escapeHtml(r.tecnico||'—')+'</td>'
+      +'<td style="font-size:11.5px;">'+escapeHtml((r.tipoEquipo||'—')+' · '+(r.marca||'—'))+'</td>'
+      +'<td style="font-size:11.5px;">'+fmtDate(ff)+'</td>'
+      +'</tr>';
+  });
+  html+='</tbody></table></div></div>';
+
+  el.innerHTML=html;
+}
+
+/* ============================================================
+   DASHBOARD: VENTAS POR FACTURAR
+   Muestra pedidos con estado "Órdenes de venta" (confirmados)
+   o cotizaciones pendientes con monto acumulado.
+============================================================ */
+
+function facturaInit(){
+  var el=document.getElementById('facturaPanel');
+  if(!el) return;
+  var v=STATE.ventas.raw;
+  if(!v.length){ el.style.display='none'; return; }
+  el.style.display='';
+  facturaRender();
+}
+
+function facturaRender(){
+  var el=document.getElementById('facturaContent');
+  if(!el) return;
+  var v=STATE.ventas.raw;
+
+  /* Por facturar = Órdenes de venta confirmadas */
+  var porFacturar=v.filter(function(r){
+    return /orden|venta/i.test(r.estadoPedido||'');
+  });
+  /* Cotizaciones pendientes */
+  var cotizaciones=v.filter(function(r){
+    return /cotiz/i.test(r.estadoPedido||'');
+  });
+
+  /* Totales */
+  function sumPEN(arr){return arr.reduce(function(s,r){return s+(r.moneda==='PEN'?r.total:0);},0);}
+  function sumUSD(arr){return arr.reduce(function(s,r){return s+(r.moneda==='USD'?r.total:0);},0);}
+  function sumTotal(arr){return sumPEN(arr)+sumUSD(arr)*3.8;}
+
+  /* Agrupar por cliente */
+  function agrupar(arr){
+    var m={};
+    arr.forEach(function(r){
+      var c=(r.cliente||'Sin cliente').trim();
+      if(!m[c]) m[c]={cliente:c,pedidos:[],pen:0,usd:0,ultima:null};
+      m[c].pedidos.push(r);
+      m[c].pen+=(r.moneda==='PEN'?r.total:0)||0;
+      m[c].usd+=(r.moneda==='USD'?r.total:0)||0;
+      var fp=r.fechaPedido instanceof Date?r.fechaPedido:new Date(r.fechaPedido||'');
+      if(!isNaN(fp.getTime())) if(!m[c].ultima||fp>m[c].ultima) m[c].ultima=fp;
+    });
+    return Object.values(m).sort(function(a,b){return (b.pen+b.usd*3.8)-(a.pen+a.usd*3.8);});
+  }
+
+  var gruposFact=agrupar(porFacturar);
+  var gruposCot =agrupar(cotizaciones);
+
+  /* ── PANEL 1: Por Facturar ── */
+  var html='<div class="pxf-header">'
+    +'<div><div class="pxf-header-title">📋 Órdenes de Venta confirmadas — Por Facturar</div>'
+    +'<div class="pxf-header-sub">Pedidos confirmados que están pendientes de factura</div></div>'
+    +'<div style="text-align:right;"><div style="font-size:22px;font-weight:800;">'+porFacturar.length+' pedidos</div>'
+    +'<div style="font-size:11.5px;color:rgba(255,255,255,0.65);">'+gruposFact.length+' clientes</div></div>'
+    +'</div>';
+
+  html+='<div class="pxf-kpi-row">'
+    +'<div class="pxf-kpi danger"><div class="pxf-kpi-label">Pedidos por facturar</div>'
+    +'<div class="pxf-kpi-value">'+porFacturar.length+'</div><div class="pxf-kpi-sub">órdenes confirmadas</div></div>'
+    +'<div class="pxf-kpi warning"><div class="pxf-kpi-label">Monto acumulado S/</div>'
+    +'<div class="pxf-kpi-value" style="font-size:20px;">'+fmtMoneyCompact(sumPEN(porFacturar),'PEN')+'</div>'
+    +'<div class="pxf-kpi-sub">pendiente de cobro</div></div>'
+    +(sumUSD(porFacturar)>0?'<div class="pxf-kpi warning"><div class="pxf-kpi-label">Monto acumulado US$</div>'
+    +'<div class="pxf-kpi-value" style="font-size:20px;">'+fmtMoneyCompact(sumUSD(porFacturar),'USD')+'</div>'
+    +'<div class="pxf-kpi-sub">pendiente de cobro</div></div>':'')
+    +'<div class="pxf-kpi"><div class="pxf-kpi-label">Total equiv. S/</div>'
+    +'<div class="pxf-kpi-value" style="font-size:20px;">'+fmtMoneyCompact(sumTotal(porFacturar),'PEN')+'</div>'
+    +'<div class="pxf-kpi-sub">TC 3.8 para USD</div></div>'
+    +'</div>';
+
+  if(!gruposFact.length){
+    html+='<div style="background:#F0FDF4;border:1.5px solid #A7F3D0;border-radius:10px;padding:16px 20px;font-size:13px;color:#065F46;font-weight:600;margin-bottom:18px;">✅ Sin órdenes pendientes de factura.</div>';
+  } else {
+    html+='<div class="pxf-section-title"><span>Por cliente — Órdenes a facturar</span><span style="font-size:11px;color:var(--ink-muted);">Orden descendente por monto</span></div>';
+    html+='<div class="pxf-table-wrap"><div class="table-scroll"><table class="ej-table"><thead><tr>'
+      +'<th>Cliente</th><th>N° Pedidos</th><th>Monto S/ PEN</th><th>Monto US$ USD</th><th>Total equiv. S/</th><th>Último pedido</th><th>Vendedor</th>'
+      +'</tr></thead><tbody>';
+    gruposFact.forEach(function(g){
+      var total=g.pen+g.usd*3.8;
+      html+='<tr>'
+        +'<td><strong>'+escapeHtml(g.cliente)+'</strong></td>'
+        +'<td style="font-weight:800;color:#EF4444;">'+g.pedidos.length+'</td>'
+        +'<td style="font-weight:700;">'+(g.pen>0?fmtMoneyCompact(g.pen,'PEN'):'—')+'</td>'
+        +'<td style="font-weight:700;">'+(g.usd>0?fmtMoneyCompact(g.usd,'USD'):'—')+'</td>'
+        +'<td style="font-weight:800;color:var(--navy);">'+fmtMoneyCompact(total,'PEN')+'</td>'
+        +'<td style="font-size:11.5px;">'+fmtDate(g.ultima)+'</td>'
+        +'<td style="font-size:11.5px;">'+escapeHtml(g.pedidos[0]&&g.pedidos[0].vendedor||'—')+'</td>'
+        +'</tr>';
+    });
+    html+='</tbody></table></div></div>';
+    /* Detalle individual */
+    html+='<div class="pxf-section-title" style="margin-top:14px;">Detalle de órdenes a facturar</div>';
+    html+='<div class="pxf-table-wrap"><div class="table-scroll"><table class="ej-table"><thead><tr>'
+      +'<th>N° Pedido</th><th>Cliente</th><th>Categoría</th><th>Fecha</th><th>Monto</th><th>Moneda</th><th>Vendedor</th>'
+      +'</tr></thead><tbody>';
+    porFacturar.slice().sort(function(a,b){return (b.total||0)-(a.total||0);}).forEach(function(r){
+      html+='<tr>'
+        +'<td><strong>'+escapeHtml(r.pedido||'—')+'</strong></td>'
+        +'<td>'+escapeHtml(r.cliente||'—')+'</td>'
+        +'<td style="font-size:11.5px;">'+escapeHtml(r.categoria||'—')+'</td>'
+        +'<td style="font-size:11.5px;">'+fmtDate(r.fechaPedido)+'</td>'
+        +'<td style="font-weight:700;">'+fmtMoneyCompact(r.total||0,r.moneda||'PEN')+'</td>'
+        +'<td>'+escapeHtml(r.moneda||'—')+'</td>'
+        +'<td style="font-size:11.5px;">'+escapeHtml(r.vendedor||'—')+'</td>'
+        +'</tr>';
+    });
+    html+='</tbody></table></div></div>';
+  }
+
+  /* ── PANEL 2: Cotizaciones pendientes ── */
+  html+='<div class="pxf-header" style="margin-top:24px;background:linear-gradient(135deg,#92400E,#B45309);">'
+    +'<div><div class="pxf-header-title">📝 Cotizaciones pendientes de confirmar</div>'
+    +'<div class="pxf-header-sub">Propuestas enviadas al cliente sin aprobación aún</div></div>'
+    +'<div style="text-align:right;"><div style="font-size:22px;font-weight:800;">'+cotizaciones.length+' cotiz.</div>'
+    +'<div style="font-size:11.5px;color:rgba(255,255,255,0.65);">'+gruposCot.length+' clientes</div></div>'
+    +'</div>';
+
+  html+='<div class="pxf-kpi-row">'
+    +'<div class="pxf-kpi warning"><div class="pxf-kpi-label">Cotizaciones activas</div>'
+    +'<div class="pxf-kpi-value">'+cotizaciones.length+'</div><div class="pxf-kpi-sub">pendientes de aprobación</div></div>'
+    +'<div class="pxf-kpi warning"><div class="pxf-kpi-label">Potencial S/</div>'
+    +'<div class="pxf-kpi-value" style="font-size:20px;">'+fmtMoneyCompact(sumPEN(cotizaciones),'PEN')+'</div>'
+    +'<div class="pxf-kpi-sub">monto en cotizaciones</div></div>'
+    +(sumUSD(cotizaciones)>0?'<div class="pxf-kpi warning"><div class="pxf-kpi-label">Potencial US$</div>'
+    +'<div class="pxf-kpi-value" style="font-size:20px;">'+fmtMoneyCompact(sumUSD(cotizaciones),'USD')+'</div>'
+    +'<div class="pxf-kpi-sub">monto en cotizaciones</div></div>':'')
+    +'</div>';
+
+  if(!gruposCot.length){
+    html+='<div style="background:#F0FDF4;border:1.5px solid #A7F3D0;border-radius:10px;padding:16px 20px;font-size:13px;color:#065F46;font-weight:600;">✅ Sin cotizaciones pendientes.</div>';
+  } else {
+    html+='<div class="pxf-table-wrap"><div class="table-scroll"><table class="ej-table"><thead><tr>'
+      +'<th>N° Pedido</th><th>Cliente</th><th>Categoría</th><th>Fecha</th><th>Monto</th><th>Moneda</th><th>Vendedor</th>'
+      +'</tr></thead><tbody>';
+    cotizaciones.slice().sort(function(a,b){
+      var fa=a.fechaPedido instanceof Date?a.fechaPedido:new Date(a.fechaPedido||0);
+      var fb=b.fechaPedido instanceof Date?b.fechaPedido:new Date(b.fechaPedido||0);
+      return fa-fb;
+    }).forEach(function(r){
+      html+='<tr>'
+        +'<td><strong>'+escapeHtml(r.pedido||'—')+'</strong></td>'
+        +'<td>'+escapeHtml(r.cliente||'—')+'</td>'
+        +'<td style="font-size:11.5px;">'+escapeHtml(r.categoria||'—')+'</td>'
+        +'<td style="font-size:11.5px;">'+fmtDate(r.fechaPedido)+'</td>'
+        +'<td style="font-weight:700;">'+fmtMoneyCompact(r.total||0,r.moneda||'PEN')+'</td>'
+        +'<td>'+escapeHtml(r.moneda||'—')+'</td>'
+        +'<td style="font-size:11.5px;">'+escapeHtml(r.vendedor||'—')+'</td>'
+        +'</tr>';
+    });
+    html+='</tbody></table></div></div>';
+  }
+
+  el.innerHTML=html;
 }
 
 function exportSectionAsHtml(contentElId, sectionTitle, filenamePrefix){
