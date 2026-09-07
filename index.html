@@ -1091,9 +1091,29 @@ License: MIT
 
       <!-- ── Dashboard: Ventas por Facturar ── -->
       <div id="facturaPanel" style="display:none;padding:20px 0 0;">
-        <div style="margin-bottom:14px;">
-          <h3 style="margin:0;font-size:16px;font-weight:800;color:var(--navy);">💰 Ventas por Facturar</h3>
-          <p style="margin:4px 0 0;font-size:12px;color:var(--ink-muted);">Órdenes confirmadas pendientes de factura + cotizaciones activas</p>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:14px;">
+          <div>
+            <h3 style="margin:0;font-size:16px;font-weight:800;color:var(--navy);">💰 Ventas por Facturar</h3>
+            <p style="margin:4px 0 0;font-size:12px;color:var(--ink-muted);">Órdenes confirmadas pendientes de factura + cotizaciones activas</p>
+          </div>
+          <button class="btn btn-ghost" style="font-size:11.5px;" onclick="facturaLimpiarFiltros()">✕ Limpiar filtros</button>
+        </div>
+        <!-- Filtros -->
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;background:var(--surface-alt);border:1.5px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:16px;" id="facturaFiltersBar">
+          <div class="filter-field"><label>Año</label>
+            <select id="fac-anio" onchange="facturaRender()" class="inf-select"><option value="">Todos</option></select></div>
+          <div class="filter-field"><label>Mes</label>
+            <select id="fac-mes" onchange="facturaRender()" class="inf-select"><option value="">Todos</option></select></div>
+          <div class="filter-field"><label>Semana</label>
+            <select id="fac-semana" onchange="facturaRender()" class="inf-select"><option value="">Todas</option></select></div>
+          <div class="filter-field"><label>Vendedor</label>
+            <select id="fac-vendedor" onchange="facturaRender()" class="inf-select"><option value="">Todos</option></select></div>
+          <div class="filter-field"><label>Categoría</label>
+            <select id="fac-categoria" onchange="facturaRender()" class="inf-select"><option value="">Todas</option></select></div>
+          <div class="filter-field"><label>Moneda</label>
+            <select id="fac-moneda" onchange="facturaRender()" class="inf-select">
+              <option value="">Todas</option><option value="PEN">S/ PEN</option><option value="USD">US$ USD</option>
+            </select></div>
         </div>
         <div id="facturaContent"></div>
       </div>
@@ -1969,11 +1989,7 @@ function buildTicketsSkeleton(){
   + '<div class="table-card"><div class="table-scroll" id="ticketsTableWrap"></div><div class="pagination" id="ticketsPagination"></div></div>'
   /* ── Informe por cliente (nuevo) ── */
   + '<div class="section-title" style="margin-top:28px;"><h3>🏢 Informe por cliente</h3><div class="line"></div><span style="font-size:11.5px;color:var(--ink-muted);">Vista gerencial para reuniones y seguimiento de cuentas</span></div>'
-  + '<div class="tcli-panel">'
-  +   '<div class="tcli-tabs">'
-  +     '<button class="tcli-tab active" onclick="tcliShowTab(\'tabla\')">📋 Tabla comparativa</button>'
-  +     '<button class="tcli-tab" onclick="tcliShowTab(\'detalle\')">📌 Detalle por cliente</button>'
-  +   '</div>'
+  + '<div class="tcli-panel">'  +   '<div class="tcli-tabs">'  +     '<button class="tcli-tab active" onclick="tcliShowTab(\'tabla\')">📋 Tabla comparativa</button>'  +     '<button class="tcli-tab" onclick="tcliShowTab(\'detalle\')">📌 Detalle por cliente</button>'  +     '<div style="flex:1;"></div>'  +     '<button class="btn btn-ghost" style="font-size:11px;padding:5px 10px;" onclick="tcliLimpiarFiltros()">✕ Limpiar filtros</button>'  +   '</div>'  +   '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;background:var(--surface-alt);border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:12px;">'  +     '<div class="filter-field"><label>Año</label><select id="tcli-anio" onchange="tcliRefresh()" class="inf-select"><option value="">Todos</option></select></div>'  +     '<div class="filter-field"><label>Mes</label><select id="tcli-mes" onchange="tcliRefresh()" class="inf-select"><option value="">Todos</option></select></div>'  +     '<div class="filter-field"><label>Semana</label><select id="tcli-semana" onchange="tcliRefresh()" class="inf-select"><option value="">Todas</option></select></div>'  +     '<div class="filter-field"><label>Tipo de Servicio</label><select id="tcli-tipo" onchange="tcliRefresh()" class="inf-select"><option value="">Todos</option></select></div>'  +     '<div class="filter-field"><label>Técnico</label><select id="tcli-tecnico" onchange="tcliRefresh()" class="inf-select"><option value="">Todos</option></select></div>'  +     '<div class="filter-field"><label>Estado</label><select id="tcli-estado" onchange="tcliRefresh()" class="inf-select"><option value="">Todos</option></select></div>'  +   '</div>'
   /* Sub-vista 1: tabla comparativa */
   +   '<div class="tcli-sub active" id="tcli-sub-tabla">'
   +     '<div class="tcli-search-bar">'
@@ -2591,7 +2607,7 @@ function buildVentasSkeleton(){
   +   '<div class="chart-card"><h4>Top 10 de Clientes <span class="chart-hint">por monto de venta</span></h4><div class="chart-wrap" id="chartTopClientesWrap" style="height:340px;"><canvas id="chartTopClientes"></canvas></div></div>'
   + '</div>'
   + '<div class="charts-grid" style="margin-top:16px; grid-template-columns:1fr;">'
-  +   '<div class="chart-card"><h4>Ventas por cliente <span class="chart-hint">listado completo · clic para filtrar</span></h4><div class="chart-wrap" id="chartClientesWrap" style="height:auto;"><canvas id="chartClientes"></canvas></div></div>'
+  +   '<div class="chart-card"><h4>Ventas por cliente <span class="chart-hint">top 10 · clic para filtrar</span></h4><div class="chart-wrap" id="chartClientesWrap" style="height:auto;"><canvas id="chartClientes"></canvas></div></div>'
   + '</div>'
   + '<div class="section-title"><h3>Conversión Cotización → Orden de Venta (por vendedor)</h3><div class="line"></div></div>'
   + '<div class="table-card"><div class="table-scroll" id="conversionTableWrap"></div></div>'
@@ -2742,13 +2758,13 @@ function renderClientesChart(data){
     var subset = monedaActiva ? data.filter(function(r){ return r.moneda===monedaActiva; }) : data;
     var porCliente = {};
     subset.forEach(function(r){ porCliente[r.cliente] = (porCliente[r.cliente]||0) + r.total; });
-    var clientes = Object.keys(porCliente).sort(function(a,b){ return porCliente[b]-porCliente[a]; });
+    var clientes = Object.keys(porCliente).sort(function(a,b){ return porCliente[b]-porCliente[a]; }).slice(0,10);
     if(clientes.length === 0){
       wrap.style.height = '120px';
       wrap.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--ink-muted);font-size:12.5px;">Sin datos de clientes</div>';
       return;
     }
-    wrap.style.height = Math.max(220, clientes.length*30 + 40) + 'px';
+    wrap.style.height = Math.max(220, clientes.length*34 + 40) + 'px';
     if(wrap.querySelector('canvas') === null){ wrap.innerHTML = '<canvas id="chartClientes"></canvas>'; }
     var selCliente = (msGetSelected('vf-cliente')[0])||'';
     CHARTS.clientes = new Chart(document.getElementById('chartClientes'), {
@@ -2768,7 +2784,7 @@ function renderClientesChart(data){
     else if(r.moneda==='USD') usdMap[c] = (usdMap[c]||0) + (r.total||0);
   });
   var clientes = Array.from(new Set(Object.keys(penMap).concat(Object.keys(usdMap))))
-    .sort(function(a,b){ return ((penMap[b]||0)+(usdMap[b]||0)*3.8) - ((penMap[a]||0)+(usdMap[a]||0)*3.8); });
+    .sort(function(a,b){ return ((penMap[b]||0)+(usdMap[b]||0)*3.8) - ((penMap[a]||0)+(usdMap[a]||0)*3.8); }).slice(0,10);
   if(!clientes.length){
     wrap.style.height='120px';
     wrap.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--ink-muted);font-size:12.5px;">Sin datos de clientes</div>';
@@ -4323,10 +4339,60 @@ function tcliBuild(data){
 }
 
 /* Punto de entrada: llamado desde renderTickets con los datos filtrados */
+var _tcliRawData = [];
+
 function renderTcliPanel(data){
+  _tcliRawData = data;
+  /* Poblar filtros */
+  function fillTcliSel(id, vals, labelFn){
+    var s=document.getElementById(id); if(!s) return;
+    var cur=s.value;
+    while(s.options.length>1) s.remove(1);
+    vals.forEach(function(v){ var o=document.createElement('option'); o.value=v; o.textContent=labelFn?labelFn(v):v; s.appendChild(o); });
+    if(vals.indexOf(cur)!==-1) s.value=cur;
+  }
+  var uniq=function(arr){ return Array.from(new Set(arr.filter(Boolean))).sort(); };
+  fillTcliSel('tcli-anio',    uniq(data.map(function(r){return r.anio?String(r.anio):'';})));
+  fillTcliSel('tcli-mes',     uniq(data.map(function(r){return r.mes?String(r.mes):''})), function(m){return MES_NOMBRES[parseInt(m)-1]||m;});
+  fillTcliSel('tcli-semana',  uniq(data.map(function(r){return r.semana?String(r.semana):''})));
+  fillTcliSel('tcli-tipo',    uniq(data.map(function(r){return r.tipoServicio||'';})));
+  fillTcliSel('tcli-tecnico', uniq(data.map(function(r){return r.tecnico||'';})));
+  fillTcliSel('tcli-estado',  uniq(data.map(function(r){return r.estadoTicket||'';})));
   _tcliDataCache = tcliBuild(data);
   tcliRenderTabla();
   tcliRenderDetalle();
+}
+
+function tcliGetFiltrados(){
+  var v=_tcliRawData;
+  var anio   =(document.getElementById('tcli-anio')   ||{value:''}).value||'';
+  var mes    =(document.getElementById('tcli-mes')    ||{value:''}).value||'';
+  var semana =(document.getElementById('tcli-semana') ||{value:''}).value||'';
+  var tipo   =(document.getElementById('tcli-tipo')   ||{value:''}).value||'';
+  var tecnico=(document.getElementById('tcli-tecnico')||{value:''}).value||'';
+  var estado =(document.getElementById('tcli-estado') ||{value:''}).value||'';
+  return v.filter(function(r){
+    if(anio    && String(r.anio)!==anio)       return false;
+    if(mes     && String(r.mes)!==mes)         return false;
+    if(semana  && String(r.semana)!==semana)   return false;
+    if(tipo    && r.tipoServicio!==tipo)       return false;
+    if(tecnico && r.tecnico!==tecnico)         return false;
+    if(estado  && r.estadoTicket!==estado)     return false;
+    return true;
+  });
+}
+
+function tcliRefresh(){
+  _tcliDataCache = tcliBuild(tcliGetFiltrados());
+  tcliRenderTabla();
+  tcliRenderDetalle();
+}
+
+function tcliLimpiarFiltros(){
+  ['tcli-anio','tcli-mes','tcli-semana','tcli-tipo','tcli-tecnico','tcli-estado'].forEach(function(id){
+    var s=document.getElementById(id); if(s) s.value='';
+  });
+  tcliRefresh();
 }
 
 /* Cambia la sub-vista activa */
@@ -5235,13 +5301,53 @@ function facturaInit(){
   var v=STATE.ventas.raw;
   if(!v.length){ el.style.display='none'; return; }
   el.style.display='';
+  /* Poblar filtros */
+  function fillSel(id, vals, labelFn){
+    var s=document.getElementById(id); if(!s) return;
+    var cur=s.value;
+    while(s.options.length>1) s.remove(1);
+    vals.forEach(function(val){ var o=document.createElement('option'); o.value=val; o.textContent=labelFn?labelFn(val):val; s.appendChild(o); });
+    if(vals.indexOf(cur)!==-1) s.value=cur;
+  }
+  var uniq=function(arr){ return Array.from(new Set(arr.filter(Boolean))).sort(); };
+  fillSel('fac-anio',   uniq(v.map(function(r){return r.anio?String(r.anio):'';})));
+  fillSel('fac-mes',    uniq(v.map(function(r){return r.mes?String(r.mes):''})), function(m){return MES_NOMBRES[parseInt(m)-1]||m;});
+  fillSel('fac-semana', uniq(v.map(function(r){return r.semana?String(r.semana):''})));
+  fillSel('fac-vendedor', uniq(v.map(function(r){return r.vendedor||'';})));
+  fillSel('fac-categoria', uniq(v.map(function(r){return r.categoria||'';})));
+  facturaRender();
+}
+
+function facturaGetVentas(){
+  var v=STATE.ventas.raw;
+  var anio   =(document.getElementById('fac-anio')   ||{value:''}).value||'';
+  var mes    =(document.getElementById('fac-mes')    ||{value:''}).value||'';
+  var semana =(document.getElementById('fac-semana') ||{value:''}).value||'';
+  var vend   =(document.getElementById('fac-vendedor')||{value:''}).value||'';
+  var cat    =(document.getElementById('fac-categoria')||{value:''}).value||'';
+  var moneda =(document.getElementById('fac-moneda') ||{value:''}).value||'';
+  return v.filter(function(r){
+    if(anio   && String(r.anio)   !==anio)   return false;
+    if(mes    && String(r.mes)    !==mes)     return false;
+    if(semana && String(r.semana) !==semana)  return false;
+    if(vend   && r.vendedor!==vend)           return false;
+    if(cat    && r.categoria!==cat)           return false;
+    if(moneda && r.moneda!==moneda)           return false;
+    return true;
+  });
+}
+
+function facturaLimpiarFiltros(){
+  ['fac-anio','fac-mes','fac-semana','fac-vendedor','fac-categoria','fac-moneda'].forEach(function(id){
+    var s=document.getElementById(id); if(s) s.value='';
+  });
   facturaRender();
 }
 
 function facturaRender(){
   var el=document.getElementById('facturaContent');
   if(!el) return;
-  var v=STATE.ventas.raw;
+  var v=facturaGetVentas();
 
   /* Por facturar = Órdenes de venta confirmadas */
   var porFacturar=v.filter(function(r){
