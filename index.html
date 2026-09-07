@@ -2736,34 +2736,56 @@ function renderClientesChart(data){
   var monedasPresentes = Array.from(new Set(data.map(function(r){return r.moneda;}))).filter(Boolean).sort();
   var monedaSeleccionada = (msGetSelected('vf-moneda')[0])||'';
 
-  if(!monedaSeleccionada && monedasPresentes.length > 1){
-    wrap.style.height = '120px';
-    wrap.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;text-align:center;color:var(--ink-muted);font-size:12.5px;padding:0 24px;">Hay más de una moneda en los datos filtrados.<br>Selecciona <strong>USD</strong> o <strong>PEN</strong> en el filtro "Moneda" para ver las ventas por cliente.</div>';
+  /* Si hay una moneda filtrada: comportamiento original (una sola serie) */
+  if(monedaSeleccionada || monedasPresentes.length <= 1){
+    var monedaActiva = monedaSeleccionada || monedasPresentes[0] || '';
+    var subset = monedaActiva ? data.filter(function(r){ return r.moneda===monedaActiva; }) : data;
+    var porCliente = {};
+    subset.forEach(function(r){ porCliente[r.cliente] = (porCliente[r.cliente]||0) + r.total; });
+    var clientes = Object.keys(porCliente).sort(function(a,b){ return porCliente[b]-porCliente[a]; });
+    if(clientes.length === 0){
+      wrap.style.height = '120px';
+      wrap.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--ink-muted);font-size:12.5px;">Sin datos de clientes</div>';
+      return;
+    }
+    wrap.style.height = Math.max(220, clientes.length*30 + 40) + 'px';
+    if(wrap.querySelector('canvas') === null){ wrap.innerHTML = '<canvas id="chartClientes"></canvas>'; }
+    var selCliente = (msGetSelected('vf-cliente')[0])||'';
+    CHARTS.clientes = new Chart(document.getElementById('chartClientes'), {
+      type:'bar',
+      data:{ labels: clientes, datasets:[{ label:'Monto ('+currencySymbol(monedaActiva)+')', data: clientes.map(function(c){return porCliente[c];}), backgroundColor: barColorsWithSelection(clientes, selCliente), borderRadius:5 }]},
+      options: Object.assign(baseBarOptions(), {indexAxis:'y'})
+    });
+    attachClickFilter('chartClientes', CHARTS.clientes, msCategoryPickHandler('vf-cliente','ventas'));
     return;
   }
 
-  var monedaActiva = monedaSeleccionada || monedasPresentes[0] || '';
-  var subset = monedaActiva ? data.filter(function(r){ return r.moneda===monedaActiva; }) : data;
-
-  var porCliente = {};
-  subset.forEach(function(r){ porCliente[r.cliente] = (porCliente[r.cliente]||0) + r.total; });
-  var clientes = Object.keys(porCliente).sort(function(a,b){ return porCliente[b]-porCliente[a]; });
-
-  if(clientes.length === 0){
-    wrap.style.height = '120px';
-    wrap.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--ink-muted);font-size:12.5px;">Sin datos de clientes para el período seleccionado</div>';
+  /* Multi-moneda: barras agrupadas PEN + USD por cliente */
+  var penMap = {}, usdMap = {};
+  data.forEach(function(r){
+    var c = r.cliente||'—';
+    if(r.moneda==='PEN') penMap[c] = (penMap[c]||0) + (r.total||0);
+    else if(r.moneda==='USD') usdMap[c] = (usdMap[c]||0) + (r.total||0);
+  });
+  var clientes = Array.from(new Set(Object.keys(penMap).concat(Object.keys(usdMap))))
+    .sort(function(a,b){ return ((penMap[b]||0)+(usdMap[b]||0)*3.8) - ((penMap[a]||0)+(usdMap[a]||0)*3.8); });
+  if(!clientes.length){
+    wrap.style.height='120px';
+    wrap.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--ink-muted);font-size:12.5px;">Sin datos de clientes</div>';
     return;
   }
-
-  // Altura dinámica: ~30px por cliente, con un mínimo cómodo, para no comprimir las barras
-  wrap.style.height = Math.max(220, clientes.length*30 + 40) + 'px';
+  wrap.style.height = Math.max(220, clientes.length*34 + 60) + 'px';
   if(wrap.querySelector('canvas') === null){ wrap.innerHTML = '<canvas id="chartClientes"></canvas>'; }
-
-  var selCliente = (msGetSelected('vf-cliente')[0])||'';
   CHARTS.clientes = new Chart(document.getElementById('chartClientes'), {
     type:'bar',
-    data:{ labels: clientes, datasets:[{ label:'Monto vendido ('+currencySymbol(monedaActiva)+')', data: clientes.map(function(c){return porCliente[c];}), backgroundColor: barColorsWithSelection(clientes, selCliente), borderRadius:5 }]},
-    options: Object.assign(baseBarOptions(), {indexAxis:'y'})
+    data:{ labels: clientes, datasets:[
+      { label:'S/ PEN', data: clientes.map(function(c){return penMap[c]||0;}), backgroundColor:'#1A86F1', borderRadius:3 },
+      { label:'US$ USD', data: clientes.map(function(c){return usdMap[c]||0;}), backgroundColor:'#10B981', borderRadius:3 }
+    ]},
+    options: Object.assign(baseBarOptions(), {indexAxis:'y',
+      plugins:{ legend:{ display:true, position:'top', align:'end', labels:{boxWidth:10,font:{size:11}} }},
+      scales:{ x:{ stacked:false, grid:{color:'#F1F5F9'} }, y:{ stacked:false } }
+    })
   });
   attachClickFilter('chartClientes', CHARTS.clientes, msCategoryPickHandler('vf-cliente','ventas'));
 }
@@ -2777,25 +2799,63 @@ function renderTopClientesChart(data){
   var monedasPresentes = Array.from(new Set(data.map(function(r){return r.moneda;}))).filter(Boolean).sort();
   var monedaSeleccionada = (msGetSelected('vf-moneda')[0])||'';
 
-  if(!monedaSeleccionada && monedasPresentes.length > 1){
-    wrap.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;text-align:center;color:var(--ink-muted);font-size:12.5px;padding:0 24px;">Hay más de una moneda en los datos filtrados.<br>Selecciona <strong>USD</strong> o <strong>PEN</strong> en el filtro "Moneda" para ver el Top 10 de Clientes.</div>';
-    return;
-  }
-
   if(wrap.querySelector('canvas') === null){ wrap.innerHTML = '<canvas id="chartTopClientes"></canvas>'; }
 
-  var monedaActiva = monedaSeleccionada || monedasPresentes[0] || '';
-  var subset = monedaActiva ? data.filter(function(r){ return r.moneda===monedaActiva; }) : data;
-
-  var porCliente = {};
-  subset.forEach(function(r){ porCliente[r.cliente] = (porCliente[r.cliente]||0) + r.total; });
-  var clientesTop = Object.keys(porCliente).sort(function(a,b){ return porCliente[b]-porCliente[a]; }).slice(0,10);
-
-  if(clientesTop.length === 0){
-    wrap.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--ink-muted);font-size:12.5px;">Sin datos de clientes para el período seleccionado</div>';
+  /* Si hay moneda filtrada o solo una: comportamiento original */
+  if(monedaSeleccionada || monedasPresentes.length <= 1){
+    var monedaActiva = monedaSeleccionada || monedasPresentes[0] || '';
+    var subset = monedaActiva ? data.filter(function(r){ return r.moneda===monedaActiva; }) : data;
+    var porCliente = {};
+    subset.forEach(function(r){ porCliente[r.cliente] = (porCliente[r.cliente]||0) + r.total; });
+    var clientesTop = Object.keys(porCliente).sort(function(a,b){ return porCliente[b]-porCliente[a]; }).slice(0,10);
+    if(!clientesTop.length){
+      wrap.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--ink-muted);font-size:12.5px;">Sin datos</div>';
+      return;
+    }
+    CHARTS.topClientes = new Chart(document.getElementById('chartTopClientes'), {
+      type:'bar',
+      data:{ labels: clientesTop, datasets:[{ label:'Monto ('+currencySymbol(monedaActiva)+')', data: clientesTop.map(function(c){return porCliente[c];}), backgroundColor:'#1A86F1', borderRadius:4 }]},
+      options: Object.assign(baseBarOptions(), {indexAxis:'y', plugins:{legend:{display:false}}})
+    });
     return;
   }
 
+  /* Multi-moneda: Top 10 por monto equivalente (USD × TC 3.8) + barras apiladas PEN/USD */
+  var TC = 3.8;
+  var penMap={}, usdMap={};
+  data.forEach(function(r){
+    var c=r.cliente||'—';
+    if(r.moneda==='PEN') penMap[c]=(penMap[c]||0)+(r.total||0);
+    else if(r.moneda==='USD') usdMap[c]=(usdMap[c]||0)+(r.total||0);
+  });
+  var allCli=Array.from(new Set(Object.keys(penMap).concat(Object.keys(usdMap))));
+  var clientesTop=allCli.sort(function(a,b){
+    return ((penMap[b]||0)+(usdMap[b]||0)*TC) - ((penMap[a]||0)+(usdMap[a]||0)*TC);
+  }).slice(0,10);
+  if(!clientesTop.length){
+    wrap.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--ink-muted);font-size:12.5px;">Sin datos</div>';
+    return;
+  }
+  CHARTS.topClientes = new Chart(document.getElementById('chartTopClientes'), {
+    type:'bar',
+    data:{ labels: clientesTop, datasets:[
+      { label:'S/ PEN', data: clientesTop.map(function(c){return penMap[c]||0;}), backgroundColor:'#1A86F1', borderRadius:3 },
+      { label:'US$ USD', data: clientesTop.map(function(c){return usdMap[c]||0;}), backgroundColor:'#10B981', borderRadius:3 }
+    ]},
+    options: Object.assign(baseBarOptions(), {indexAxis:'y',
+      plugins:{ legend:{ display:true, position:'top', align:'end', labels:{boxWidth:10,font:{size:11}} },
+        tooltip:{ callbacks:{ afterLabel:function(ctx){
+          var c=clientesTop[ctx.dataIndex];
+          return 'Equiv. S/: '+Math.round((penMap[c]||0)+(usdMap[c]||0)*TC).toLocaleString('es-PE');
+        }}}
+      },
+      scales:{ x:{ stacked:false, grid:{color:'#F1F5F9'} }, y:{ stacked:false } }
+    })
+  });
+  /* No attach click filter en multi-moneda para evitar conflictos */
+  return;
+
+  /* bloque original que ya no se usa en multi-moneda */
   CHARTS.topClientes = new Chart(document.getElementById('chartTopClientes'), {
     type:'bar',
     data:{ labels: clientesTop, datasets:[{ label:'Monto vendido ('+currencySymbol(monedaActiva)+')', data: clientesTop.map(function(c){return porCliente[c];}), backgroundColor: clientesTop.map(function(_,i){return CHART_PALETTE[i%CHART_PALETTE.length];}), borderRadius:5 }]},
