@@ -925,6 +925,33 @@ License: MIT
         </div>
       </div>
 
+      <!-- ── Dashboard: Tickets por Cotizar ── -->
+      <div id="cotizarPanel" style="display:none;margin-top:24px;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:14px;">
+          <div>
+            <h3 style="margin:0;font-size:16px;font-weight:800;color:var(--navy);">🧾 Tickets por Cotizar</h3>
+            <p style="margin:4px 0 0;font-size:12px;color:var(--ink-muted);">Tickets con estado de reparación <strong>"POR COTIZAR"</strong> — pendientes de generar cotización al cliente</p>
+          </div>
+          <button class="btn btn-ghost" style="font-size:11.5px;" onclick="cotizarLimpiarFiltros()">✕ Limpiar filtros</button>
+        </div>
+        <!-- Filtros -->
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;background:var(--surface-alt);border:1.5px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:16px;">
+          <div class="filter-field"><label>Año</label>
+            <select id="cot-anio" onchange="cotizarRender()" class="inf-select"><option value="">Todos</option></select></div>
+          <div class="filter-field"><label>Mes</label>
+            <select id="cot-mes" onchange="cotizarRender()" class="inf-select"><option value="">Todos</option></select></div>
+          <div class="filter-field"><label>Semana</label>
+            <select id="cot-semana" onchange="cotizarRender()" class="inf-select"><option value="">Todas</option></select></div>
+          <div class="filter-field"><label>Técnico</label>
+            <select id="cot-tecnico" onchange="cotizarRender()" class="inf-select"><option value="">Todos</option></select></div>
+          <div class="filter-field"><label>Tipo de Servicio</label>
+            <select id="cot-tipo" onchange="cotizarRender()" class="inf-select"><option value="">Todos</option></select></div>
+          <div class="filter-field"><label>Cliente</label>
+            <select id="cot-cliente" onchange="cotizarRender()" class="inf-select"><option value="">Todos</option></select></div>
+        </div>
+        <div id="cotizarContent"></div>
+      </div>
+
     </section>
 
     <!-- ======================= MODULE 2: VENTAS ======================= -->
@@ -4625,7 +4652,7 @@ function ejRender(t, v){
 
   var ordenes = v.filter(function(r){ return (r.estadoPedido||'').toLowerCase().indexOf('orden')!==-1||(r.estadoPedido||'').toLowerCase().indexOf('venta')!==-1; });
   var cotizaciones = v.filter(function(r){ return (r.estadoPedido||'').toLowerCase().indexOf('cotiz')!==-1; });
-  var conv = (cotizaciones.length+ordenes.length) > 0 ? Math.round(ordenes.length/(cotizaciones.length+ordenes.length)*100) : 0;
+  var conv = (0+ordenes.length) > 0 ? Math.round(ordenes.length/(0+ordenes.length)*100) : 0;
   var clientes = new Set(v.map(function(r){return r.cliente;}));
 
   /* ── Top 5 clientes por monto (PEN) ── */
@@ -4716,7 +4743,7 @@ function ejRender(t, v){
   /* Conversión */
   html += '<div class="ej-kpi purple"><div class="ej-kpi-label">Conversión Comer.</div>'
     +'<div class="ej-kpi-value" style="color:'+(conv>=70?'#10B981':conv>=40?'#F59E0B':'#EF4444')+';">'+conv+'%</div>'
-    +'<div class="ej-kpi-sub">'+cotizaciones.length+' cot → '+ordenes.length+' órd</div></div>';
+    +'<div class="ej-kpi-sub">'+0+' cot → '+ordenes.length+' órd</div></div>';
   /* Clientes activos */
   html += '<div class="ej-kpi cyan"><div class="ej-kpi-label">Clientes con pedidos</div>'
     +'<div class="ej-kpi-value">'+clientes.size+'</div>'
@@ -5161,9 +5188,8 @@ function borrarSesion(){
 
 /* ============================================================
    DASHBOARD: TICKETS POR COTIZAR
-   Muestra tickets cerrados que aún no tienen una cotización/
-   venta correspondiente en Ventas (cruce por cliente).
-   Se inserta como panel adicional dentro de Tickets.
+   Fuente: STATE.tickets.raw donde estadoReparacion === 'POR COTIZAR'
+   Filtros: año, mes, semana, técnico, tipo de servicio, cliente.
 ============================================================ */
 
 function cotizarInit(){
@@ -5171,7 +5197,57 @@ function cotizarInit(){
   if(!el) return;
   var t=STATE.tickets.raw;
   if(!t.length){ el.style.display='none'; return; }
+
+  /* Verificar si hay tickets POR COTIZAR */
+  var hayPorCotizar=t.some(function(r){
+    return (r.estadoReparacion||'').toUpperCase()==='POR COTIZAR';
+  });
+  if(!hayPorCotizar){ el.style.display='none'; return; }
   el.style.display='';
+
+  /* Poblar filtros */
+  function fillSel(id,vals,labelFn){
+    var s=document.getElementById(id); if(!s) return;
+    var cur=s.value;
+    while(s.options.length>1) s.remove(1);
+    vals.forEach(function(v){ var o=document.createElement('option'); o.value=v; o.textContent=labelFn?labelFn(v):v; s.appendChild(o); });
+    if(vals.indexOf(cur)!==-1) s.value=cur;
+  }
+  var uniq=function(arr){ return Array.from(new Set(arr.filter(Boolean))).sort(); };
+  fillSel('cot-anio',    uniq(t.map(function(r){return r.anio?String(r.anio):'';})));
+  fillSel('cot-mes',     uniq(t.map(function(r){return r.mes?String(r.mes):''})), function(m){return MES_NOMBRES[parseInt(m)-1]||m;});
+  fillSel('cot-semana',  uniq(t.map(function(r){return r.semana?String(r.semana):''})));
+  fillSel('cot-tecnico', uniq(t.map(function(r){return r.tecnico||'';})));
+  fillSel('cot-tipo',    uniq(t.map(function(r){return r.tipoServicio||'';})));
+  fillSel('cot-cliente', uniq(t.map(function(r){return r.cliente||'';})));
+
+  cotizarRender();
+}
+
+function cotizarGetFiltrados(){
+  var t=STATE.tickets.raw;
+  var anio   =(document.getElementById('cot-anio')   ||{value:''}).value||'';
+  var mes    =(document.getElementById('cot-mes')    ||{value:''}).value||'';
+  var semana =(document.getElementById('cot-semana') ||{value:''}).value||'';
+  var tecnico=(document.getElementById('cot-tecnico')||{value:''}).value||'';
+  var tipo   =(document.getElementById('cot-tipo')   ||{value:''}).value||'';
+  var cliente=(document.getElementById('cot-cliente')||{value:''}).value||'';
+  return t.filter(function(r){
+    if((r.estadoReparacion||'').toUpperCase()!=='POR COTIZAR') return false;
+    if(anio    && String(r.anio)!==anio)       return false;
+    if(mes     && String(r.mes)!==mes)         return false;
+    if(semana  && String(r.semana)!==semana)   return false;
+    if(tecnico && r.tecnico!==tecnico)         return false;
+    if(tipo    && r.tipoServicio!==tipo)       return false;
+    if(cliente && (r.cliente||'').trim()!==cliente) return false;
+    return true;
+  });
+}
+
+function cotizarLimpiarFiltros(){
+  ['cot-anio','cot-mes','cot-semana','cot-tecnico','cot-tipo','cot-cliente'].forEach(function(id){
+    var s=document.getElementById(id); if(s) s.value='';
+  });
   cotizarRender();
 }
 
@@ -5179,109 +5255,98 @@ function cotizarRender(){
   var el=document.getElementById('cotizarContent');
   if(!el) return;
 
-  var t=STATE.tickets.raw;
-  var v=STATE.ventas.raw;
+  var porCotizar=cotizarGetFiltrados();
 
-  /* Tickets cerrados */
-  var cerrados=t.filter(function(r){
-    return /cerr|resuel|finish|complet/i.test(r.estadoTicket||'');
-  });
+  /* KPIs */
+  var nTickets=porCotizar.length;
+  var nClientes=new Set(porCotizar.map(function(r){return (r.cliente||'').trim();})).size;
+  var nTecnicos=new Set(porCotizar.map(function(r){return r.tecnico||'—';})).size;
 
-  /* Clientes que YA tienen una Orden de Venta confirmada */
-  var clientesConOrden={};
-  v.forEach(function(r){
-    if(/orden|venta/i.test(r.estadoPedido||'')){
-      clientesConOrden[(r.cliente||'').trim().toLowerCase()]=true;
+  /* Antigüedad: días desde la fecha inicio del ticket más antiguo */
+  var masAntiguo=0;
+  porCotizar.forEach(function(r){
+    var fi=r.fechaInicio instanceof Date?r.fechaInicio:new Date(r.fechaInicio||'');
+    if(!isNaN(fi.getTime())){
+      var d=Math.round((Date.now()-fi.getTime())/86400000);
+      if(d>masAntiguo) masAntiguo=d;
     }
   });
 
-  /* Tickets cuyo cliente NO tiene orden confirmada aún = por cotizar */
-  var porCotizar=cerrados.filter(function(r){
-    return !clientesConOrden[(r.cliente||'').trim().toLowerCase()];
-  });
+  var html='';
 
-  /* Agrupar por cliente */
-  var clienteMap={};
-  porCotizar.forEach(function(r){
-    var c=(r.cliente||'Sin cliente').trim();
-    if(!clienteMap[c]) clienteMap[c]={cliente:c,tickets:[],tecnico:r.tecnico||'—',ultima:null};
-    clienteMap[c].tickets.push(r);
-    var fi=r.fechaFin instanceof Date?r.fechaFin:new Date(r.fechaFin||r.fechaInicio);
-    if(!isNaN(fi.getTime())) if(!clienteMap[c].ultima||fi>clienteMap[c].ultima) clienteMap[c].ultima=fi;
-  });
-  var grupos=Object.values(clienteMap).sort(function(a,b){return b.tickets.length-a.tickets.length;});
-
-  /* Días sin cotizar (desde última atención) */
-  function diasSinCot(g){ if(!g.ultima) return null; return Math.round((Date.now()-g.ultima.getTime())/86400000); }
-
-  /* KPIs */
-  var nClientes=grupos.length;
-  var nTickets=porCotizar.length;
-  var masAntiguo=grupos.reduce(function(max,g){ var d=diasSinCot(g); return (d&&d>max)?d:max; },0);
-
-  var html='<div class="pxf-kpi-row">'
-    +'<div class="pxf-kpi '+(nClientes>0?'warning':'success')+'">'
-      +'<div class="pxf-kpi-label">Clientes a cotizar</div>'
-      +'<div class="pxf-kpi-value">'+nClientes+'</div>'
-      +'<div class="pxf-kpi-sub">sin orden de venta confirmada</div></div>'
-    +'<div class="pxf-kpi '+(nTickets>0?'warning':'success')+'">'
-      +'<div class="pxf-kpi-label">Tickets cerrados</div>'
-      +'<div class="pxf-kpi-value">'+nTickets+'</div>'
-      +'<div class="pxf-kpi-sub">listos para cotizar</div></div>'
-    +'<div class="pxf-kpi '+(masAntiguo>30?'danger':masAntiguo>14?'warning':'success')+'">'
-      +'<div class="pxf-kpi-label">Mayor antigüedad</div>'
-      +'<div class="pxf-kpi-value">'+(masAntiguo||0)+'d</div>'
-      +'<div class="pxf-kpi-sub">días sin cotización</div></div>'
-    +'<div class="pxf-kpi">'
-      +'<div class="pxf-kpi-label">Cerrados c/orden</div>'
-      +'<div class="pxf-kpi-value success" style="color:#10B981;">'+(cerrados.length-nTickets)+'</div>'
-      +'<div class="pxf-kpi-sub">ya cuentan con orden de venta</div></div>'
-    +'</div>';
-
-  if(!grupos.length){
-    html+='<div style="background:#F0FDF4;border:1.5px solid #A7F3D0;border-radius:10px;padding:16px 20px;font-size:13px;color:#065F46;font-weight:600;">✅ Todos los tickets cerrados tienen una orden de venta asociada.</div>';
+  if(!nTickets){
+    html='<div style="background:#F0FDF4;border:1.5px solid #A7F3D0;border-radius:10px;padding:16px 20px;font-size:13px;color:#065F46;font-weight:600;">✅ No hay tickets con estado "POR COTIZAR" en los filtros seleccionados.</div>';
     el.innerHTML=html; return;
   }
 
+  html+='<div class="pxf-kpi-row">'
+    +'<div class="pxf-kpi '+(nTickets>0?'danger':'success')+'">'
+      +'<div class="pxf-kpi-label">Tickets por cotizar</div>'
+      +'<div class="pxf-kpi-value">'+nTickets+'</div>'
+      +'<div class="pxf-kpi-sub">estado reparación = POR COTIZAR</div></div>'
+    +'<div class="pxf-kpi warning">'
+      +'<div class="pxf-kpi-label">Clientes afectados</div>'
+      +'<div class="pxf-kpi-value">'+nClientes+'</div>'
+      +'<div class="pxf-kpi-sub">con tickets pendientes</div></div>'
+    +'<div class="pxf-kpi">'
+      +'<div class="pxf-kpi-label">Técnicos involucrados</div>'
+      +'<div class="pxf-kpi-value">'+nTecnicos+'</div>'
+      +'<div class="pxf-kpi-sub">asignados a estos tickets</div></div>'
+    +'<div class="pxf-kpi '+(masAntiguo>30?'danger':masAntiguo>14?'warning':'success')+'">'
+      +'<div class="pxf-kpi-label">Mayor antigüedad</div>'
+      +'<div class="pxf-kpi-value">'+(masAntiguo||0)+'d</div>'
+      +'<div class="pxf-kpi-sub">días desde inicio del ticket</div></div>'
+    +'</div>';
+
   /* Tabla agrupada por cliente */
+  var clienteMap={};
+  porCotizar.forEach(function(r){
+    var c=(r.cliente||'Sin cliente').trim();
+    if(!clienteMap[c]) clienteMap[c]={cliente:c,tickets:[],tecnico:r.tecnico||'—'};
+    clienteMap[c].tickets.push(r);
+  });
+  var grupos=Object.values(clienteMap).sort(function(a,b){return b.tickets.length-a.tickets.length;});
+
+  html+='<div style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-muted);margin-bottom:8px;">Resumen por cliente</div>';
   html+='<div class="pxf-table-wrap"><div class="table-scroll"><table class="ej-table"><thead><tr>'
-    +'<th>Cliente</th><th>Tickets</th><th>Técnico</th><th>Tipos de servicio</th><th>Última atención</th><th>Días sin cotiz.</th><th>Urgencia</th>'
+    +'<th>Cliente</th><th>Tickets por cotizar</th><th>Técnico</th><th>Tipos de servicio</th><th>Equipos</th>'
     +'</tr></thead><tbody>';
   grupos.forEach(function(g){
-    var d=diasSinCot(g);
-    var urgencia=d===null?'—':d>30?'🔴 Alta':d>14?'🟡 Media':'🟢 Normal';
-    var urgColor=d===null?'':d>30?'color:#EF4444;font-weight:700;':d>14?'color:#F59E0B;font-weight:700;':'color:#10B981;';
     var tipos=Array.from(new Set(g.tickets.map(function(r){return r.tipoServicio||'—';}))).join(', ');
+    var equipos=Array.from(new Set(g.tickets.map(function(r){return (r.tipoEquipo||'—')+(r.marca?' · '+r.marca:'');}))).join(', ');
     html+='<tr>'
       +'<td><strong>'+escapeHtml(g.cliente)+'</strong></td>'
-      +'<td style="font-weight:800;color:#1A86F1;">'+g.tickets.length+'</td>'
+      +'<td style="font-weight:800;color:#EF4444;">'+g.tickets.length+'</td>'
       +'<td style="font-size:11.5px;">'+escapeHtml(g.tecnico)+'</td>'
       +'<td style="font-size:11px;color:var(--ink-muted);">'+escapeHtml(tipos.slice(0,60))+'</td>'
-      +'<td style="font-size:11.5px;">'+fmtDate(g.ultima)+'</td>'
-      +'<td style="font-weight:700;'+urgColor+'">'+(d!==null?d+'d':'—')+'</td>'
-      +'<td style="'+urgColor+'">'+urgencia+'</td>'
+      +'<td style="font-size:11px;color:var(--ink-muted);">'+escapeHtml(equipos.slice(0,60))+'</td>'
       +'</tr>';
   });
   html+='</tbody></table></div></div>';
 
-  /* Detalle por cliente expandible */
-  html+='<div class="pxf-section-title">Tickets individuales listos para cotizar</div>';
+  /* Detalle individual */
+  html+='<div style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-muted);margin:14px 0 8px;">Detalle de tickets por cotizar</div>';
   html+='<div class="pxf-table-wrap"><div class="table-scroll"><table class="ej-table"><thead><tr>'
-    +'<th>N° Ticket</th><th>Cliente</th><th>Tipo de servicio</th><th>Técnico</th><th>Equipo / Marca</th><th>Fecha cierre</th>'
+    +'<th>N° Ticket</th><th>Cliente</th><th>Tipo de Servicio</th><th>Técnico</th>'
+    +'<th>Equipo / Marca</th><th>N° Activo</th><th>Fecha inicio</th><th>Días transcurridos</th>'
     +'</tr></thead><tbody>';
   porCotizar.slice().sort(function(a,b){
-    var fa=a.fechaFin instanceof Date?a.fechaFin:new Date(a.fechaFin||0);
-    var fb=b.fechaFin instanceof Date?b.fechaFin:new Date(b.fechaFin||0);
+    var fa=a.fechaInicio instanceof Date?a.fechaInicio:new Date(a.fechaInicio||0);
+    var fb=b.fechaInicio instanceof Date?b.fechaInicio:new Date(b.fechaInicio||0);
     return fa-fb;
   }).forEach(function(r){
-    var ff=r.fechaFin instanceof Date?r.fechaFin:new Date(r.fechaFin||'');
+    var fi=r.fechaInicio instanceof Date?r.fechaInicio:new Date(r.fechaInicio||'');
+    var dias=!isNaN(fi.getTime())?Math.round((Date.now()-fi.getTime())/86400000):null;
+    var urgColor=dias!==null?(dias>30?'color:#EF4444;font-weight:700;':dias>14?'color:#F59E0B;font-weight:700;':''):'';
     html+='<tr>'
       +'<td><strong>'+escapeHtml(r.nroTicket||'—')+'</strong></td>'
       +'<td>'+escapeHtml(r.cliente||'—')+'</td>'
-      +'<td>'+escapeHtml(r.tipoServicio||'—')+'</td>'
-      +'<td>'+escapeHtml(r.tecnico||'—')+'</td>'
-      +'<td style="font-size:11.5px;">'+escapeHtml((r.tipoEquipo||'—')+' · '+(r.marca||'—'))+'</td>'
-      +'<td style="font-size:11.5px;">'+fmtDate(ff)+'</td>'
+      +'<td style="font-size:11.5px;">'+escapeHtml(r.tipoServicio||'—')+'</td>'
+      +'<td style="font-size:11.5px;">'+escapeHtml(r.tecnico||'—')+'</td>'
+      +'<td style="font-size:11.5px;">'+escapeHtml((r.tipoEquipo||'—')+(r.marca?' · '+r.marca:''))+'</td>'
+      +'<td style="font-size:11.5px;">'+escapeHtml(r.nActivo||'—')+'</td>'
+      +'<td style="font-size:11.5px;">'+fmtDate(fi)+'</td>'
+      +'<td style="'+urgColor+'">'+(dias!==null?dias+'d':'—')+'</td>'
       +'</tr>';
   });
   html+='</tbody></table></div></div>';
@@ -5379,7 +5444,7 @@ function facturaRender(){
   }
 
   var gruposFact=agrupar(porFacturar);
-  var gruposCot =agrupar(cotizaciones);
+  var [] =agrupar(cotizaciones);
 
   /* ── PANEL 1: Por Facturar ── */
   var html='<div class="pxf-header">'
@@ -5442,1302 +5507,7 @@ function facturaRender(){
     html+='</tbody></table></div></div>';
   }
 
-  /* ── PANEL 2: Cotizaciones pendientes ── */
-  html+='<div class="pxf-header" style="margin-top:24px;background:linear-gradient(135deg,#92400E,#B45309);">'
-    +'<div><div class="pxf-header-title">📝 Cotizaciones pendientes de confirmar</div>'
-    +'<div class="pxf-header-sub">Propuestas enviadas al cliente sin aprobación aún</div></div>'
-    +'<div style="text-align:right;"><div style="font-size:22px;font-weight:800;">'+cotizaciones.length+' cotiz.</div>'
-    +'<div style="font-size:11.5px;color:rgba(255,255,255,0.65);">'+gruposCot.length+' clientes</div></div>'
-    +'</div>';
-
-  html+='<div class="pxf-kpi-row">'
-    +'<div class="pxf-kpi warning"><div class="pxf-kpi-label">Cotizaciones activas</div>'
-    +'<div class="pxf-kpi-value">'+cotizaciones.length+'</div><div class="pxf-kpi-sub">pendientes de aprobación</div></div>'
-    +'<div class="pxf-kpi warning"><div class="pxf-kpi-label">Potencial S/</div>'
-    +'<div class="pxf-kpi-value" style="font-size:20px;">'+fmtMoneyCompact(sumPEN(cotizaciones),'PEN')+'</div>'
-    +'<div class="pxf-kpi-sub">monto en cotizaciones</div></div>'
-    +(sumUSD(cotizaciones)>0?'<div class="pxf-kpi warning"><div class="pxf-kpi-label">Potencial US$</div>'
-    +'<div class="pxf-kpi-value" style="font-size:20px;">'+fmtMoneyCompact(sumUSD(cotizaciones),'USD')+'</div>'
-    +'<div class="pxf-kpi-sub">monto en cotizaciones</div></div>':'')
-    +'</div>';
-
-  if(!gruposCot.length){
-    html+='<div style="background:#F0FDF4;border:1.5px solid #A7F3D0;border-radius:10px;padding:16px 20px;font-size:13px;color:#065F46;font-weight:600;">✅ Sin cotizaciones pendientes.</div>';
-  } else {
-    html+='<div class="pxf-table-wrap"><div class="table-scroll"><table class="ej-table"><thead><tr>'
-      +'<th>N° Pedido</th><th>Cliente</th><th>Categoría</th><th>Fecha</th><th>Monto</th><th>Moneda</th><th>Vendedor</th>'
-      +'</tr></thead><tbody>';
-    cotizaciones.slice().sort(function(a,b){
-      var fa=a.fechaPedido instanceof Date?a.fechaPedido:new Date(a.fechaPedido||0);
-      var fb=b.fechaPedido instanceof Date?b.fechaPedido:new Date(b.fechaPedido||0);
-      return fa-fb;
-    }).forEach(function(r){
-      html+='<tr>'
-        +'<td><strong>'+escapeHtml(r.pedido||'—')+'</strong></td>'
-        +'<td>'+escapeHtml(r.cliente||'—')+'</td>'
-        +'<td style="font-size:11.5px;">'+escapeHtml(r.categoria||'—')+'</td>'
-        +'<td style="font-size:11.5px;">'+fmtDate(r.fechaPedido)+'</td>'
-        +'<td style="font-weight:700;">'+fmtMoneyCompact(r.total||0,r.moneda||'PEN')+'</td>'
-        +'<td>'+escapeHtml(r.moneda||'—')+'</td>'
-        +'<td style="font-size:11.5px;">'+escapeHtml(r.vendedor||'—')+'</td>'
-        +'</tr>';
-    });
-    html+='</tbody></table></div></div>';
-  }
-
   el.innerHTML=html;
-}
-
-function exportSectionAsHtml(contentElId, sectionTitle, filenamePrefix){
-  var srcEl = document.getElementById(contentElId);
-  if(!srcEl || srcEl.querySelector('.empty-state')){
-    alert('No hay datos importados para exportar en esta sección.');
-    return;
-  }
-
-  var clone = srcEl.cloneNode(true);
-
-  // Los gráficos Chart.js son <canvas> dibujados por JS; para que el archivo exportado no
-  // dependa de Chart.js (ni de ninguna CDN externa), se capturan como imagen estática.
-  var liveCanvases = srcEl.querySelectorAll('canvas');
-  var cloneCanvases = clone.querySelectorAll('canvas');
-  liveCanvases.forEach(function(liveCanvas, i){
-    var img = document.createElement('img');
-    try{ img.src = liveCanvas.toDataURL('image/png'); }catch(e){ img.alt = 'No se pudo capturar el gráfico'; }
-    img.style.width = '100%';
-    var target = cloneCanvases[i];
-    if(target && target.parentNode) target.parentNode.replaceChild(img, target);
-  });
-
-  // Modo solo lectura: se quitan manejadores de eventos y se deshabilitan controles interactivos
-  clone.querySelectorAll('*').forEach(function(el){
-    Array.from(el.attributes).forEach(function(attr){
-      if(/^on/i.test(attr.name) || attr.name==='draggable'){ el.removeAttribute(attr.name); }
-    });
-    if(el.tagName==='BUTTON'){ el.disabled = true; el.style.pointerEvents='none'; el.style.opacity='0.55'; }
-    if(el.tagName==='INPUT' || el.tagName==='SELECT' || el.tagName==='TEXTAREA'){ el.disabled = true; }
-  });
-
-  var stylesHtml = document.querySelector('style') ? document.querySelector('style').outerHTML : '';
-  var fechaExport = new Date();
-  var fechaStr = fechaExport.toLocaleString('es-PE', {dateStyle:'long', timeStyle:'short'});
-
-  var doc = '<!DOCTYPE html>\n<html lang="es">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n'
-    + '<title>' + escapeHtml(sectionTitle) + ' — Reporte ' + fechaExport.toISOString().slice(0,10) + '</title>\n'
-    + stylesHtml + '\n'
-    + '<style>\n'
-    + '.export-header{background:var(--navy);color:#fff;padding:18px 26px;border-bottom:3px solid var(--blue);}\n'
-    + '.export-header h1{margin:0;font-size:17px;} .export-header p{margin:5px 0 0;font-size:12px;color:rgba(255,255,255,0.75);}\n'
-    + '.rep-badge{display:inline-block;margin-top:8px;font-size:10.5px;font-weight:bold;background:rgba(255,255,255,0.15);padding:3px 10px;border-radius:20px;margin-right:6px;}\n'
-    + '.export-main{max-width:1400px;margin:0 auto;padding:24px 28px 40px;}\n'
-    + '.export-footer{text-align:center;padding:18px;font-size:11px;color:var(--ink-muted);}\n'
-    + '</style>\n</head>\n<body>\n'
-    + '<div class="export-header"><h1>' + escapeHtml(sectionTitle) + ' — Reporte</h1><p>COSEINCO · Documento de solo lectura, no editable</p>'
-    + '<span class="rep-badge">Generado el ' + fechaStr + '</span></div>\n'
-    + '<div class="export-main">' + clone.innerHTML + '</div>\n'
-    + '<div class="export-footer">Reporte estático exportado desde el dashboard de COSEINCO. No refleja cambios posteriores a la fecha de generación.</div>\n'
-    + '</body>\n</html>';
-
-  var blob2 = new Blob([doc], {type:'text/html;charset=utf-8'});
-  var url2 = URL.createObjectURL(blob2);
-  var stamp2 = fechaExport.toISOString().slice(0,10);
-  var a2 = document.createElement('a');
-  a2.href = url2;
-  a2.download = filenamePrefix + '_reporte_' + stamp2 + '.html';
-  document.body.appendChild(a2);
-  a2.click();
-  document.body.removeChild(a2);
-  setTimeout(function(){ URL.revokeObjectURL(url2); }, 1000);
-}
-
-/* ============================================================
-   MOTOR MULTI-SELECT CON CHECKBOXES (sección Tickets de Servicio)
-   Maneja los filtros de Técnico, Estado de ticket y Estado Reparación.
-   Cada "key" corresponde a un trío de elementos DOM:
-     ms-btn-{key}  → trigger (botón que despliega)
-     ms-dd-{key}   → contenedor del dropdown
-     ms-lbl-{key}  → texto del trigger
-     ms-all-{key}  → checkbox "Todos"
-     .ms-cb-{key}  → checkboxes individuales
-     ms-tags-{key} → contenedor de tags
-============================================================ */
-var MS_ALL_KEYS = [
-  'tf-anio','tf-mes','tf-semana','tecnico','estado','reparacion','tf-tiposervicio','tf-cliente-t',
-  'vf-anio','vf-mes','vf-semana','vf-vendedor','vf-cliente','vf-estado','vf-categoria','vf-moneda'
-];
-function ticketsExportCsv(){
-  var s = STATE.tickets;
-  var sorted = sortRows(s.filtered, s.sort.col, s.sort.dir);
-
-  if(sorted.length === 0){
-    alert('No hay tickets para exportar con los filtros aplicados.');
-    return;
-  }
-
-  var headers = ['Nro. Ticket','Estado','Tipo de Servicio','Cliente','Técnico','Tipo de Equipo','Marca','N° Activo','Fecha Inicio','Fecha Fin','Duración'];
-
-  function csvCell(val){
-    var str = (val == null) ? '' : String(val);
-    if(str.indexOf(',')!==-1 || str.indexOf('"')!==-1 || str.indexOf('\n')!==-1){
-      str = '"' + str.replace(/"/g, '""') + '"';
-    }
-    return str;
-  }
-
-  var lines = [headers.map(csvCell).join(',')];
-  sorted.forEach(function(r){
-    lines.push([
-      csvCell(r.nroTicket),
-      csvCell(r.estadoTicket),
-      csvCell(r.tipoServicio),
-      csvCell(r.cliente),
-      csvCell(r.tecnico),
-      csvCell(r.tipoEquipo),
-      csvCell(r.marca),
-      csvCell(r.nActivo),
-      csvCell(fmtDate(r.fechaInicio)),
-      csvCell(fmtDate(r.fechaFin)),
-      csvCell(r.duracionStr)
-    ].join(','));
-  });
-
-  // BOM UTF-8 (\uFEFF) para que Excel reconozca la codificación automáticamente
-  var bom = '\uFEFF';
-  var csvContent = bom + lines.join('\r\n');
-  var blob = new Blob([csvContent], {type: 'text/csv;charset=utf-8;'});
-  var url = URL.createObjectURL(blob);
-  var stamp = new Date().toISOString().slice(0,10);
-  var a = document.createElement('a');
-  a.href = url;
-  a.download = 'tickets_servicio_' + stamp + '.csv';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
-}
-
-function ticketsExportHtml(){ exportSectionAsHtml('ticketsContent', 'Tickets de Servicio', 'tickets_servicio'); }
-function ventasExportHtml(){ exportSectionAsHtml('ventasContent', 'Ventas / Pedidos', 'ventas_pedidos'); }
-function activosExportHtml(){ exportSectionAsHtml('activosContent', 'Activos TI', 'activos_ti'); }
-function clientesExportHtml(){ exportSectionAsHtml('clientesContent', 'Clientes — Informes a Gerencia', 'clientes'); }
-function seguimientoExportHtml(){ exportSectionAsHtml('kbSeguimiento', 'Seguimiento Pipeline Comercial', 'pipeline_seguimiento'); }
-
-/* ============================================================
-   VALORIZACIÓN SEMANAL POR TÉCNICO (Módulo 1: Tickets de Servicio)
-   El CSV de Tickets no trae ningún monto/tarifa — por eso esta sección
-   usa una configuración de tarifas que el propio usuario define y que se
-   guarda en localStorage (igual que el Pipeline Comercial). Dos modos:
-   1) Monto fijo por Tipo de Servicio
-   2) Horas invertidas × Tarifa por hora del Técnico
-============================================================ */
-function backupExportar(){
-  try {
-    /* 1. Datos persistidos en localStorage */
-    var lsKeys = [
-      KB_STORAGE_KEY,       /* coseinco_pipeline_v1  */
-      TR_STORAGE_KEY,       /* coseinco_tickets_rates_v1 */
-      ACTIVOS_KEY,          /* coseinco_activos_manual_v1 */
-      ODOO_CFG_KEY          /* coseinco_odoo_config_v1 */
-    ];
-    var lsData = {};
-    lsKeys.forEach(function(k){
-      var v = localStorage.getItem(k);
-      if(v !== null) {
-        try { lsData[k] = JSON.parse(v); }
-        catch(e) { lsData[k] = v; }
-      }
-    });
-
-    /* 2. Snapshots de los datasets CSV cargados en memoria
-       Las fechas (Date objects) se convierten a timestamp numérico
-       para que JSON.stringify las serialice y JSON.parse las recupere */
-    function serializeRows(rows){
-      if(!rows || !rows.length) return [];
-      return rows.map(function(r){
-        var out = {};
-        Object.keys(r).forEach(function(k){
-          out[k] = (r[k] instanceof Date) ? { __type:'Date', ts: r[k].getTime() } : r[k];
-        });
-        return out;
-      });
-    }
-
-    var snapshots = {
-      _snapshot_tickets: serializeRows(STATE.tickets.raw),
-      _snapshot_ventas:  serializeRows(STATE.ventas.raw)
-    };
-
-    /* 3. Empaquetar todo */
-    var backup = {
-      _meta: {
-        version:   '1.0',
-        app:       'COSEINCO Dashboard',
-        exportedAt: new Date().toISOString(),
-        ticketsCount: STATE.tickets.raw.length,
-        ventasCount:  STATE.ventas.raw.length,
-        pipelineCount: STATE.pipeline.raw.length
-      },
-      localStorage: lsData,
-      snapshots:    snapshots
-    };
-
-    /* 4. Descargar */
-    var json = JSON.stringify(backup, null, 2);
-    var blob = new Blob([json], { type: 'application/json;charset=utf-8;' });
-    var url  = URL.createObjectURL(blob);
-    var stamp = new Date().toISOString().slice(0, 10);
-    var a = document.createElement('a');
-    a.href     = url;
-    a.download = 'coseinco_dashboard_backup_' + stamp + '.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
-
-    odooToast('✓ Backup exportado — ' + STATE.pipeline.raw.length + ' tarjetas · '
-      + STATE.tickets.raw.length + ' tickets · ' + STATE.ventas.raw.length + ' pedidos', 'success', 5000);
-
-  } catch(e) {
-    console.error('[COSEINCO Backup] Error al exportar:', e);
-    odooToast('Error al exportar: ' + e.message, 'error');
-  }
-}
-
-function backupImportar(evt){
-  var file = evt.target.files && evt.target.files[0];
-  /* Limpiar el input para permitir importar el mismo archivo dos veces */
-  evt.target.value = '';
-  if(!file) return;
-
-  if(!file.name.endsWith('.json')){
-    odooToast('El archivo debe ser .json (exportado desde este dashboard).', 'error');
-    return;
-  }
-
-  odooToast('Leyendo archivo de backup…', 'info', 10000);
-
-  var reader = new FileReader();
-  reader.onload = function(e){
-    try {
-      var backup = JSON.parse(e.target.result);
-
-      /* Validación básica del formato */
-      if(!backup || typeof backup !== 'object' || !backup.localStorage){
-        throw new Error('El archivo no tiene el formato esperado de backup de COSEINCO Dashboard.');
-      }
-
-      /* 1. Restaurar claves de localStorage */
-      var lsData = backup.localStorage || {};
-      Object.keys(lsData).forEach(function(k){
-        try {
-          localStorage.setItem(k, JSON.stringify(lsData[k]));
-        } catch(ex) {
-          console.warn('[Backup] No se pudo restaurar clave:', k, ex);
-        }
-      });
-
-      /* 2. Restaurar snapshots de datasets CSV en sessionStorage
-         (se leen en el onload a continuación, antes del reload) */
-      var snaps = backup.snapshots || {};
-      if(snaps._snapshot_tickets && snaps._snapshot_tickets.length){
-        try { sessionStorage.setItem('_coseinco_restore_tickets', JSON.stringify(snaps._snapshot_tickets)); }
-        catch(ex){}
-      }
-      if(snaps._snapshot_ventas && snaps._snapshot_ventas.length){
-        try { sessionStorage.setItem('_coseinco_restore_ventas', JSON.stringify(snaps._snapshot_ventas)); }
-        catch(ex){}
-      }
-
-      var meta = backup._meta || {};
-      var msg  = '✓ Backup restaurado'
-        + (meta.pipelineCount !== undefined ? ' · ' + meta.pipelineCount + ' tarjetas Kanban' : '')
-        + (meta.ticketsCount  !== undefined ? ' · ' + meta.ticketsCount  + ' tickets'         : '')
-        + (meta.ventasCount   !== undefined ? ' · ' + meta.ventasCount   + ' pedidos'         : '')
-        + (meta.exportedAt    ? ' · exportado el ' + meta.exportedAt.slice(0,10)              : '');
-
-      odooToast(msg, 'success', 3500);
-
-      /* 3. Recargar la página tras un breve delay para que el toast sea visible */
-      setTimeout(function(){ location.reload(); }, 1800);
-
-    } catch(err) {
-      console.error('[COSEINCO Backup] Error al importar:', err);
-      odooToast('Error al importar: ' + err.message, 'error', 9000);
-    }
-  };
-
-  reader.onerror = function(){
-    odooToast('No se pudo leer el archivo. Inténtalo de nuevo.', 'error');
-  };
-
-  reader.readAsText(file, 'utf-8');
-}
-
-/* ── Restaurar snapshots CSV desde sessionStorage al cargar la página ──
-   Se ejecuta una sola vez después del reload que dispara backupImportar.
-   Reconstituye las fechas serializadas como {__type:'Date', ts:N} → Date
-   y luego llama al mismo pipeline que usa handleFile internamente.
-────────────────────────────────────────────────────────────────────── */
-function clientesRefreshPanel(){
-  if(_cliTabActiva==='pedidos') clientesRenderPedidos();
-  else if(_cliTabActiva==='monto') clientesRenderMonto();
-  else if(_cliTabActiva==='matriz') clientesRenderMatriz();
-}
-
-/* ── Exportar vista actual a CSV ── */
-function clientesExportCsv(){
-  var data = cliGetDataFiltrada();
-  if(!data.length){ alert('No hay datos para exportar.'); return; }
-  var clientes = clientesBuildMapa(data);
-  var headers, rows;
-  function cel(v){ var s=String(v==null?'':v); if(s.indexOf(',')!==-1||s.indexOf('"')!==-1||s.indexOf('\n')!==-1) s='"'+s.replace(/"/g,'""')+'"'; return s; }
-
-  if(_cliTabActiva==='pedidos'){
-    headers = ['Cliente','N° Pedidos','% del Total','S/ PEN','US$ USD'];
-    var total = data.length;
-    clientes.sort(function(a,b){return b.totalPedidos-a.totalPedidos;});
-    rows = clientes.map(function(c){
-      return [c.cliente, c.totalPedidos, ((c.totalPedidos/total)*100).toFixed(1)+'%',
-        c.totalPEN.toFixed(2), c.totalUSD.toFixed(2)];
-    });
-  } else if(_cliTabActiva==='monto'){
-    headers = ['Cliente','Pedidos','S/ PEN','US$ USD'];
-    clientes.sort(function(a,b){return (b.totalPEN+b.totalUSD)-(a.totalPEN+a.totalUSD);});
-    rows = clientes.map(function(c){
-      return [c.cliente, c.totalPedidos, c.totalPEN.toFixed(2), c.totalUSD.toFixed(2)];
-    });
-  } else {
-    /* Matriz — aplica los mismos filtros de moneda y estado que la vista */
-    var moneda=(document.getElementById('cli-moneda-matriz')||{value:'PEN'}).value||'PEN';
-    var estadoCsv=(document.getElementById('cli-estado-matriz')||{value:''}).value||'';
-    var dataFilt=data.filter(function(r){
-      if((r.moneda||'').toUpperCase()!==moneda.toUpperCase()) return false;
-      if(estadoCsv && (r.estadoPedido||'').trim()!==estadoCsv) return false;
-      return true;
-    });
-    var mapaM={}, catS={};
-    dataFilt.forEach(function(r){
-      var cli=(r.cliente||'Sin cliente').trim(), cat=r.categoria||'Sin categoría';
-      catS[cat]=true;
-      if(!mapaM[cli]) mapaM[cli]={};
-      mapaM[cli][cat]=(mapaM[cli][cat]||0)+(r.total||0);
-    });
-    var cliKeys=Object.keys(mapaM).sort(), catKeys=Object.keys(catS).sort();
-    headers=['Cliente'].concat(catKeys).concat(['TOTAL '+moneda+(estadoCsv?' ('+estadoCsv+')':'')]);
-    rows=cliKeys.map(function(cli){
-      var t=catKeys.reduce(function(s,c){return s+(mapaM[cli][c]||0);},0);
-      return [cli].concat(catKeys.map(function(c){return (mapaM[cli][c]||0).toFixed(2);})).concat([t.toFixed(2)]);
-    });
-  }
-
-  var lines=[headers.map(cel).join(',')].concat(rows.map(function(r){return r.map(cel).join(',');}));
-  var blob=new Blob(['\uFEFF'+lines.join('\r\n')],{type:'text/csv;charset=utf-8;'});
-  var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');
-  a.href=url; a.download='clientes_informe_'+_cliTabActiva+'_'+new Date().toISOString().slice(0,10)+'.csv';
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  setTimeout(function(){URL.revokeObjectURL(url);},1000);
-}
-
-/* ── Auto-refresh cuando se importan ventas ── */
-var _handleFileCliOrig = handleFile;
-handleFile = function(evt, mod){
-  _handleFileCliOrig(evt, mod);
-  if(mod==='ventas'){
-    var modCli = document.getElementById('mod-clientes');
-    if(modCli && modCli.classList.contains('active')){
-      setTimeout(clientesInit, 300);
-    }
-  }
-};
-
-/* ============================================================
-   MÓDULO: INFORMES AL CLIENTE
-   ─────────────────────────────────────────────────────────────
-   Fuente de datos: STATE.tickets.raw
-   Funciones principales:
-   · informesInit()      — puebla el selector de clientes y años/meses
-   · informesRender()    — renderiza KPIs, gráficos y tabla del cliente
-   · informesExportHtml()— exporta el informe como HTML autocontenido
-   · informesExportCsv() — exporta los tickets del cliente como CSV
-============================================================ */
-
-/* ── Inicializar el módulo ── */
-function informesInit(){
-  var raw = STATE.tickets.raw;
-  var statusEl = document.getElementById('informesStatus');
-  if(!raw.length){
-    if(statusEl) statusEl.textContent = 'Importa el CSV de Tickets para generar informes';
-    document.getElementById('informesContent').innerHTML =
-      '<div class="inf-empty"><div class="inf-empty-icon">📋</div>'
-      +'<h4 style="color:var(--ink);margin-bottom:6px;">Sin datos de Tickets</h4>'
-      +'<p style="font-size:12.5px;">Ve a "Tickets de Servicio" e importa el CSV primero.</p></div>';
-    return;
-  }
-
-  /* Poblar selector de clientes con los valores únicos del CSV */
-  var clientes = Array.from(new Set(raw.map(function(r){ return (r.cliente||'').trim(); })))
-    .filter(Boolean).sort();
-  var selCli = document.getElementById('inf-cliente');
-  if(selCli){
-    var cur = selCli.value;
-    selCli.innerHTML = '<option value="">— Selecciona un cliente —</option>'
-      + clientes.map(function(c){
-          return '<option value="'+escapeHtml(c)+'"'+(c===cur?' selected':'')+'>'+escapeHtml(c)+'</option>';
-        }).join('');
-  }
-
-  /* Poblar años disponibles */
-  var anios = Array.from(new Set(raw.map(function(r){ return r.anio; }))).filter(Boolean).sort();
-  var selA = document.getElementById('inf-anio');
-  if(selA){
-    var curA = selA.value;
-    selA.innerHTML = '<option value="">Todos</option>'
-      + anios.map(function(a){ return '<option value="'+a+'"'+(String(a)===curA?' selected':'')+'>'+a+'</option>'; }).join('');
-  }
-
-  /* Poblar meses */
-  var meses = Array.from(new Set(raw.map(function(r){ return r.mes; }))).filter(Boolean).sort(function(a,b){return a-b;});
-  var selM = document.getElementById('inf-mes');
-  if(selM){
-    var curM = selM.value;
-    selM.innerHTML = '<option value="">Todos</option>'
-      + meses.map(function(m){ return '<option value="'+m+'"'+(String(m)===curM?' selected':'')+'>'+MES_NOMBRES[m-1]+'</option>'; }).join('');
-  }
-
-  /* Poblar semanas */
-  var semanas = Array.from(new Set(raw.map(function(r){ return r.semana; }))).filter(Boolean).sort(function(a,b){return a-b;});
-  var selS = document.getElementById('inf-semana');
-  if(selS){
-    var curS = selS.value;
-    selS.innerHTML = '<option value="">Todas</option>'
-      + semanas.map(function(s){ return '<option value="'+s+'"'+(String(s)===curS?' selected':'')+'>Semana '+s+'</option>'; }).join('');
-  }
-
-  /* Poblar tipos de servicio */
-  var tipos = Array.from(new Set(raw.map(function(r){ return (r.tipoServicio||'').trim(); }))).filter(Boolean).sort();
-  var selTS = document.getElementById('inf-tiposervicio');
-  if(selTS){
-    var curTS = selTS.value;
-    selTS.innerHTML = '<option value="">Todos</option>'
-      + tipos.map(function(t){ return '<option value="'+escapeHtml(t)+'"'+(t===curTS?' selected':'')+'>'+escapeHtml(t)+'</option>'; }).join('');
-  }
-
-  if(statusEl) statusEl.textContent = raw.length + ' tickets disponibles · ' + clientes.length + ' clientes';
-  informesRender();
-}
-
-/* ── Limpiar filtros secundarios ── */
-function informesLimpiarFiltros(){
-  ['inf-anio','inf-mes','inf-semana','inf-tiposervicio','inf-estadopedido'].forEach(function(id){
-    var el = document.getElementById(id);
-    if(el) el.value = '';
-  });
-  informesRender();
-}
-
-/* ── Obtener datos filtrados ── */
-function informesGetData(){
-  var cli    = (document.getElementById('inf-cliente')      ||{value:''}).value||'';
-  var anio   = (document.getElementById('inf-anio')         ||{value:''}).value||'';
-  var mes    = (document.getElementById('inf-mes')          ||{value:''}).value||'';
-  var semana = (document.getElementById('inf-semana')       ||{value:''}).value||'';
-  var tipo   = (document.getElementById('inf-tiposervicio') ||{value:''}).value||'';
-  return STATE.tickets.raw.filter(function(r){
-    if(cli    && (r.cliente||'').trim().toLowerCase() !== cli.toLowerCase()) return false;
-    if(anio   && String(r.anio)   !== anio)   return false;
-    if(mes    && String(r.mes)    !== mes)     return false;
-    if(semana && String(r.semana) !== semana)  return false;
-    if(tipo   && (r.tipoServicio||'').trim() !== tipo) return false;
-    return true;
-  });
-}
-
-/* ── Renderizar el informe completo ── */
-function informesRender(){
-  var cli = (document.getElementById('inf-cliente')||{value:''}).value||'';
-  var btnHtml = document.getElementById('informesBtnHtml');
-  var btnCsv  = document.getElementById('informesBtnCsv');
-  var content = document.getElementById('informesContent');
-  if(!content) return;
-
-  if(!cli){
-    if(btnHtml) btnHtml.style.display='none';
-    if(btnCsv)  btnCsv.style.display='none';
-    content.innerHTML = '<div class="inf-empty"><div class="inf-empty-icon">🔍</div>'
-      +'<h4 style="color:var(--ink);margin-bottom:6px;">Selecciona un cliente</h4>'
-      +'<p style="font-size:12.5px;">Usa el selector de cliente para generar el informe personalizado.</p></div>';
-    return;
-  }
-
-  var data = informesGetData();
-  if(btnHtml) btnHtml.style.display='inline-flex';
-  if(btnCsv)  btnCsv.style.display='inline-flex';
-
-  if(!data.length){
-    content.innerHTML = '<div class="inf-empty"><div class="inf-empty-icon">📭</div>'
-      +'<h4 style="color:var(--ink);margin-bottom:6px;">Sin tickets para los filtros seleccionados</h4>'
-      +'<p style="font-size:12.5px;">Prueba cambiando el año, mes o semana.</p></div>';
-    return;
-  }
-
-  /* ── Cálculos ── */
-  var cerrados = data.filter(function(r){
-    var e = (r.estadoTicket||'').toLowerCase();
-    return e.indexOf('cerr')!==-1 || e.indexOf('resuel')!==-1 || e.indexOf('finaliz')!==-1;
-  });
-  var pendientes = data.filter(function(r){
-    var e = (r.estadoTicket||'').toLowerCase();
-    return e.indexOf('cerr')===-1 && e.indexOf('resuel')===-1 && e.indexOf('finaliz')===-1;
-  });
-  var pctResolucion = data.length ? Math.round(cerrados.length/data.length*100) : 0;
-  var segTotal = data.reduce(function(s,r){ return s+(r.duracionSeg||0); }, 0);
-  var promSeg  = data.length ? Math.round(segTotal/data.length) : 0;
-
-  /* Tipos de servicio */
-  var tipoMap = {};
-  data.forEach(function(r){ var t=r.tipoServicio||'Sin tipo'; tipoMap[t]=(tipoMap[t]||0)+1; });
-  var tiposOrdenados = Object.keys(tipoMap).sort(function(a,b){ return tipoMap[b]-tipoMap[a]; });
-
-  /* Tendencia mensual */
-  var mesMap = {};
-  data.forEach(function(r){
-    var key = (r.anio||'')+'/'+(String(r.mes||'').padStart(2,'0'));
-    mesMap[key] = (mesMap[key]||0)+1;
-  });
-  var mesKeys = Object.keys(mesMap).sort();
-
-  /* Equipos más atendidos */
-  var equipoMap = {};
-  data.forEach(function(r){ var e=r.tipoEquipo||'Sin tipo'; equipoMap[e]=(equipoMap[e]||0)+1; });
-  var equiposOrdenados = Object.keys(equipoMap).sort(function(a,b){ return equipoMap[b]-equipoMap[a]; });
-
-  /* Técnicos asignados */
-  var tecMap = {};
-  data.forEach(function(r){ var t=r.tecnico||'Sin asignar'; tecMap[t]=(tecMap[t]||0)+1; });
-
-  /* Color SLA */
-  var slaColor = pctResolucion>=90?'#2FAE60':pctResolucion>=70?'#F2994A':'#EF5350';
-
-  /* ── Construir HTML ── */
-  var anioFiltro   = (document.getElementById('inf-anio')  ||{value:''}).value||'';
-  var mesFiltro    = (document.getElementById('inf-mes')   ||{value:''}).value||'';
-  var semanaFiltro = (document.getElementById('inf-semana')||{value:''}).value||'';
-  var periodoDesc  = [
-    anioFiltro   ? 'Año '+anioFiltro         : '',
-    mesFiltro    ? MES_NOMBRES[mesFiltro-1]  : '',
-    semanaFiltro ? 'Semana '+semanaFiltro    : ''
-  ].filter(Boolean).join(' · ') || 'Todo el período';
-
-  var html = '<div style="margin-bottom:10px;padding:12px 16px;background:var(--surface-alt);border-radius:8px;border:1px solid var(--border);">'
-    +'<div style="font-size:11px;color:var(--ink-muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;">Informe de soporte técnico para</div>'
-    +'<div style="font-size:18px;font-weight:800;color:var(--navy);margin-top:2px;">'+escapeHtml(cli)+'</div>'
-    +'<div style="font-size:11.5px;color:var(--ink-muted);margin-top:2px;">Período: '+periodoDesc+'  ·  Generado el '+fmtDate(new Date())+'</div>'
-    +'</div>';
-
-  /* KPIs */
-  html += '<div class="inf-kpi-grid">';
-  html += '<div class="inf-kpi navy"><div class="inf-kpi-label">Total de tickets</div><div class="inf-kpi-value">'+data.length+'</div><div class="inf-kpi-sub">en el período</div></div>';
-  html += '<div class="inf-kpi green"><div class="inf-kpi-label">Resueltos / cerrados</div><div class="inf-kpi-value">'+cerrados.length+'</div><div class="inf-kpi-sub">de '+data.length+' atendidos</div></div>';
-  html += '<div class="inf-kpi red"><div class="inf-kpi-label">Pendientes</div><div class="inf-kpi-value">'+pendientes.length+'</div><div class="inf-kpi-sub">por resolver</div></div>';
-  html += '<div class="inf-kpi blue"><div class="inf-kpi-label">Tiempo promedio</div><div class="inf-kpi-value" style="font-size:20px;">'+formatSecondsToHMS(promSeg)+'</div><div class="inf-kpi-sub">por ticket</div></div>';
-  html += '<div class="inf-kpi orange"><div class="inf-kpi-label">Tiempo total</div><div class="inf-kpi-value" style="font-size:20px;">'+formatSecondsToHMS(segTotal)+'</div><div class="inf-kpi-sub">horas de soporte</div></div>';
-  html += '<div class="inf-kpi purple"><div class="inf-kpi-label">% Resolución (SLA)</div>'
-    +'<div class="inf-kpi-value" style="color:'+slaColor+'">'+pctResolucion+'%</div>'
-    +'<div class="inf-sla-wrap" style="margin-top:6px;"><div class="inf-sla-bar-bg"><div class="inf-sla-bar" style="width:'+pctResolucion+'%;background:'+slaColor+';"></div></div></div>'
-    +'</div>';
-  html += '</div>';
-
-  /* Gráficos */
-  html += '<div class="charts-grid" style="margin-bottom:16px;">';
-  html += '<div class="chart-card"><h4>Tickets por mes</h4><div class="chart-wrap"><canvas id="chartInfTendencia"></canvas></div></div>';
-  html += '<div class="chart-card"><h4>Distribución por tipo de servicio</h4><div class="chart-wrap"><canvas id="chartInfTipo"></canvas></div></div>';
-  html += '</div>';
-  html += '<div class="charts-grid" style="margin-bottom:20px; grid-template-columns:1fr;">';
-  html += '<div class="chart-card"><h4>Equipos más atendidos (Top 8)</h4><div class="chart-wrap" style="height:240px;"><canvas id="chartInfEquipos"></canvas></div></div>';
-  html += '</div>';
-
-  /* Tabla de técnicos */
-  html += '<div class="inf-section-title"><h3>Técnicos asignados</h3><div class="line"></div></div>';
-  html += '<div class="table-card"><div class="table-scroll"><table class="inf-table"><thead><tr>'
-    +'<th>Técnico</th><th>Tickets atendidos</th><th>Participación</th></tr></thead><tbody>';
-  Object.keys(tecMap).sort(function(a,b){ return tecMap[b]-tecMap[a]; }).forEach(function(t){
-    var pct = Math.round(tecMap[t]/data.length*100);
-    html += '<tr><td><strong>'+escapeHtml(t)+'</strong></td>'
-      +'<td>'+tecMap[t]+'</td>'
-      +'<td><div class="inf-sla-wrap"><div class="inf-sla-bar-bg"><div class="inf-sla-bar" style="width:'+pct+'%;background:var(--blue);"></div></div>'
-      +'<span style="font-size:11px;font-weight:700;min-width:32px;text-align:right;">'+pct+'%</span></div></td></tr>';
-  });
-  html += '</tbody></table></div></div>';
-
-  /* Tabla detalle de tickets */
-  html += '<div class="inf-section-title" style="margin-top:24px;"><h3>Detalle de tickets</h3><div class="line"></div>'
-    +'<span style="font-size:11.5px;color:var(--ink-muted);">'+data.length+' registros</span></div>';
-  html += '<div class="table-card"><div class="table-scroll"><table class="inf-table"><thead><tr>'
-    +'<th>N° Ticket</th><th>Estado</th><th>Tipo de Servicio</th><th>Técnico</th>'
-    +'<th>Equipo / Marca</th><th>Fecha Inicio</th><th>Duración</th></tr></thead><tbody>';
-  data.slice().sort(function(a,b){ return (b.fechaInicio||0)-(a.fechaInicio||0); })
-    .slice(0,100)
-    .forEach(function(r){
-      var est = (r.estadoTicket||'').toLowerCase();
-      var badgeCls = est.indexOf('cerr')!==-1||est.indexOf('resuel')!==-1 ? 'cerrado' : est.indexOf('abiert')!==-1 ? 'abierto' : 'otro';
-      html += '<tr>'
-        +'<td><strong>'+escapeHtml(r.nroTicket||'—')+'</strong></td>'
-        +'<td><span class="inf-badge '+badgeCls+'">'+escapeHtml(r.estadoTicket||'—')+'</span></td>'
-        +'<td>'+escapeHtml(r.tipoServicio||'—')+'</td>'
-        +'<td>'+escapeHtml(r.tecnico||'—')+'</td>'
-        +'<td>'+escapeHtml((r.tipoEquipo||'')+(r.marca?' · '+r.marca:''))+'</td>'
-        +'<td style="white-space:nowrap;font-size:11.5px;">'+fmtDate(r.fechaInicio)+'</td>'
-        +'<td style="font-size:11.5px;font-family:monospace;">'+escapeHtml(r.duracionStr||'—')+'</td>'
-        +'</tr>';
-    });
-  if(data.length>100) html += '<tr><td colspan="7" style="text-align:center;color:var(--ink-muted);font-size:11.5px;padding:10px;">… y '+(data.length-100)+' tickets más. Exporta el CSV para ver todos.</td></tr>';
-  html += '</tbody></table></div></div>';
-
-  content.innerHTML = html;
-
-  /* ── Renderizar gráficos ── */
-  /* 1. Tendencia mensual */
-  destroyChart('infTendencia');
-  var ctxT = document.getElementById('chartInfTendencia');
-  if(ctxT){
-    CHARTS.infTendencia = new Chart(ctxT, {
-      type:'bar',
-      data:{
-        labels: mesKeys.map(function(k){ var p=k.split('/'); return MES_NOMBRES[(parseInt(p[1])-1)]+(p[0]?' '+p[0]:''); }),
-        datasets:[
-          {label:'Resueltos',  data: mesKeys.map(function(k){ return data.filter(function(r){ var kk=(r.anio||'')+'/'+(String(r.mes||'').padStart(2,'0')); var e=(r.estadoTicket||'').toLowerCase(); return kk===k&&(e.indexOf('cerr')!==-1||e.indexOf('resuel')!==-1); }).length; }), backgroundColor:'#2FAE60', borderRadius:4},
-          {label:'Pendientes', data: mesKeys.map(function(k){ return data.filter(function(r){ var kk=(r.anio||'')+'/'+(String(r.mes||'').padStart(2,'0')); var e=(r.estadoTicket||'').toLowerCase(); return kk===k&&e.indexOf('cerr')===-1&&e.indexOf('resuel')===-1; }).length; }), backgroundColor:'#F2994A', borderRadius:4}
-        ]
-      },
-      options: Object.assign(baseBarOptions(), {plugins:{legend:{display:true,position:'top',align:'end',labels:{boxWidth:10,font:{size:11}}}}})
-    });
-  }
-
-  /* 2. Dona por tipo de servicio */
-  destroyChart('infTipo');
-  var ctxD = document.getElementById('chartInfTipo');
-  if(ctxD){
-    CHARTS.infTipo = new Chart(ctxD, {
-      type:'doughnut',
-      data:{
-        labels: tiposOrdenados,
-        datasets:[{data: tiposOrdenados.map(function(t){ return tipoMap[t]; }), backgroundColor: CHART_PALETTE, borderWidth:2, borderColor:'#fff'}]
-      },
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:12,font:{size:11}}}}}
-    });
-  }
-
-  /* 3. Barras horizontales equipos */
-  destroyChart('infEquipos');
-  var ctxE = document.getElementById('chartInfEquipos');
-  var top8eq = equiposOrdenados.slice(0,8);
-  if(ctxE && top8eq.length){
-    CHARTS.infEquipos = new Chart(ctxE, {
-      type:'bar',
-      data:{
-        labels: top8eq,
-        datasets:[{label:'Tickets',data:top8eq.map(function(e){ return equipoMap[e]; }),backgroundColor:'#1A86F1',borderRadius:4}]
-      },
-      options: Object.assign(baseBarOptions(), {indexAxis:'y', plugins:{legend:{display:false}}})
-    });
-  }
-
-  /* ═══════════════════════════════════════════════════════════
-     SECCIONES NUEVAS: DATOS DE VENTAS + ACTIVOS + RENTABILIDAD
-  ═══════════════════════════════════════════════════════════ */
-
-  /* ── Obtener ventas del cliente ── */
-  var clienteNorm = cli.trim().toLowerCase();
-  var ventasCli = STATE.ventas.raw.filter(function(r){
-    return (r.cliente||'').trim().toLowerCase() === clienteNorm;
-  });
-  /* Aplicar filtros de año/mes si están activos */
-  var anioF   = (document.getElementById('inf-anio')  ||{value:''}).value||'';
-  var mesF    = (document.getElementById('inf-mes')   ||{value:''}).value||'';
-  if(anioF) ventasCli = ventasCli.filter(function(r){ return String(r.anio)===anioF; });
-  if(mesF)  ventasCli = ventasCli.filter(function(r){ return String(r.mes)===mesF; });
-  var estadoPedF = (document.getElementById('inf-estadopedido')||{value:''}).value||'';
-  if(estadoPedF === 'cotizacion') ventasCli = ventasCli.filter(function(r){ return /cotiz/i.test(r.estadoPedido||''); });
-  if(estadoPedF === 'ordenes')    ventasCli = ventasCli.filter(function(r){ return /orden|venta/i.test(r.estadoPedido||''); });
-
-  /* ── SECCIÓN 1: ACTIVIDAD COMERCIAL (sin montos) ── */
-  var secHtml = '';
-  if(STATE.ventas.raw.length){
-    secHtml += '<div class="inf-section-title" style="margin-top:28px;">'
-      +'<h3>💼 Actividad Comercial</h3><div class="line"></div>'
-      +'<span style="font-size:11.5px;color:var(--ink-muted);">Resumen de servicios y pedidos del período</span></div>';
-
-    if(!ventasCli.length){
-      secHtml += '<div style="padding:14px 18px;background:var(--surface-alt);border-radius:8px;font-size:12.5px;color:var(--ink-muted);">Sin pedidos registrados para <strong>'+escapeHtml(cli)+'</strong> en este período.</div>';
-    } else {
-      /* Calcular métricas no monetarias */
-      var nPedidos  = ventasCli.length;
-      var nOrdenes  = ventasCli.filter(function(r){return /orden|venta/i.test(r.estadoPedido||'');}).length;
-      var nCotiz    = ventasCli.filter(function(r){return /cotiz/i.test(r.estadoPedido||'');}).length;
-      var nOtros    = nPedidos - nOrdenes - nCotiz;
-
-      /* Categoría más frecuente */
-      var catMap = {};
-      ventasCli.forEach(function(r){var c=r.categoria||'Sin categoría'; catMap[c]=(catMap[c]||0)+1;});
-      var catTop = Object.keys(catMap).sort(function(a,b){return catMap[b]-catMap[a];})[0]||'—';
-
-      /* Vendedor asignado */
-      var vendMap = {};
-      ventasCli.forEach(function(r){var v=r.vendedor||'Sin asignar'; vendMap[v]=(vendMap[v]||0)+1;});
-      var vendTop = Object.keys(vendMap).sort(function(a,b){return vendMap[b]-vendMap[a];})[0]||'—';
-
-      /* Último pedido */
-      var ultimoPedido = ventasCli.slice().sort(function(a,b){return (b.fechaPedido||0)-(a.fechaPedido||0);})[0];
-
-      /* KPIs sin dinero */
-      secHtml += '<div class="inf-kpi-grid" style="margin-bottom:16px;">';
-      secHtml += '<div class="inf-kpi navy"><div class="inf-kpi-label">Total de servicios</div><div class="inf-kpi-value">'+nPedidos+'</div><div class="inf-kpi-sub">registrados en el período</div></div>';
-      secHtml += '<div class="inf-kpi green"><div class="inf-kpi-label">Servicios completados</div><div class="inf-kpi-value">'+nOrdenes+'</div><div class="inf-kpi-sub">órdenes confirmadas</div></div>';
-      secHtml += '<div class="inf-kpi blue"><div class="inf-kpi-label">En proceso</div><div class="inf-kpi-value">'+nCotiz+'</div><div class="inf-kpi-sub">cotizaciones activas</div></div>';
-      secHtml += '<div class="inf-kpi purple"><div class="inf-kpi-label">Servicio principal</div><div class="inf-kpi-value" style="font-size:13px;line-height:1.3;">'+escapeHtml(catTop)+'</div><div class="inf-kpi-sub">categoría más solicitada</div></div>';
-      secHtml += '<div class="inf-kpi orange"><div class="inf-kpi-label">Ejecutivo asignado</div><div class="inf-kpi-value" style="font-size:15px;line-height:1.3;">'+escapeHtml(vendTop)+'</div><div class="inf-kpi-sub">último contacto: '+(ultimoPedido?fmtDate(ultimoPedido.fechaPedido):'—')+'</div></div>';
-      secHtml += '</div>';
-
-      /* Gráficos de categorías y estado */
-      secHtml += '<div class="charts-grid" style="margin-bottom:16px;">';
-      secHtml += '<div class="chart-card"><h4>Servicios por mes</h4><div class="chart-wrap"><canvas id="chartInfVentasMes"></canvas></div></div>';
-      secHtml += '<div class="chart-card"><h4>Servicios por categoría</h4><div class="chart-wrap"><canvas id="chartInfCategorias"></canvas></div></div>';
-      secHtml += '</div>';
-
-      /* Tabla de servicios SIN columna de monto */
-      secHtml += '<div class="inf-section-title"><h3>Detalle de servicios</h3><div class="line"></div></div>';
-      secHtml += '<div class="table-card"><div class="table-scroll"><table class="inf-table"><thead><tr>'
-        +'<th>N° Pedido</th><th>Estado</th><th>Fecha</th><th>Categoría</th><th>Ejecutivo</th>'
-        +'</tr></thead><tbody>';
-      ventasCli.slice().sort(function(a,b){return (b.fechaPedido||0)-(a.fechaPedido||0);}).slice(0,50)
-        .forEach(function(r){
-          var est = (r.estadoPedido||'').toLowerCase();
-          var badgeCls = /orden|venta/.test(est)?'cerrado':/cotiz/.test(est)?'otro':'abierto';
-          secHtml += '<tr>'
-            +'<td><strong>'+escapeHtml(r.pedido||'—')+'</strong></td>'
-            +'<td><span class="inf-badge '+badgeCls+'">'+escapeHtml(r.estadoPedido||'—')+'</span></td>'
-            +'<td style="font-size:11.5px;">'+fmtDate(r.fechaPedido)+'</td>'
-            +'<td style="font-size:11.5px;">'+escapeHtml(r.categoria||'—')+'</td>'
-            +'<td style="font-size:11.5px;">'+escapeHtml(r.vendedor||'—')+'</td>'
-            +'</tr>';
-        });
-      secHtml += '</tbody></table></div></div>';
-    }
-  }
-
-  /* ── SECCIÓN 3: INVENTARIO DE ACTIVOS ATENDIDOS ── */
-  var activoMap = {};
-  data.forEach(function(r){
-    var nac = (r.nActivo||'').trim();
-    if(!nac) return;
-    if(!activoMap[nac]) activoMap[nac]={activo:nac,tipo:r.tipoEquipo||'—',marca:r.marca||'—',fallas:0,ultimaFalla:null};
-    activoMap[nac].fallas++;
-    if(r.fechaInicio){
-      var f=r.fechaInicio instanceof Date?r.fechaInicio:new Date(r.fechaInicio);
-      if(!activoMap[nac].ultimaFalla||f>activoMap[nac].ultimaFalla) activoMap[nac].ultimaFalla=f;
-    }
-  });
-  var activosList = Object.values(activoMap).sort(function(a,b){return b.fallas-a.fallas;});
-
-  if(activosList.length){
-    secHtml += '<div class="inf-section-title" style="margin-top:28px;">'
-      +'<h3>🖥️ Inventario de activos atendidos</h3><div class="line"></div>'
-      +'<span style="font-size:11.5px;color:var(--ink-muted);">Equipos del cliente con historial de tickets</span></div>';
-    secHtml += '<div class="table-card"><div class="table-scroll"><table class="inf-table"><thead><tr>'
-      +'<th>N° Activo</th><th>Tipo</th><th>Marca</th><th>N° de incidencias</th><th>Última atención</th><th>Estado</th>'
-      +'</tr></thead><tbody>';
-    activosList.forEach(function(a){
-      var riskColor = a.fallas>=7?'#EF4444':a.fallas>=3?'#F59E0B':'#10B981';
-      var riskTxt   = a.fallas>=7?'⚠ Crítico':a.fallas>=3?'🔶 Observación':'✅ Normal';
-      secHtml += '<tr>'
-        +'<td><strong style="color:var(--navy);">'+escapeHtml(a.activo)+'</strong></td>'
-        +'<td>'+escapeHtml(a.tipo)+'</td>'
-        +'<td>'+escapeHtml(a.marca)+'</td>'
-        +'<td><span style="font-weight:800;color:'+riskColor+';">'+a.fallas+'</span></td>'
-        +'<td style="font-size:11.5px;">'+fmtDate(a.ultimaFalla)+'</td>'
-        +'<td style="font-size:11.5px;font-weight:700;color:'+riskColor+';">'+riskTxt+'</td>'
-        +'</tr>';
-    });
-    secHtml += '</tbody></table></div></div>';
-  }
-
-  /* ── SECCIÓN 4: TIEMPO POR TIPO DE SERVICIO ── */
-  var tipoDetalle = {};
-  data.forEach(function(r){
-    var t = r.tipoServicio||'Sin tipo';
-    if(!tipoDetalle[t]) tipoDetalle[t]={count:0,segTotal:0};
-    tipoDetalle[t].count++;
-    tipoDetalle[t].segTotal += r.duracionSeg||0;
-  });
-  /* Promedios COSEINCO global para comparar */
-  var globalTipoDetalle = {};
-  STATE.tickets.raw.forEach(function(r){
-    var t = r.tipoServicio||'Sin tipo';
-    if(!globalTipoDetalle[t]) globalTipoDetalle[t]={count:0,segTotal:0};
-    globalTipoDetalle[t].count++;
-    globalTipoDetalle[t].segTotal += r.duracionSeg||0;
-  });
-
-  secHtml += '<div class="inf-section-title" style="margin-top:28px;">'
-    +'<h3>⏱ Tiempo por tipo de servicio</h3><div class="line"></div>'
-    +'<span style="font-size:11.5px;color:var(--ink-muted);">Comparación del cliente vs. promedio COSEINCO</span></div>';
-  secHtml += '<div class="table-card"><div class="table-scroll"><table class="inf-table"><thead><tr>'
-    +'<th>Tipo de servicio</th><th>Tickets</th><th>Tiempo promedio cliente</th><th>Promedio COSEINCO</th><th>Diferencia</th>'
-    +'</tr></thead><tbody>';
-  Object.keys(tipoDetalle).sort().forEach(function(t){
-    var td = tipoDetalle[t];
-    var gd = globalTipoDetalle[t]||{count:0,segTotal:0};
-    var promCli    = td.count?td.segTotal/td.count:0;
-    var promGlobal = gd.count?gd.segTotal/gd.count:0;
-    var diff = promCli - promGlobal;
-    var diffColor = diff>0?'#EF4444':diff<0?'#10B981':'var(--ink-muted)';
-    var diffTxt   = diff===0?'Igual':(diff>0?'+'+(diff/3600).toFixed(2)+' h más':(-diff/3600).toFixed(2)+' h menos');
-    secHtml += '<tr>'
-      +'<td><strong>'+escapeHtml(t)+'</strong></td>'
-      +'<td>'+td.count+'</td>'
-      +'<td>'+formatSecondsToHMS(Math.round(promCli))+'</td>'
-      +'<td style="color:var(--ink-muted);">'+formatSecondsToHMS(Math.round(promGlobal))+'</td>'
-      +'<td style="font-weight:700;color:'+diffColor+';">'+diffTxt+'</td>'
-      +'</tr>';
-  });
-  secHtml += '</tbody></table></div></div>';
-
-
-  /* ═══════════════════════════════════════════════════
-     INFORMES ADICIONALES — 10 secciones para el cliente
-  ═══════════════════════════════════════════════════ */
-
-  /* ── 5. RESUMEN EJECUTIVO NARRATIVO ── */
-  (function(){
-    var nT=data.length, nCerr=cerrados.length, nPend=pendientes.length;
-    var pctRes=nT>0?Math.round(nCerr/nT*100):0;
-    var activosFrecuentes=Object.values((function(){var m={};data.forEach(function(r){if(r.nActivo){m[r.nActivo]=(m[r.nActivo]||0)+1;}});return m;})()).sort(function(a,b){return b-a;});
-    var tipoTop=(function(){var m={};data.forEach(function(r){var t=r.tipoServicio||'Sin tipo';m[t]=(m[t]||0)+1;});return Object.keys(m).sort(function(a,b){return m[b]-m[a];})[0]||'—';}());
-    var activoCrit=(function(){var m={};data.forEach(function(r){if(r.nActivo){m[r.nActivo]=(m[r.nActivo]||0)+1;}});var keys=Object.keys(m).sort(function(a,b){return m[b]-m[a];});return keys.length?{id:keys[0],cnt:m[keys[0]]}:null;}());
-    var tecTop=(function(){var m={};data.forEach(function(r){var t=r.tecnico||'—';m[t]=(m[t]||0)+1;});var k=Object.keys(m).sort(function(a,b){return m[b]-m[a];})[0]||'—';return k;}());
-    var nivelRes=pctRes>=90?'excelente nivel de resolución ('+pctRes+'%)':pctRes>=70?'buen nivel de resolución ('+pctRes+'%)':'nivel de resolución del '+pctRes+'%, que se está trabajando para mejorar';
-    var frase='Durante el período analizado se registraron <strong>'+nT+' atenciones</strong> de soporte técnico, alcanzando un <strong>'+nivelRes+'</strong>. '
-      +(nPend>0?'Al cierre del informe quedan <strong>'+nPend+' ticket(s) en proceso</strong> de resolución. ':'Todos los tickets fueron resueltos satisfactoriamente. ')
-      +'El tipo de servicio más solicitado fue <strong>'+escapeHtml(tipoTop)+'</strong>'
-      +(activoCrit?' y el activo con mayor número de atenciones fue <strong>'+escapeHtml(activoCrit.id)+'</strong> con <strong>'+activoCrit.cnt+' incidencias</strong>.':'.')
-      +' El técnico principal asignado fue <strong>'+escapeHtml(tecTop)+'</strong>.';
-    secHtml += '<div style="background:linear-gradient(135deg,#EFF6FF,#F0FDF4);border:1.5px solid #BFDBFE;border-radius:12px;padding:20px 24px;margin-top:28px;margin-bottom:18px;">'
-      +'<div style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#1D4ED8;margin-bottom:8px;">📋 Resumen ejecutivo</div>'
-      +'<p style="font-size:13.5px;color:#1E293B;line-height:1.7;margin:0;">'+frase+'</p>'
-      +'</div>';
-  })();
-
-  /* ── 6. SEMÁFORO DE SALUD IT ── */
-  (function(){
-    var activoMap={};
-    data.forEach(function(r){
-      var n=(r.nActivo||'').trim(); if(!n) return;
-      if(!activoMap[n]) activoMap[n]={id:n,tipo:r.tipoEquipo||'—',marca:r.marca||'—',fallas:0,ult:null};
-      activoMap[n].fallas++;
-      if(r.fechaInicio){var f=r.fechaInicio instanceof Date?r.fechaInicio:new Date(r.fechaInicio); if(!activoMap[n].ult||f>activoMap[n].ult) activoMap[n].ult=f;}
-    });
-    var activos=Object.values(activoMap).sort(function(a,b){return b.fallas-a.fallas;});
-    if(!activos.length) return;
-    secHtml+='<div class="inf-section-title" style="margin-top:28px;"><h3>🚦 Semáforo de salud IT</h3><div class="line"></div>'
-      +'<span style="font-size:11.5px;color:var(--ink-muted);">Estado de tus equipos según historial de incidencias</span></div>';
-    secHtml+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-bottom:18px;">';
-    activos.forEach(function(a){
-      var color=a.fallas>=7?'#EF4444':a.fallas>=3?'#F59E0B':'#10B981';
-      var bg=a.fallas>=7?'#FEF2F2':a.fallas>=3?'#FFFBEB':'#F0FDF4';
-      var icon=a.fallas>=7?'🔴':a.fallas>=3?'🟡':'🟢';
-      var lbl=a.fallas>=7?'Crítico':a.fallas>=3?'Observación':'OK';
-      secHtml+='<div style="background:'+bg+';border:2px solid '+color+';border-radius:10px;padding:14px;text-align:center;">'
-        +'<div style="font-size:28px;">'+icon+'</div>'
-        +'<div style="font-size:12px;font-weight:800;color:'+color+';margin:4px 0;">'+lbl+'</div>'
-        +'<div style="font-size:11px;font-weight:700;color:#1E293B;">'+escapeHtml(a.id)+'</div>'
-        +'<div style="font-size:10.5px;color:#64748B;">'+escapeHtml(a.tipo)+' · '+escapeHtml(a.marca)+'</div>'
-        +'<div style="font-size:10px;color:'+color+';font-weight:700;margin-top:4px;">'+a.fallas+' incidencia'+(a.fallas!==1?'s':'')+'</div>'
-        +'</div>';
-    });
-    secHtml+='</div>';
-    secHtml+='<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:18px;font-size:11.5px;">'
-      +'<span>🟢 <strong>OK</strong> — sin incidencias recientes o solo 1-2 esporádicas</span>'
-      +'<span>🟡 <strong>Observación</strong> — 3 a 6 incidencias, monitorear</span>'
-      +'<span>🔴 <strong>Crítico</strong> — 7+ incidencias, revisar o reemplazar</span>'
-      +'</div>';
-  })();
-
-  /* ── 7. TICKETS ABIERTOS ACTUALMENTE ── */
-  (function(){
-    var abiertos=data.filter(function(r){var e=(r.estadoTicket||'').toLowerCase();return !/cerr|resuel|finish|complet/.test(e);});
-    secHtml+='<div class="inf-section-title" style="margin-top:28px;"><h3>📂 Tickets en proceso actualmente</h3><div class="line"></div>'
-      +'<span style="font-size:11.5px;color:var(--ink-muted);">'+abiertos.length+' atención'+(abiertos.length!==1?'es':'')+(abiertos.length?' pendiente'+(abiertos.length!==1?'s':'')+' al cierre del informe':' pendiente')+'</span></div>';
-    if(!abiertos.length){
-      secHtml+='<div style="background:#F0FDF4;border:1.5px solid #A7F3D0;border-radius:10px;padding:16px 20px;font-size:13px;color:#065F46;font-weight:600;">✅ Todos los tickets registrados en este período fueron resueltos.</div>';
-    } else {
-      secHtml+='<div class="table-card"><div class="table-scroll"><table class="inf-table"><thead><tr>'
-        +'<th>N° Ticket</th><th>Estado</th><th>Tipo de servicio</th><th>Equipo</th><th>Técnico</th><th>Fecha inicio</th><th>Tiempo abierto</th>'
-        +'</tr></thead><tbody>';
-      abiertos.forEach(function(r){
-        var fi=r.fechaInicio instanceof Date?r.fechaInicio:new Date(r.fechaInicio);
-        var horas=!isNaN(fi.getTime())?Math.round((Date.now()-fi.getTime())/3600000):null;
-        var tiempoTxt=horas!==null?(horas<24?horas+'h':Math.round(horas/24)+'d '+Math.round(horas%24)+'h'):'—';
-        var urgColor=horas!==null&&horas>72?'color:#EF4444;font-weight:700':horas!==null&&horas>24?'color:#F59E0B;font-weight:700':'';
-        secHtml+='<tr>'
-          +'<td><strong>'+escapeHtml(r.nroTicket||'—')+'</strong></td>'
-          +'<td><span class="inf-badge abierto">'+escapeHtml(r.estadoTicket||'Abierto')+'</span></td>'
-          +'<td>'+escapeHtml(r.tipoServicio||'—')+'</td>'
-          +'<td style="font-size:11.5px;">'+escapeHtml((r.tipoEquipo||'—')+' · '+(r.marca||'—'))+'</td>'
-          +'<td>'+escapeHtml(r.tecnico||'—')+'</td>'
-          +'<td style="font-size:11.5px;">'+fmtDate(fi)+'</td>'
-          +'<td style="'+urgColor+'">'+tiempoTxt+'</td>'
-          +'</tr>';
-      });
-      secHtml+='</tbody></table></div></div>';
-    }
-  })();
-
-  /* ── 8. EVOLUCIÓN MENSUAL — ÚLTIMOS 12 MESES (todos los tickets del cliente) ── */
-  (function(){
-    var ahora=new Date();
-    var meses12=[];
-    for(var i=11;i>=0;i--){
-      var d=new Date(ahora.getFullYear(),ahora.getMonth()-i,1);
-      meses12.push({mes:d.getMonth()+1,anio:d.getFullYear(),label:MES_NOMBRES[d.getMonth()].slice(0,3)+' '+d.getFullYear()});
-    }
-    /* Usar TODOS los tickets del cliente (no solo el período filtrado) */
-    var todosCli=STATE.tickets.raw.filter(function(r){return (r.cliente||'').trim().toLowerCase()===cli.trim().toLowerCase();});
-    var conteos=meses12.map(function(m){return todosCli.filter(function(r){return r.mes===m.mes&&r.anio===m.anio;}).length;});
-    if(todosCli.length<2) return;
-    secHtml+='<div class="inf-section-title" style="margin-top:28px;"><h3>📊 Evolución de atenciones — últimos 12 meses</h3><div class="line"></div>'
-      +'<span style="font-size:11.5px;color:var(--ink-muted);">Tendencia histórica de incidencias</span></div>';
-    secHtml+='<div class="charts-grid" style="margin-bottom:18px;">'
-      +'<div class="chart-card" style="grid-column:1/-1;"><h4>Tickets por mes (historial 12 meses)</h4><div class="chart-wrap" style="height:180px;"><canvas id="chartInfEvol12"></canvas></div></div>'
-      +'</div>';
-  })();
-
-  /* ── 9. ANÁLISIS POR MARCA Y MODELO ── */
-  (function(){
-    var marcaMap={};
-    data.forEach(function(r){var m=(r.marca||'Sin marca').trim(); marcaMap[m]=(marcaMap[m]||0)+1;});
-    var marcas=Object.keys(marcaMap).sort(function(a,b){return marcaMap[b]-marcaMap[a];});
-    if(!marcas.length) return;
-    secHtml+='<div class="inf-section-title" style="margin-top:28px;"><h3>🏷️ Atenciones por marca y tipo de equipo</h3><div class="line"></div></div>';
-    secHtml+='<div class="charts-grid" style="margin-bottom:18px;">'
-      +'<div class="chart-card"><h4>Tickets por marca</h4><div class="chart-wrap"><canvas id="chartInfMarca"></canvas></div></div>'
-      +'<div class="chart-card"><h4>Tickets por tipo de equipo</h4><div class="chart-wrap"><canvas id="chartInfTipoEq"></canvas></div></div>'
-      +'</div>';
-  })();
-
-  /* ── 10. TOP 5 INCIDENCIAS MÁS FRECUENTES ── */
-  (function(){
-    var tipoMap={};
-    data.forEach(function(r){var t=(r.tipoServicio||'Sin tipo').trim(); tipoMap[t]=(tipoMap[t]||0)+1;});
-    var top5=Object.keys(tipoMap).sort(function(a,b){return tipoMap[b]-tipoMap[a];}).slice(0,5);
-    if(!top5.length) return;
-    var maxVal=tipoMap[top5[0]]||1;
-    secHtml+='<div class="inf-section-title" style="margin-top:28px;"><h3>🔝 Top 5 tipos de atención más frecuentes</h3><div class="line"></div></div>';
-    secHtml+='<div class="table-card"><div style="padding:16px 18px;">';
-    top5.forEach(function(t,i){
-      var pct=Math.round(tipoMap[t]/maxVal*100);
-      var pctTotal=data.length?Math.round(tipoMap[t]/data.length*100):0;
-      var colors=['#1A86F1','#10B981','#F59E0B','#8B5CF6','#EF4444'];
-      secHtml+='<div style="margin-bottom:14px;">'
-        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">'
-        +'<span style="font-size:12.5px;font-weight:700;color:#1E293B;">'+(i+1)+'. '+escapeHtml(t)+'</span>'
-        +'<span style="font-size:11.5px;color:#64748B;"><strong style="color:'+colors[i]+';">'+tipoMap[t]+'</strong> tickets ('+pctTotal+'%)</span>'
-        +'</div>'
-        +'<div style="height:8px;background:#E9ECF0;border-radius:4px;overflow:hidden;">'
-        +'<div style="width:'+pct+'%;height:100%;background:'+colors[i]+';border-radius:4px;"></div>'
-        +'</div></div>';
-    });
-    secHtml+='</div></div>';
-  })();
-
-  /* ── 11. DISTRIBUCIÓN POR DÍA DE LA SEMANA ── */
-  (function(){
-    var dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-    var diaCount=[0,0,0,0,0,0,0];
-    data.forEach(function(r){
-      if(r.fechaInicio){var f=r.fechaInicio instanceof Date?r.fechaInicio:new Date(r.fechaInicio);if(!isNaN(f.getTime())) diaCount[f.getDay()]++;}
-    });
-    var hasData=diaCount.some(function(v){return v>0;});
-    if(!hasData) return;
-    secHtml+='<div class="inf-section-title" style="margin-top:28px;"><h3>📅 Distribución de atenciones por día de la semana</h3><div class="line"></div>'
-      +'<span style="font-size:11.5px;color:var(--ink-muted);">Cuándo se generan más incidencias</span></div>';
-    secHtml+='<div class="charts-grid" style="margin-bottom:18px;">'
-      +'<div class="chart-card"><h4>Tickets por día</h4><div class="chart-wrap"><canvas id="chartInfDia"></canvas></div></div>'
-      +'<div class="chart-card" style="display:flex;flex-direction:column;justify-content:center;padding:16px;">';
-    var maxDia=Math.max.apply(null,diaCount);
-    dias.forEach(function(d,i){
-      var pct=maxDia>0?Math.round(diaCount[i]/maxDia*100):0;
-      var esMax=diaCount[i]===maxDia&&maxDia>0;
-      secHtml+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
-        +'<span style="width:80px;font-size:11.5px;color:#64748B;'+(esMax?'font-weight:700;color:#1E293B;':'')+'">'+d+'</span>'
-        +'<div style="flex:1;height:12px;background:#E9ECF0;border-radius:6px;overflow:hidden;">'
-        +'<div style="width:'+pct+'%;height:100%;background:'+(esMax?'#EF4444':'#1A86F1')+';border-radius:6px;"></div></div>'
-        +'<span style="font-size:11.5px;font-weight:700;min-width:24px;text-align:right;color:'+(esMax?'#EF4444':'#64748B')+';">'+diaCount[i]+'</span>'
-        +'</div>';
-    });
-    secHtml+='</div></div>';
-  })();
-
-  /* ── 12. ÍNDICE DE REINCIDENCIA ── */
-  (function(){
-    var activoRec={};
-    data.forEach(function(r){
-      var n=(r.nActivo||'').trim(); if(!n) return;
-      if(!activoRec[n]) activoRec[n]={id:n,tipo:r.tipoEquipo||'—',marca:r.marca||'—',cnt:0,fechas:[]};
-      activoRec[n].cnt++;
-      if(r.fechaInicio) activoRec[n].fechas.push(r.fechaInicio instanceof Date?r.fechaInicio:new Date(r.fechaInicio));
-    });
-    var reincidentes=Object.values(activoRec).filter(function(a){return a.cnt>=2;}).sort(function(a,b){return b.cnt-a.cnt;});
-    if(!reincidentes.length){
-      secHtml+='<div class="inf-section-title" style="margin-top:28px;"><h3>🔁 Índice de reincidencia</h3><div class="line"></div></div>'
-        +'<div style="background:#F0FDF4;border:1.5px solid #A7F3D0;border-radius:10px;padding:14px 18px;font-size:12.5px;color:#065F46;font-weight:600;">✅ Sin reincidencias detectadas en el período — cada equipo fue atendido una sola vez.</div>';
-      return;
-    }
-    secHtml+='<div class="inf-section-title" style="margin-top:28px;"><h3>🔁 Índice de reincidencia</h3><div class="line"></div>'
-      +'<span style="font-size:11.5px;color:var(--ink-muted);">Equipos que han requerido más de una atención</span></div>';
-    secHtml+='<div class="table-card"><div class="table-scroll"><table class="inf-table"><thead><tr>'
-      +'<th>Activo</th><th>Tipo / Marca</th><th>N° atenciones</th><th>Primera atención</th><th>Última atención</th><th>Recomendación</th>'
-      +'</tr></thead><tbody>';
-    reincidentes.forEach(function(a){
-      var fechaOrd=a.fechas.filter(function(f){return !isNaN(f.getTime());}).sort(function(x,y){return x-y;});
-      var primera=fechaOrd.length?fmtDate(fechaOrd[0]):'—';
-      var ultima=fechaOrd.length>1?fmtDate(fechaOrd[fechaOrd.length-1]):'—';
-      var reco=a.cnt>=7?'⚠ Evaluar reemplazo':a.cnt>=4?'🔶 Revisión profunda':a.cnt>=2?'🔵 Seguimiento preventivo':'—';
-      secHtml+='<tr>'
-        +'<td><strong style="color:var(--navy);">'+escapeHtml(a.id)+'</strong></td>'
-        +'<td style="font-size:11.5px;">'+escapeHtml(a.tipo)+' · '+escapeHtml(a.marca)+'</td>'
-        +'<td style="font-weight:800;color:'+(a.cnt>=7?'#EF4444':a.cnt>=4?'#F59E0B':'#1A86F1')+';">'+a.cnt+'</td>'
-        +'<td style="font-size:11.5px;">'+primera+'</td>'
-        +'<td style="font-size:11.5px;">'+ultima+'</td>'
-        +'<td style="font-size:11.5px;">'+reco+'</td>'
-        +'</tr>';
-    });
-    secHtml+='</tbody></table></div></div>';
-  })();
-
-  /* ── 13. LÍNEA DE TIEMPO DE ATENCIONES ── */
-  (function(){
-    var sorted=data.slice().sort(function(a,b){
-      var fa=a.fechaInicio instanceof Date?a.fechaInicio:new Date(a.fechaInicio);
-      var fb=b.fechaInicio instanceof Date?b.fechaInicio:new Date(b.fechaInicio);
-      return fa-fb;
-    }).slice(0,20);
-    if(!sorted.length) return;
-    secHtml+='<div class="inf-section-title" style="margin-top:28px;"><h3>🗓️ Línea de tiempo de atenciones</h3><div class="line"></div>'
-      +'<span style="font-size:11.5px;color:var(--ink-muted);">Cronología de las últimas '+sorted.length+' atenciones</span></div>';
-    secHtml+='<div style="position:relative;padding-left:28px;margin-bottom:18px;">';
-    secHtml+='<div style="position:absolute;left:10px;top:0;bottom:0;width:2px;background:#E2E8F0;border-radius:2px;"></div>';
-    sorted.forEach(function(r,i){
-      var fi=r.fechaInicio instanceof Date?r.fechaInicio:new Date(r.fechaInicio);
-      var esCerrado=!/abierto|proceso|pendiente/i.test(r.estadoTicket||'');
-      var dotColor=esCerrado?'#10B981':'#F59E0B';
-      secHtml+='<div style="position:relative;margin-bottom:14px;">'
-        +'<div style="position:absolute;left:-22px;top:3px;width:12px;height:12px;border-radius:50%;background:'+dotColor+';border:2px solid #fff;box-shadow:0 0 0 2px '+dotColor+';"></div>'
-        +'<div style="background:#fff;border:1px solid #E2E8F0;border-radius:8px;padding:10px 14px;">'
-        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:4px;">'
-        +'<div>'
-        +'<span style="font-size:12px;font-weight:700;color:#1E293B;">'+escapeHtml(r.tipoServicio||'Sin tipo')+'</span>'
-        +' <span style="font-size:10.5px;background:'+(esCerrado?'#D1FAE5':'#FEF3C7')+';color:'+(esCerrado?'#065F46':'#92400E')+';padding:1px 7px;border-radius:20px;font-weight:600;">'+(esCerrado?'Cerrado':'En proceso')+'</span>'
-        +'</div>'
-        +'<span style="font-size:10.5px;color:#94A3B8;">'+fmtDate(fi)+'</span>'
-        +'</div>'
-        +'<div style="font-size:11.5px;color:#64748B;margin-top:4px;">'+escapeHtml(r.tecnico||'—')+' · '+escapeHtml((r.tipoEquipo||'—')+' '+( r.marca||''))+'</div>'
-        +'</div></div>';
-    });
-    secHtml+='</div>';
-  })();
-
-  /* ── 14. ESTADO DETALLADO POR TÉCNICO ── */
-  (function(){
-    var tecMap={};
-    data.forEach(function(r){
-      var t=(r.tecnico||'Sin asignar').trim();
-      if(!tecMap[t]) tecMap[t]={nombre:t,total:0,cerrados:0,seg:0};
-      tecMap[t].total++;
-      if(!/abierto|proceso|pendiente/i.test(r.estadoTicket||'')) tecMap[t].cerrados++;
-      tecMap[t].seg+=r.duracionSeg||0;
-    });
-    var tecs=Object.values(tecMap).sort(function(a,b){return b.total-a.total;});
-    if(!tecs.length) return;
-    secHtml+='<div class="inf-section-title" style="margin-top:28px;"><h3>👤 Rendimiento por técnico asignado</h3><div class="line"></div>'
-      +'<span style="font-size:11.5px;color:var(--ink-muted);">Detalle del equipo que atendió al cliente</span></div>';
-    secHtml+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:18px;">';
-    tecs.forEach(function(tc){
-      var pctRes=tc.total>0?Math.round(tc.cerrados/tc.total*100):0;
-      var resColor=pctRes>=90?'#10B981':pctRes>=70?'#F59E0B':'#EF4444';
-      var promH=tc.total?tc.seg/tc.total/3600:0;
-      secHtml+='<div style="background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:16px;">'
-        +'<div style="font-size:13.5px;font-weight:800;color:var(--navy);margin-bottom:12px;">'+escapeHtml(tc.nombre)+'</div>'
-        +'<div style="display:flex;flex-direction:column;gap:7px;">'
-        +'<div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:#64748B;">Tickets atendidos</span><strong>'+tc.total+'</strong></div>'
-        +'<div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:#64748B;">Resueltos</span><strong style="color:#10B981;">'+tc.cerrados+'</strong></div>'
-        +'<div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:#64748B;">% Resolución</span><strong style="color:'+resColor+';">'+pctRes+'%</strong></div>'
-        +'<div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:#64748B;">Tiempo prom.</span><strong>'+promH.toFixed(1)+' h/ticket</strong></div>'
-        +'</div>'
-        +'<div style="margin-top:10px;height:6px;background:#E9ECF0;border-radius:3px;overflow:hidden;">'
-        +'<div style="width:'+pctRes+'%;height:100%;background:'+resColor+';border-radius:3px;"></div>'
-        +'</div>'
-        +'</div>';
-    });
-    secHtml+='</div>';
-  })();
-
-  /* Insertar todas las secciones nuevas en el contenido */
-  content.insertAdjacentHTML('beforeend', secHtml);
-
-  /* ── Gráficos nuevos: ventas por mes + categorías ── */
-  if(ventasCli && ventasCli.length){
-    /* Ingresos PEN por mes */
-    var vMesMap = {};
-    ventasCli.forEach(function(r){
-      var k=(r.anio||'')+'/'+(String(r.mes||'').padStart(2,'0'));
-      if(!vMesMap[k]) vMesMap[k]={pen:0,usd:0};
-      if(r.moneda==='USD') vMesMap[k].usd+=r.total||0;
-      else vMesMap[k].pen+=r.total||0;
-    });
-    var vMesKeys = Object.keys(vMesMap).sort();
-
-    /* Contar pedidos por mes (sin montos) */
-    var vConteoMes = {};
-    ventasCli.forEach(function(r){
-      var k=(r.anio||'')+'/'+(String(r.mes||'').padStart(2,'0'));
-      vConteoMes[k]=(vConteoMes[k]||0)+1;
-    });
-    var vMesKeys2 = Object.keys(vConteoMes).sort();
-
-    destroyChart('infVentasMes');
-    var ctxVM = document.getElementById('chartInfVentasMes');
-    if(ctxVM && vMesKeys2.length){
-      CHARTS.infVentasMes = new Chart(ctxVM,{
-        type:'bar',
-        data:{
-          labels:vMesKeys2.map(function(k){var p=k.split('/');return MES_NOMBRES[(parseInt(p[1])-1)]+' '+p[0];}),
-          datasets:[
-            {label:'Servicios',data:vMesKeys2.map(function(k){return vConteoMes[k];}),backgroundColor:'#1A86F1',borderRadius:4}
-          ]
-        },
-        options:Object.assign(baseBarOptions(),{plugins:{legend:{display:false}}})
-      });
-    }
-
-    /* Dona de categorías — recalcular aquí */
-    var catMapChart = {};
-    ventasCli.forEach(function(r){var c=r.categoria||'Sin categoría'; catMapChart[c]=(catMapChart[c]||0)+1;});
-    var catKeys = Object.keys(catMapChart||{});
-    destroyChart('infCategorias');
-    var ctxCat = document.getElementById('chartInfCategorias');
-    if(ctxCat && catKeys.length){
-      CHARTS.infCategorias = new Chart(ctxCat,{
-        type:'doughnut',
-        data:{
-          labels:catKeys,
-          datasets:[{data:catKeys.map(function(c){return catMapChart[c];}),backgroundColor:CHART_PALETTE,borderWidth:2,borderColor:'#fff'}]
-        },
-        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:12,font:{size:11}}}}}
-      });
-    }
-  }
-
-  /* ── Charts adicionales de los nuevos informes ── */
-  var clienteNormChk = cli.trim().toLowerCase();
-
-  /* Evolución 12 meses */
-  (function(){
-    var ahora=new Date();
-    var meses12=[]; for(var i=11;i>=0;i--){var d=new Date(ahora.getFullYear(),ahora.getMonth()-i,1);meses12.push({mes:d.getMonth()+1,anio:d.getFullYear(),label:MES_NOMBRES[d.getMonth()].slice(0,3)+' '+d.getFullYear()});}
-    var todosCli=STATE.tickets.raw.filter(function(r){return (r.cliente||'').trim().toLowerCase()===clienteNormChk;});
-    var conteos=meses12.map(function(m){return todosCli.filter(function(r){return r.mes===m.mes&&r.anio===m.anio;}).length;});
-    destroyChart('infEvol12');
-    var ctx=document.getElementById('chartInfEvol12');
-    if(ctx&&todosCli.length>=2) CHARTS.infEvol12=new Chart(ctx,{type:'line',data:{
-      labels:meses12.map(function(m){return m.label;}),
-      datasets:[{label:'Tickets',data:conteos,borderColor:'#8B5CF6',backgroundColor:'#8B5CF622',tension:.35,pointRadius:5,fill:true}]
-    },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1},grid:{color:'#F1F5F9'}}}}});
-  })();
-
-  /* Marca */
-  (function(){
-    var marcaMap={},tipoEqMap={};
-    var dataCur=STATE.tickets.raw.filter(function(r){return (r.cliente||'').trim().toLowerCase()===clienteNormChk;});
-    dataCur.forEach(function(r){var m=(r.marca||'Sin marca').trim();marcaMap[m]=(marcaMap[m]||0)+1; var t=(r.tipoEquipo||'Sin tipo').trim();tipoEqMap[t]=(tipoEqMap[t]||0)+1;});
-    var mKeys=Object.keys(marcaMap).sort(function(a,b){return marcaMap[b]-marcaMap[a];});
-    var tKeys=Object.keys(tipoEqMap).sort(function(a,b){return tipoEqMap[b]-tipoEqMap[a];});
-    destroyChart('infMarca');
-    var cm=document.getElementById('chartInfMarca');
-    if(cm&&mKeys.length) CHARTS.infMarca=new Chart(cm,{type:'bar',data:{
-      labels:mKeys,
-      datasets:[{label:'Tickets',data:mKeys.map(function(k){return marcaMap[k];}),backgroundColor:'#1A86F1',borderRadius:4}]
-    },options:Object.assign(baseBarOptions(),{plugins:{legend:{display:false}}})});
-    destroyChart('infTipoEq');
-    var ct=document.getElementById('chartInfTipoEq');
-    if(ct&&tKeys.length) CHARTS.infTipoEq=new Chart(ct,{type:'bar',data:{
-      labels:tKeys,
-      datasets:[{label:'Tickets',data:tKeys.map(function(k){return tipoEqMap[k];}),backgroundColor:'#10B981',borderRadius:4}]
-    },options:Object.assign(baseBarOptions(),{plugins:{legend:{display:false}}})});
-  })();
-
-  /* Día de la semana */
-  (function(){
-    var dias=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-    var diaCount=[0,0,0,0,0,0,0];
-    var dataCur=STATE.tickets.raw.filter(function(r){return (r.cliente||'').trim().toLowerCase()===clienteNormChk;});
-    dataCur.forEach(function(r){if(r.fechaInicio){var f=r.fechaInicio instanceof Date?r.fechaInicio:new Date(r.fechaInicio);if(!isNaN(f.getTime())) diaCount[f.getDay()]++;}});
-    destroyChart('infDia');
-    var cd=document.getElementById('chartInfDia');
-    if(cd&&diaCount.some(function(v){return v>0;})) CHARTS.infDia=new Chart(cd,{type:'bar',data:{
-      labels:dias,
-      datasets:[{label:'Tickets',data:diaCount,backgroundColor:diaCount.map(function(v){return v===Math.max.apply(null,diaCount)?'#EF4444':'#1A86F1';}),borderRadius:4}]
-    },options:Object.assign(baseBarOptions(),{plugins:{legend:{display:false}}})});
-  })();
-}
-
-/* ── Exportar informe como HTML autocontenido ── */
-function informesExportHtml(){
-  var cli = (document.getElementById('inf-cliente')||{value:''}).value||'';
-  exportSectionAsHtml('informesContent',
-    'Informe de Soporte — '+cli,
-    'informe_cliente_'+cli.replace(/[^a-zA-Z0-9]/g,'_').toLowerCase()
-  );
-}
-
-/* ── Exportar tickets del cliente como CSV ── */
-function informesExportCsv(){
-  var data = informesGetData();
-  if(!data.length){ alert('No hay datos para exportar.'); return; }
-  var headers = ['Nro Ticket','Estado','Tipo de Servicio','Técnico','Tipo Equipo','Marca','N° Activo','Fecha Inicio','Duración'];
-  var rows = data.map(function(r){
-    function cel(v){ var s=String(v==null?'':v); if(s.indexOf(',')!==-1||s.indexOf('"')!==-1||s.indexOf('\n')!==-1) s='"'+s.replace(/"/g,'""')+'"'; return s; }
-    return [r.nroTicket,r.estadoTicket,r.tipoServicio,r.tecnico,r.tipoEquipo,r.marca,r.nActivo,fmtDate(r.fechaInicio),r.duracionStr].map(cel).join(',');
-  });
-  var csv = '\uFEFF' + headers.join(',') + '\r\n' + rows.join('\r\n');
-  var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-  var url  = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  var cli = (document.getElementById('inf-cliente')||{value:''}).value||'cliente';
-  a.href = url; a.download = 'tickets_'+cli.replace(/[^a-zA-Z0-9]/g,'_').toLowerCase()+'_'+new Date().toISOString().slice(0,10)+'.csv';
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
-}
-
-/* Auto-init cuando se importa un CSV de Tickets y el módulo está activo */
-var _infHandleFileOrig = handleFile;
-handleFile = function(evt, mod){
-  _infHandleFileOrig(evt, mod);
-  if(mod==='tickets'){
-    var modInf = document.getElementById('mod-informes');
-    if(modInf && modInf.classList.contains('active')){
-      setTimeout(informesInit, 300);
-    }
-  }
-};
-
-function clientesMsgVacio(containerId){
-  var el = document.getElementById(containerId);
-  if(el) el.innerHTML = '<div class="empty-state" style="padding:50px 20px;">'
-    +'<div class="icon">📊</div><h4>Sin datos</h4>'
-    +'<p>Importa el CSV de Ventas en la pestaña "Ventas / Pedidos" para ver los informes de clientes.</p></div>';
-}
-
-</script>
+}</script>
 </body>
 </html>
