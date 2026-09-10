@@ -5187,6 +5187,351 @@ function borrarSesion(){
 }
 
 /* ============================================================
+   MÓDULO: INFORMES AL CLIENTE
+   informesInit()   — pobla filtros y llama a informesRender()
+   informesRender() — renderiza KPIs, gráficos y tabla del cliente
+   informesExportHtml() — exporta el informe como HTML autocontenido
+   informesExportCsv()  — exporta los tickets del cliente como CSV
+============================================================ */
+
+/* ── Inicializar el módulo ── */
+function informesInit(){
+  var raw = STATE.tickets.raw;
+  var statusEl = document.getElementById('informesStatus');
+  if(!raw.length){
+    if(statusEl) statusEl.textContent = 'Importa el CSV de Tickets para generar informes';
+    var cont = document.getElementById('informesContent');
+    if(cont) cont.innerHTML =
+      '<div class="inf-empty"><div class="inf-empty-icon">📋</div>'
+      +'<h4 style="color:var(--ink);margin-bottom:6px;">Sin datos de Tickets</h4>'
+      +'<p style="font-size:12.5px;">Ve a "Tickets de Servicio" e importa el CSV primero.</p></div>';
+    return;
+  }
+
+  /* Poblar selector de clientes */
+  var clientes = Array.from(new Set(raw.map(function(r){ return (r.cliente||'').trim(); })))
+    .filter(Boolean).sort();
+  var selCli = document.getElementById('inf-cliente');
+  if(selCli){
+    var cur = selCli.value;
+    selCli.innerHTML = '<option value="">— Selecciona un cliente —</option>'
+      + clientes.map(function(c){
+          return '<option value="'+escapeHtml(c)+'"'+(c===cur?' selected':'')+'>'+escapeHtml(c)+'</option>';
+        }).join('');
+  }
+
+  /* Poblar años */
+  var anios = Array.from(new Set(raw.map(function(r){ return r.anio; }))).filter(Boolean).sort();
+  var selA = document.getElementById('inf-anio');
+  if(selA){
+    var curA = selA.value;
+    selA.innerHTML = '<option value="">Todos</option>'
+      + anios.map(function(a){ return '<option value="'+a+'"'+(String(a)===curA?' selected':'')+'>'+a+'</option>'; }).join('');
+  }
+
+  /* Poblar meses */
+  var meses = Array.from(new Set(raw.map(function(r){ return r.mes; }))).filter(Boolean).sort(function(a,b){return a-b;});
+  var selM = document.getElementById('inf-mes');
+  if(selM){
+    var curM = selM.value;
+    selM.innerHTML = '<option value="">Todos</option>'
+      + meses.map(function(m){ return '<option value="'+m+'"'+(String(m)===curM?' selected':'')+'>'+MES_NOMBRES[m-1]+'</option>'; }).join('');
+  }
+
+  /* Poblar semanas */
+  var semanas = Array.from(new Set(raw.map(function(r){ return r.semana; }))).filter(Boolean).sort(function(a,b){return a-b;});
+  var selS = document.getElementById('inf-semana');
+  if(selS){
+    var curS = selS.value;
+    selS.innerHTML = '<option value="">Todas</option>'
+      + semanas.map(function(s){ return '<option value="'+s+'"'+(String(s)===curS?' selected':'')+'>Semana '+s+'</option>'; }).join('');
+  }
+
+  /* Poblar tipos de servicio */
+  var tipos = Array.from(new Set(raw.map(function(r){ return (r.tipoServicio||'').trim(); }))).filter(Boolean).sort();
+  var selTS = document.getElementById('inf-tiposervicio');
+  if(selTS){
+    var curTS = selTS.value;
+    selTS.innerHTML = '<option value="">Todos</option>'
+      + tipos.map(function(t){ return '<option value="'+escapeHtml(t)+'"'+(t===curTS?' selected':'')+'>'+escapeHtml(t)+'</option>'; }).join('');
+  }
+
+  if(statusEl) statusEl.textContent = raw.length + ' tickets disponibles · ' + clientes.length + ' clientes';
+  informesRender();
+}
+
+/* ── Limpiar filtros ── */
+function informesLimpiarFiltros(){
+  ['inf-anio','inf-mes','inf-semana','inf-tiposervicio','inf-estadopedido'].forEach(function(id){
+    var el = document.getElementById(id); if(el) el.value = '';
+  });
+  informesRender();
+}
+
+/* ── Obtener datos filtrados ── */
+function informesGetData(){
+  var cli    = (document.getElementById('inf-cliente')      ||{value:''}).value||'';
+  var anio   = (document.getElementById('inf-anio')         ||{value:''}).value||'';
+  var mes    = (document.getElementById('inf-mes')          ||{value:''}).value||'';
+  var semana = (document.getElementById('inf-semana')       ||{value:''}).value||'';
+  var tipo   = (document.getElementById('inf-tiposervicio') ||{value:''}).value||'';
+  return STATE.tickets.raw.filter(function(r){
+    if(cli    && (r.cliente||'').trim().toLowerCase() !== cli.toLowerCase()) return false;
+    if(anio   && String(r.anio)   !== anio)   return false;
+    if(mes    && String(r.mes)    !== mes)     return false;
+    if(semana && String(r.semana) !== semana)  return false;
+    if(tipo   && (r.tipoServicio||'').trim() !== tipo) return false;
+    return true;
+  });
+}
+
+/* ── Renderizar el informe completo ── */
+function informesRender(){
+  var cli = (document.getElementById('inf-cliente')||{value:''}).value||'';
+  var btnHtml = document.getElementById('informesBtnHtml');
+  var btnCsv  = document.getElementById('informesBtnCsv');
+  var content = document.getElementById('informesContent');
+  if(!content) return;
+
+  if(!cli){
+    if(btnHtml) btnHtml.style.display='none';
+    if(btnCsv)  btnCsv.style.display='none';
+    content.innerHTML = '<div class="inf-empty"><div class="inf-empty-icon">🔍</div>'
+      +'<h4 style="color:var(--ink);margin-bottom:6px;">Selecciona un cliente</h4>'
+      +'<p style="font-size:12.5px;">Usa el selector de cliente para generar el informe personalizado.</p></div>';
+    return;
+  }
+
+  var data = informesGetData();
+  if(btnHtml) btnHtml.style.display='inline-flex';
+  if(btnCsv)  btnCsv.style.display='inline-flex';
+
+  if(!data.length){
+    content.innerHTML = '<div class="inf-empty"><div class="inf-empty-icon">📭</div>'
+      +'<h4 style="color:var(--ink);margin-bottom:6px;">Sin tickets para los filtros seleccionados</h4>'
+      +'<p style="font-size:12.5px;">Prueba cambiando el año, mes o semana.</p></div>';
+    return;
+  }
+
+  /* ── Cálculos ── */
+  var cerrados = data.filter(function(r){
+    var e = (r.estadoTicket||'').toLowerCase();
+    return e.indexOf('cerr')!==-1 || e.indexOf('resuel')!==-1 || e.indexOf('finaliz')!==-1;
+  });
+  var pendientes = data.filter(function(r){
+    var e = (r.estadoTicket||'').toLowerCase();
+    return e.indexOf('cerr')===-1 && e.indexOf('resuel')===-1 && e.indexOf('finaliz')===-1;
+  });
+  var pctResolucion = data.length ? Math.round(cerrados.length/data.length*100) : 0;
+  var segTotal = data.reduce(function(s,r){ return s+(r.duracionSeg||0); }, 0);
+  var promSeg  = data.length ? Math.round(segTotal/data.length) : 0;
+
+  /* Tipos de servicio */
+  var tipoMap = {};
+  data.forEach(function(r){ var t=r.tipoServicio||'Sin tipo'; tipoMap[t]=(tipoMap[t]||0)+1; });
+  var tiposOrdenados = Object.keys(tipoMap).sort(function(a,b){ return tipoMap[b]-tipoMap[a]; });
+
+  /* ── Tendencia POR DÍA (no por mes) ── */
+  var diaMap = {};
+  data.forEach(function(r){
+    var fi = r.fechaInicio instanceof Date ? r.fechaInicio : new Date(r.fechaInicio||'');
+    if(isNaN(fi.getTime())) return;
+    var key = fi.getFullYear()+'-'+(String(fi.getMonth()+1).padStart(2,'0'))+'-'+(String(fi.getDate()).padStart(2,'0'));
+    diaMap[key] = (diaMap[key]||0)+1;
+  });
+  var diaKeys = Object.keys(diaMap).sort();
+
+  /* Equipos más atendidos */
+  var equipoMap = {};
+  data.forEach(function(r){ var e=r.tipoEquipo||'Sin tipo'; equipoMap[e]=(equipoMap[e]||0)+1; });
+  var equiposOrdenados = Object.keys(equipoMap).sort(function(a,b){ return equipoMap[b]-equipoMap[a]; });
+
+  /* Técnicos asignados */
+  var tecMap = {};
+  data.forEach(function(r){ var t=r.tecnico||'Sin asignar'; tecMap[t]=(tecMap[t]||0)+1; });
+
+  /* Color SLA */
+  var slaColor = pctResolucion>=90?'#2FAE60':pctResolucion>=70?'#F2994A':'#EF5350';
+
+  /* ── Construir HTML ── */
+  var anioFiltro   = (document.getElementById('inf-anio')  ||{value:''}).value||'';
+  var mesFiltro    = (document.getElementById('inf-mes')   ||{value:''}).value||'';
+  var semanaFiltro = (document.getElementById('inf-semana')||{value:''}).value||'';
+  var periodoDesc  = [
+    anioFiltro   ? 'Año '+anioFiltro        : '',
+    mesFiltro    ? MES_NOMBRES[mesFiltro-1] : '',
+    semanaFiltro ? 'Semana '+semanaFiltro   : ''
+  ].filter(Boolean).join(' · ') || 'Todo el período';
+
+  var html = '<div style="margin-bottom:10px;padding:12px 16px;background:var(--surface-alt);border-radius:8px;border:1px solid var(--border);">'
+    +'<div style="font-size:11px;color:var(--ink-muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;">Informe de soporte técnico para</div>'
+    +'<div style="font-size:18px;font-weight:800;color:var(--navy);margin-top:2px;">'+escapeHtml(cli)+'</div>'
+    +'<div style="font-size:11.5px;color:var(--ink-muted);margin-top:2px;">Período: '+periodoDesc+'  ·  Generado el '+fmtDate(new Date())+'</div>'
+    +'</div>';
+
+  /* KPIs */
+  html += '<div class="inf-kpi-grid">';
+  html += '<div class="inf-kpi navy"><div class="inf-kpi-label">Total de tickets</div><div class="inf-kpi-value">'+data.length+'</div><div class="inf-kpi-sub">en el período</div></div>';
+  html += '<div class="inf-kpi green"><div class="inf-kpi-label">Resueltos / cerrados</div><div class="inf-kpi-value">'+cerrados.length+'</div><div class="inf-kpi-sub">de '+data.length+' atendidos</div></div>';
+  html += '<div class="inf-kpi red"><div class="inf-kpi-label">Pendientes</div><div class="inf-kpi-value">'+pendientes.length+'</div><div class="inf-kpi-sub">por resolver</div></div>';
+  html += '<div class="inf-kpi blue"><div class="inf-kpi-label">Tiempo promedio</div><div class="inf-kpi-value" style="font-size:20px;">'+formatSecondsToHMS(promSeg)+'</div><div class="inf-kpi-sub">por ticket</div></div>';
+  html += '<div class="inf-kpi orange"><div class="inf-kpi-label">Tiempo total</div><div class="inf-kpi-value" style="font-size:20px;">'+formatSecondsToHMS(segTotal)+'</div><div class="inf-kpi-sub">horas de soporte</div></div>';
+  html += '<div class="inf-kpi purple"><div class="inf-kpi-label">% Resolución (SLA)</div>'
+    +'<div class="inf-kpi-value" style="color:'+slaColor+'">'+pctResolucion+'%</div>'
+    +'<div class="inf-sla-wrap" style="margin-top:6px;"><div class="inf-sla-bar-bg"><div class="inf-sla-bar" style="width:'+pctResolucion+'%;background:'+slaColor+';"></div></div></div>'
+    +'</div>';
+  html += '</div>';
+
+  /* Gráficos: tickets por DÍA + dona tipo */
+  html += '<div class="charts-grid" style="margin-bottom:16px;">';
+  html += '<div class="chart-card"><h4>Tickets por día</h4><div class="chart-wrap"><canvas id="chartInfTendencia"></canvas></div></div>';
+  html += '<div class="chart-card"><h4>Distribución por tipo de servicio</h4><div class="chart-wrap"><canvas id="chartInfTipo"></canvas></div></div>';
+  html += '</div>';
+  html += '<div class="charts-grid" style="margin-bottom:20px; grid-template-columns:1fr;">';
+  html += '<div class="chart-card"><h4>Equipos más atendidos (Top 8)</h4><div class="chart-wrap" style="height:240px;"><canvas id="chartInfEquipos"></canvas></div></div>';
+  html += '</div>';
+
+  /* Técnicos */
+  html += '<div class="inf-section-title"><h3>Técnicos asignados</h3><div class="line"></div></div>';
+  html += '<div class="table-card"><div class="table-scroll"><table class="inf-table"><thead><tr>'
+    +'<th>Técnico</th><th>Tickets atendidos</th><th>Participación</th></tr></thead><tbody>';
+  Object.keys(tecMap).sort(function(a,b){ return tecMap[b]-tecMap[a]; }).forEach(function(t){
+    var pct = Math.round(tecMap[t]/data.length*100);
+    html += '<tr><td><strong>'+escapeHtml(t)+'</strong></td>'
+      +'<td>'+tecMap[t]+'</td>'
+      +'<td><div class="inf-sla-wrap"><div class="inf-sla-bar-bg"><div class="inf-sla-bar" style="width:'+pct+'%;background:var(--blue);"></div></div>'
+      +'<span style="font-size:11px;font-weight:700;min-width:32px;text-align:right;">'+pct+'%</span></div></td></tr>';
+  });
+  html += '</tbody></table></div></div>';
+
+  /* ── Tabla detalle de tickets — TODOS los filtrados, con columnas de verificación ── */
+  var DOC_COLS = ['Pedidos','COT. FIRMADA','OS Firmada','Factura','XML','Nota de Ingreso','Aceptada Portal'];
+  /* Clave localStorage para persistir los checks por ticket */
+  var LS_KEY = 'coseinco_inf_docs_v1';
+  var savedDocs = {};
+  try { savedDocs = JSON.parse(localStorage.getItem(LS_KEY)||'{}'); } catch(e){}
+
+  html += '<div class="inf-section-title" style="margin-top:24px;"><h3>Detalle de tickets</h3><div class="line"></div>'
+    +'<span style="font-size:11.5px;color:var(--ink-muted);">'+data.length+' registros — todos los filtrados</span></div>';
+  html += '<div class="table-card"><div class="table-scroll"><table class="inf-table"><thead><tr>'
+    +'<th>N° Ticket</th><th>Estado</th><th>Tipo de Servicio</th><th>Técnico</th>'
+    +'<th>Equipo / Marca</th><th>Fecha Inicio</th><th>Duración</th>';
+  DOC_COLS.forEach(function(col){
+    html += '<th style="text-align:center;white-space:nowrap;">'+escapeHtml(col)+'</th>';
+  });
+  html += '</tr></thead><tbody>';
+
+  data.slice().sort(function(a,b){ return (b.fechaInicio||0)-(a.fechaInicio||0); })
+    .forEach(function(r){
+      var est = (r.estadoTicket||'').toLowerCase();
+      var badgeCls = est.indexOf('cerr')!==-1||est.indexOf('resuel')!==-1 ? 'cerrado' : est.indexOf('abiert')!==-1 ? 'abierto' : 'otro';
+      var tid = escapeHtml(r.nroTicket||'');
+      var docState = savedDocs[tid] || {};
+      html += '<tr>'
+        +'<td><strong>'+escapeHtml(r.nroTicket||'—')+'</strong></td>'
+        +'<td><span class="inf-badge '+badgeCls+'">'+escapeHtml(r.estadoTicket||'—')+'</span></td>'
+        +'<td>'+escapeHtml(r.tipoServicio||'—')+'</td>'
+        +'<td>'+escapeHtml(r.tecnico||'—')+'</td>'
+        +'<td style="font-size:11.5px;">'+escapeHtml((r.tipoEquipo||'')+(r.marca?' · '+r.marca:''))+'</td>'
+        +'<td style="white-space:nowrap;font-size:11.5px;">'+fmtDate(r.fechaInicio)+'</td>'
+        +'<td style="font-size:11.5px;font-family:monospace;">'+escapeHtml(r.duracionStr||'—')+'</td>';
+      DOC_COLS.forEach(function(col, i){
+        var chkKey = 'c'+i;
+        var checked = docState[chkKey] ? ' checked' : '';
+        html += '<td style="text-align:center;">'
+          +'<input type="checkbox"'+checked
+          +' onchange="(function(el){try{var ls=JSON.parse(localStorage.getItem(\''+LS_KEY+'\')||\'{}\')||{};if(!ls[\''+tid+'\'])ls[\''+tid+'\']=={};ls[\''+tid+'\'][\'c'+i+'\']=el.checked;localStorage.setItem(\''+LS_KEY+'\',JSON.stringify(ls));}catch(e){}})(this)"'
+          +' style="width:16px;height:16px;accent-color:var(--blue);cursor:pointer;">'
+          +'</td>';
+      });
+      html += '</tr>';
+    });
+  html += '</tbody></table></div></div>';
+
+  content.insertAdjacentHTML('beforeend', '');
+  content.innerHTML = html;
+
+  /* ── Renderizar gráficos ── */
+  /* 1. Tendencia POR DÍA */
+  destroyChart('infTendencia');
+  var ctxT = document.getElementById('chartInfTendencia');
+  if(ctxT && diaKeys.length){
+    CHARTS.infTendencia = new Chart(ctxT, {
+      type:'bar',
+      data:{
+        labels: diaKeys.map(function(k){ var p=k.split('-'); return p[2]+'/'+MES_NOMBRES[parseInt(p[1])-1].slice(0,3); }),
+        datasets:[{
+          label:'Tickets por día',
+          data: diaKeys.map(function(k){ return diaMap[k]; }),
+          backgroundColor:'#1A86F1', borderRadius:4
+        }]
+      },
+      options: Object.assign(baseBarOptions(), {
+        plugins:{legend:{display:false}},
+        scales:{x:{ticks:{maxRotation:45,minRotation:30,font:{size:10}}}}
+      })
+    });
+  }
+
+  /* 2. Dona por tipo de servicio */
+  destroyChart('infTipo');
+  var ctxD = document.getElementById('chartInfTipo');
+  if(ctxD){
+    CHARTS.infTipo = new Chart(ctxD, {
+      type:'doughnut',
+      data:{
+        labels: tiposOrdenados,
+        datasets:[{data: tiposOrdenados.map(function(t){ return tipoMap[t]; }), backgroundColor: CHART_PALETTE, borderWidth:2, borderColor:'#fff'}]
+      },
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:12,font:{size:11}}}}}
+    });
+  }
+
+  /* 3. Barras horizontales equipos */
+  destroyChart('infEquipos');
+  var ctxE = document.getElementById('chartInfEquipos');
+  var top8eq = equiposOrdenados.slice(0,8);
+  if(ctxE && top8eq.length){
+    CHARTS.infEquipos = new Chart(ctxE, {
+      type:'bar',
+      data:{
+        labels: top8eq,
+        datasets:[{label:'Tickets',data:top8eq.map(function(e){ return equipoMap[e]; }),backgroundColor:'#1A86F1',borderRadius:4}]
+      },
+      options: Object.assign(baseBarOptions(), {indexAxis:'y', plugins:{legend:{display:false}}})
+    });
+  }
+}
+
+/* ── Exportar informe como HTML autocontenido ── */
+function informesExportHtml(){
+  var cli = (document.getElementById('inf-cliente')||{value:''}).value||'';
+  exportSectionAsHtml('informesContent',
+    'Informe de Soporte — '+cli,
+    'informe_cliente_'+cli.replace(/[^a-zA-Z0-9]/g,'_').toLowerCase()
+  );
+}
+
+/* ── Exportar tickets del cliente como CSV ── */
+function informesExportCsv(){
+  var cli = (document.getElementById('inf-cliente')||{value:''}).value||'Sin_cliente';
+  var data = informesGetData();
+  if(!data.length){ alert('Sin tickets para exportar'); return; }
+  var cols = ['N° Ticket','Estado','Tipo de Servicio','Técnico','Tipo de Equipo','Marca','N° Activo','Fecha Inicio','Duración'];
+  var rows = [cols.join(',')];
+  data.forEach(function(r){
+    rows.push([r.nroTicket,r.estadoTicket,r.tipoServicio,r.tecnico,r.tipoEquipo,r.marca,r.nActivo,
+      fmtDate(r.fechaInicio),r.duracionStr||'—'].map(function(v){ return '"'+(v||'').toString().replace(/"/g,'""')+'"'; }).join(','));
+  });
+  var blob = new Blob(['\uFEFF'+rows.join('\n')],{type:'text/csv;charset=utf-8'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'tickets_'+cli.replace(/[^a-zA-Z0-9]/g,'_').toLowerCase()+'_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+}
+
+
+/* ============================================================
    DASHBOARD: TICKETS POR COTIZAR
    Fuente: STATE.tickets.raw donde estadoReparacion === 'POR COTIZAR'
    Filtros: año, mes, semana, técnico, tipo de servicio, cliente.
