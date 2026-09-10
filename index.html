@@ -639,13 +639,15 @@ License: MIT
   <!-- Separador visual -->
   <div class="backup-sep"></div>
   <!-- Indicador sesión guardada -->
-  <div class="save-session-indicator" id="sessionIndicator" style="display:none;">
-    <strong id="sessionIndicatorTxt">✓ Sesión guardada</strong>
-    <span id="sessionIndicatorTs"></span>
+  <div class="save-session-indicator" id="sessionIndicator" style="display:none;align-items:center;gap:6px;">
+    <span style="color:#2FAE60;font-weight:800;font-size:10px;">●</span>
+    <strong id="sessionIndicatorTxt">Sesión guardada</strong>
+    <span id="sessionIndicatorTs" style="font-size:10.5px;"></span>
+    <button onclick="borrarSesion()" title="Borrar sesión guardada" style="background:none;border:none;cursor:pointer;font-size:13px;padding:0 2px;opacity:.5;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.5">🗑</button>
   </div>
   <!-- Botón Guardar sesión -->
-  <button class="save-session-btn" id="btnGuardarSesion" onclick="guardarSesion(true)" title="Guarda todos los datos cargados en el navegador — se restauran automáticamente al reabrir la página">
-    💾 Guardar sesión
+  <button class="save-session-btn" id="btnGuardarSesion" onclick="guardarSesion(true)" title="Guarda los datos ahora mismo — los datos se guardan automáticamente al importar o cambiar de sección">
+    💾 Guardar ahora
   </button>
   <div class="backup-sep"></div>
   <!-- Botón Exportar -->
@@ -1524,8 +1526,10 @@ trLoad();
         var modActivo = document.querySelector('.module.active');
         if(modActivo){
           var mid = modActivo.id||'';
-          if(mid==='mod-ejecutivo')   ejInit();
+          if(mid==='mod-ejecutivo')    ejInit();
           if(mid==='mod-rentabilidad') rentInit();
+          if(mid==='mod-informes')     informesInit();
+          if(mid==='mod-clientes')     clientesInit();
         }
         cotizarInit();
         facturaInit();
@@ -1533,6 +1537,13 @@ trLoad();
     }
   } catch(e){ console.warn('[Startup] Error al restaurar sesión:', e); }
 })();
+
+/* ── Auto-guardado silencioso cada 60 segundos ── */
+setInterval(function(){
+  if(STATE.tickets.raw.length || STATE.ventas.raw.length){
+    guardarSesion(false);
+  }
+}, 60000);
 
 
 /* ============================================================
@@ -1689,6 +1700,10 @@ function switchModule(mod){
   if(mod==='rentabilidad') rentInit();
   if(mod==='tickets') setTimeout(cotizarInit,200);
   if(mod==='ventas')  setTimeout(facturaInit,200);
+  /* Auto-guardar el módulo activo al cambiar de pestaña */
+  if(STATE.tickets.raw.length || STATE.ventas.raw.length){
+    setTimeout(function(){ guardarSesion(false); }, 200);
+  }
 }
 
 /* ============================================================
@@ -5089,6 +5104,8 @@ handleFile = function(evt, mod){
     if(rentEl && rentEl.classList.contains('active')) rentInit();
     cotizarInit();
     facturaInit();
+    /* Auto-guardar inmediatamente tras importar */
+    guardarSesion(false);
   }, 400);
 };
 /* ============================================================
@@ -5103,14 +5120,26 @@ handleFile = function(evt, mod){
    Claves: coseinco_session_tickets_v1 / coseinco_session_ventas_v1
 ============================================================ */
 
-var SESSION_T_KEY = 'coseinco_session_tickets_v1';
-var SESSION_V_KEY = 'coseinco_session_ventas_v1';
-var SESSION_TS_KEY= 'coseinco_session_ts_v1';
+var SESSION_T_KEY  = 'coseinco_session_tickets_v1';
+var SESSION_V_KEY  = 'coseinco_session_ventas_v1';
+var SESSION_TS_KEY = 'coseinco_session_ts_v1';
+var SESSION_UI_KEY = 'coseinco_session_ui_v1';   /* módulo activo + filtros */
 
 function guardarSesion(manual){
   try {
     if(STATE.tickets.raw.length) localStorage.setItem(SESSION_T_KEY, JSON.stringify(STATE.tickets.raw));
     if(STATE.ventas.raw.length)  localStorage.setItem(SESSION_V_KEY, JSON.stringify(STATE.ventas.raw));
+    /* Guardar estado de UI: módulo activo + valores de todos los filtros */
+    try {
+      var modActivo = '';
+      var modEl = document.querySelector('.module.active');
+      if(modEl) modActivo = modEl.id || '';
+      var filtros = {};
+      document.querySelectorAll('select[id],input[id]').forEach(function(el){
+        if(el.value !== undefined && el.value !== '') filtros[el.id] = el.value;
+      });
+      localStorage.setItem(SESSION_UI_KEY, JSON.stringify({mod: modActivo, filtros: filtros}));
+    } catch(eui){}
     var ts = new Date().toLocaleString('es-PE',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
     localStorage.setItem(SESSION_TS_KEY, ts);
     /* Actualizar UI */
@@ -5165,9 +5194,29 @@ function restaurarSesion(){
       if(indTs) indTs.textContent='Restaurado: '+ts;
       /* Status en tabs de tickets y ventas */
       var tSt=document.getElementById('ticketsStatus');
-      if(tSt && STATE.tickets.raw.length) tSt.textContent=STATE.tickets.raw.length+' tickets (sesión guardada)';
+      if(tSt && STATE.tickets.raw.length) tSt.textContent=STATE.tickets.raw.length+' tickets (sesión restaurada)';
       var vSt=document.getElementById('ventasStatus');
-      if(vSt && STATE.ventas.raw.length) vSt.textContent=STATE.ventas.raw.length+' pedidos (sesión guardada)';
+      if(vSt && STATE.ventas.raw.length) vSt.textContent=STATE.ventas.raw.length+' pedidos (sesión restaurada)';
+      /* Restaurar estado de UI */
+      try {
+        var uiRaw = localStorage.getItem(SESSION_UI_KEY);
+        if(uiRaw){
+          var ui = JSON.parse(uiRaw);
+          /* Restaurar filtros */
+          if(ui.filtros){
+            Object.keys(ui.filtros).forEach(function(id){
+              var el = document.getElementById(id);
+              if(el && el.tagName==='SELECT') el.value = ui.filtros[id];
+            });
+          }
+          /* Restaurar módulo activo (con pequeño delay para que el DOM esté listo) */
+          if(ui.mod){
+            setTimeout(function(){
+              try { switchModule(ui.mod.replace('mod-','')); } catch(e){}
+            }, 150);
+          }
+        }
+      } catch(eui){ console.warn('[Sesión] UI no restaurada:', eui.message); }
       console.log('[Sesión] Datos restaurados desde:', ts);
     }
     return restaurado;
@@ -5179,7 +5228,7 @@ function restaurarSesion(){
 
 function borrarSesion(){
   if(!confirm('¿Borrar todos los datos guardados en el navegador (tickets y pedidos)?\n\nEsta acción no elimina los respaldos exportados como .json')) return;
-  [SESSION_T_KEY, SESSION_V_KEY, SESSION_TS_KEY].forEach(function(k){ try{localStorage.removeItem(k);}catch(e){} });
+  [SESSION_T_KEY, SESSION_V_KEY, SESSION_TS_KEY, SESSION_UI_KEY].forEach(function(k){ try{localStorage.removeItem(k);}catch(e){} });
   STATE.tickets.raw=[];  STATE.ventas.raw=[];
   var ind=document.getElementById('sessionIndicator'); if(ind) ind.style.display='none';
   applyFilters('tickets'); applyFilters('ventas');
