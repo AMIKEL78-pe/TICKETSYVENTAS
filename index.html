@@ -1710,6 +1710,7 @@ function switchModule(mod){
    IMPORTACIÓN CSV
 ============================================================ */
 var TICKETS_HEADER_MAP = {
+  /* ── Campos de Ticket ── */
   'nro ticket': 'nroTicket',
   'estado de ticket': 'estadoTicket',
   'estado reparacion': 'estadoReparacion',
@@ -1726,7 +1727,17 @@ var TICKETS_HEADER_MAP = {
   'n activo': 'nActivo',
   'fecha inicio ticket': 'fechaInicioStr',
   'fecha fin ticket': 'fechaFinStr',
-  'duracion de ticket': 'duracionStr'
+  'duracion de ticket': 'duracionStr',
+  /* ── Columnas de Pedido integradas en el mismo CSV ── */
+  'pedido': 'pedido',
+  'estado': 'estadoPedido',        /* "ESTADO" = estado del pedido */
+  'estado pedido': 'estadoPedido',
+  'fecha pedido': 'fechaPedidoStr',
+  'vendedor': 'vendedor',
+  'categorias': 'categoria',
+  'categoria': 'categoria',
+  'total': 'totalStr',
+  'moneda': 'moneda'
 };
 
 var VENTAS_HEADER_MAP = {
@@ -1801,13 +1812,15 @@ function handleFile(evt, mod){
           var ticketsParsed = rows.map(function(r){
             var fIni = parseFlexibleDate(r.fechaInicioStr);
             var fFin = parseFlexibleDate(r.fechaFinStr);
-            var iso = fIni ? getISOWeekInfo(fIni) : null;
+            var fPed = parseFlexibleDate(r.fechaPedidoStr);
+            var iso  = fIni ? getISOWeekInfo(fIni) : null;
             return {
+              /* ── Campos de Ticket ── */
               nroTicket: r.nroTicket || '',
               estadoTicket: (r.estadoTicket||'').trim() || 'Sin estado',
               estadoReparacion: (r.estadoReparacion||'').trim(),
               tipoServicio: (r.tipoServicio||'').trim() || 'Sin tipo',
-              cliente: r.cliente || '',
+              cliente: (r.cliente||'').trim() || '',
               tecnico: (r.tecnico||'').trim() || 'Sin asignar',
               tipoEquipo: (r.tipoEquipo||'').trim() || 'Sin especificar',
               marca: (r.marca||'').trim() || 'Sin especificar',
@@ -1818,15 +1831,56 @@ function handleFile(evt, mod){
               mes: fIni ? (fIni.getMonth()+1) : null,
               semana: iso ? iso.week : null,
               duracionStr: r.duracionStr || '00:00:00',
-              duracionSeg: parseDurationToSeconds(r.duracionStr)
+              duracionSeg: parseDurationToSeconds(r.duracionStr),
+              /* ── Campos de Pedido integrados ── */
+              pedido: (r.pedido||'').trim(),
+              estadoPedido: (r.estadoPedido||'').trim(),
+              fechaPedido: fPed,
+              vendedor: (r.vendedor||'').trim(),
+              categoria: (r.categoria||'').trim(),
+              total: parseMoneyLocale(r.totalStr),
+              moneda: (r.moneda||'').trim()
             };
           }).filter(function(r){ return r.fechaInicio !== null; });
 
           var dedupT = dedupeRows(ticketsParsed, ticketDedupeKey);
           STATE.tickets.raw = dedupT.rows;
 
+          /* ── Si el CSV es unificado (tiene columnas de pedido), derivar STATE.ventas ── */
+          var tieneColumnaPedido = rows.some(function(r){ return r.pedido; });
+          if(tieneColumnaPedido){
+            var ventasDerived = [];
+            var ventaMap = {};   /* agrupar por N° pedido para deduplicar */
+            STATE.tickets.raw.forEach(function(r){
+              if(!r.pedido) return;
+              if(ventaMap[r.pedido]) return;   /* ya registrado */
+              ventaMap[r.pedido] = true;
+              var fp = r.fechaPedido;
+              var isoV = fp ? getISOWeekInfo(fp) : null;
+              ventasDerived.push({
+                pedido:       r.pedido,
+                estadoPedido: r.estadoPedido || 'Sin estado',
+                fechaPedido:  fp,
+                anio:  fp ? fp.getFullYear() : null,
+                mes:   fp ? (fp.getMonth()+1) : null,
+                semana: isoV ? isoV.week : null,
+                vendedor:  r.vendedor || 'Sin asignar',
+                cliente:   r.cliente  || 'Sin cliente',
+                categoria: r.categoria || 'Sin categoría',
+                total:     r.total    || 0,
+                moneda:    r.moneda   || '—'
+              });
+            });
+            STATE.ventas.raw = ventasDerived;
+            buildFilterOptions('ventas');
+            applyFilters('ventas');
+            var vSt=document.getElementById('ventasStatus');
+            if(vSt) vSt.textContent=ventasDerived.length+' pedidos derivados del CSV unificado';
+          }
+
+          var extra = tieneColumnaPedido ? ' (CSV unificado: tickets + pedidos)' : '';
           statusEl.textContent = STATE.tickets.raw.length + ' tickets importados de "' + file.name + '"'
-            + (dedupT.removed ? ' · ' + dedupT.removed + ' fila(s) duplicada(s) omitida(s)' : '');
+            + (dedupT.removed ? ' · ' + dedupT.removed + ' duplicado(s) omitido(s)' : '') + extra;
           statusEl.className = 'file-status ok';
           buildFilterOptions('tickets');
           applyFilters('tickets');
@@ -5346,8 +5400,8 @@ function informesRender(){
     if(btnHtml) btnHtml.style.display='none';
     if(btnCsv)  btnCsv.style.display='none';
     content.innerHTML = '<div class="inf-empty"><div class="inf-empty-icon">🔍</div>'
-      +'<h4 style="color:var(--ink);margin-bottom:6px;">Selecciona un cliente</h4>'
-      +'<p style="font-size:12.5px;">Usa el selector de cliente para generar el informe personalizado.</p></div>';
+      +'<h4>Selecciona un cliente</h4>'
+      +'<p>Usa el selector para generar el informe personalizado.</p></div>';
     return;
   }
 
@@ -5357,197 +5411,256 @@ function informesRender(){
 
   if(!data.length){
     content.innerHTML = '<div class="inf-empty"><div class="inf-empty-icon">📭</div>'
-      +'<h4 style="color:var(--ink);margin-bottom:6px;">Sin tickets para los filtros seleccionados</h4>'
-      +'<p style="font-size:12.5px;">Prueba cambiando el año, mes o semana.</p></div>';
+      +'<h4>Sin tickets para los filtros seleccionados</h4>'
+      +'<p>Prueba cambiando el año, mes o semana.</p></div>';
     return;
   }
 
-  /* ── Cálculos ── */
+  /* ──── Cálculos ──── */
   var cerrados = data.filter(function(r){
-    var e = (r.estadoTicket||'').toLowerCase();
-    return e.indexOf('cerr')!==-1 || e.indexOf('resuel')!==-1 || e.indexOf('finaliz')!==-1;
+    var e=(r.estadoTicket||'').toLowerCase();
+    return e.indexOf('cerr')!==-1||e.indexOf('resuel')!==-1||e.indexOf('finaliz')!==-1;
   });
-  var pendientes = data.filter(function(r){
-    var e = (r.estadoTicket||'').toLowerCase();
-    return e.indexOf('cerr')===-1 && e.indexOf('resuel')===-1 && e.indexOf('finaliz')===-1;
-  });
-  var pctResolucion = data.length ? Math.round(cerrados.length/data.length*100) : 0;
-  var segTotal = data.reduce(function(s,r){ return s+(r.duracionSeg||0); }, 0);
+  var pctRes = data.length ? Math.round(cerrados.length/data.length*100) : 0;
+  var segTotal = data.reduce(function(s,r){return s+(r.duracionSeg||0);},0);
   var promSeg  = data.length ? Math.round(segTotal/data.length) : 0;
 
   /* Tipos de servicio */
-  var tipoMap = {};
-  data.forEach(function(r){ var t=r.tipoServicio||'Sin tipo'; tipoMap[t]=(tipoMap[t]||0)+1; });
-  var tiposOrdenados = Object.keys(tipoMap).sort(function(a,b){ return tipoMap[b]-tipoMap[a]; });
+  var tipoMap={};
+  data.forEach(function(r){var t=r.tipoServicio||'—';tipoMap[t]=(tipoMap[t]||0)+1;});
+  var tiposOrd=Object.keys(tipoMap).sort(function(a,b){return tipoMap[b]-tipoMap[a];});
 
-  /* ── Tendencia POR DÍA (no por mes) ── */
-  var diaMap = {};
+  /* Tendencia por DÍA */
+  var diaMap={};
   data.forEach(function(r){
-    var fi = r.fechaInicio instanceof Date ? r.fechaInicio : new Date(r.fechaInicio||'');
-    if(isNaN(fi.getTime())) return;
-    var key = fi.getFullYear()+'-'+(String(fi.getMonth()+1).padStart(2,'0'))+'-'+(String(fi.getDate()).padStart(2,'0'));
-    diaMap[key] = (diaMap[key]||0)+1;
+    var fi=r.fechaInicio instanceof Date?r.fechaInicio:new Date(r.fechaInicio||'');
+    if(isNaN(fi.getTime()))return;
+    var k=fi.getFullYear()+'-'+String(fi.getMonth()+1).padStart(2,'0')+'-'+String(fi.getDate()).padStart(2,'0');
+    diaMap[k]=(diaMap[k]||0)+1;
   });
-  var diaKeys = Object.keys(diaMap).sort();
+  var diaKeys=Object.keys(diaMap).sort();
 
   /* Equipos más atendidos */
-  var equipoMap = {};
-  data.forEach(function(r){ var e=r.tipoEquipo||'Sin tipo'; equipoMap[e]=(equipoMap[e]||0)+1; });
-  var equiposOrdenados = Object.keys(equipoMap).sort(function(a,b){ return equipoMap[b]-equipoMap[a]; });
-
-  /* Técnicos asignados */
-  var tecMap = {};
-  data.forEach(function(r){ var t=r.tecnico||'Sin asignar'; tecMap[t]=(tecMap[t]||0)+1; });
-
-  /* Color SLA */
-  var slaColor = pctResolucion>=90?'#2FAE60':pctResolucion>=70?'#F2994A':'#EF5350';
-
-  /* ── Construir HTML ── */
-  var anioFiltro   = (document.getElementById('inf-anio')  ||{value:''}).value||'';
-  var mesFiltro    = (document.getElementById('inf-mes')   ||{value:''}).value||'';
-  var semanaFiltro = (document.getElementById('inf-semana')||{value:''}).value||'';
-  var periodoDesc  = [
-    anioFiltro   ? 'Año '+anioFiltro        : '',
-    mesFiltro    ? MES_NOMBRES[mesFiltro-1] : '',
-    semanaFiltro ? 'Semana '+semanaFiltro   : ''
-  ].filter(Boolean).join(' · ') || 'Todo el período';
-
-  var html = '<div style="margin-bottom:10px;padding:12px 16px;background:var(--surface-alt);border-radius:8px;border:1px solid var(--border);">'
-    +'<div style="font-size:11px;color:var(--ink-muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;">Informe de soporte técnico para</div>'
-    +'<div style="font-size:18px;font-weight:800;color:var(--navy);margin-top:2px;">'+escapeHtml(cli)+'</div>'
-    +'<div style="font-size:11.5px;color:var(--ink-muted);margin-top:2px;">Período: '+periodoDesc+'  ·  Generado el '+fmtDate(new Date())+'</div>'
-    +'</div>';
-
-  /* KPIs */
-  html += '<div class="inf-kpi-grid">';
-  html += '<div class="inf-kpi navy"><div class="inf-kpi-label">Total de tickets</div><div class="inf-kpi-value">'+data.length+'</div><div class="inf-kpi-sub">en el período</div></div>';
-  html += '<div class="inf-kpi green"><div class="inf-kpi-label">Resueltos / cerrados</div><div class="inf-kpi-value">'+cerrados.length+'</div><div class="inf-kpi-sub">de '+data.length+' atendidos</div></div>';
-  html += '<div class="inf-kpi red"><div class="inf-kpi-label">Pendientes</div><div class="inf-kpi-value">'+pendientes.length+'</div><div class="inf-kpi-sub">por resolver</div></div>';
-  html += '<div class="inf-kpi blue"><div class="inf-kpi-label">Tiempo promedio</div><div class="inf-kpi-value" style="font-size:20px;">'+formatSecondsToHMS(promSeg)+'</div><div class="inf-kpi-sub">por ticket</div></div>';
-  html += '<div class="inf-kpi orange"><div class="inf-kpi-label">Tiempo total</div><div class="inf-kpi-value" style="font-size:20px;">'+formatSecondsToHMS(segTotal)+'</div><div class="inf-kpi-sub">horas de soporte</div></div>';
-  html += '<div class="inf-kpi purple"><div class="inf-kpi-label">% Resolución (SLA)</div>'
-    +'<div class="inf-kpi-value" style="color:'+slaColor+'">'+pctResolucion+'%</div>'
-    +'<div class="inf-sla-wrap" style="margin-top:6px;"><div class="inf-sla-bar-bg"><div class="inf-sla-bar" style="width:'+pctResolucion+'%;background:'+slaColor+';"></div></div></div>'
-    +'</div>';
-  html += '</div>';
-
-  /* Gráficos: tickets por DÍA + dona tipo */
-  html += '<div class="charts-grid" style="margin-bottom:16px;">';
-  html += '<div class="chart-card"><h4>Tickets por día</h4><div class="chart-wrap"><canvas id="chartInfTendencia"></canvas></div></div>';
-  html += '<div class="chart-card"><h4>Distribución por tipo de servicio</h4><div class="chart-wrap"><canvas id="chartInfTipo"></canvas></div></div>';
-  html += '</div>';
-  html += '<div class="charts-grid" style="margin-bottom:20px; grid-template-columns:1fr;">';
-  html += '<div class="chart-card"><h4>Equipos más atendidos (Top 8)</h4><div class="chart-wrap" style="height:240px;"><canvas id="chartInfEquipos"></canvas></div></div>';
-  html += '</div>';
+  var eqMap={};
+  data.forEach(function(r){var e=r.tipoEquipo||'—';eqMap[e]=(eqMap[e]||0)+1;});
+  var eqOrd=Object.keys(eqMap).sort(function(a,b){return eqMap[b]-eqMap[a];});
 
   /* Técnicos */
-  html += '<div class="inf-section-title"><h3>Técnicos asignados</h3><div class="line"></div></div>';
-  html += '<div class="table-card"><div class="table-scroll"><table class="inf-table"><thead><tr>'
-    +'<th>Técnico</th><th>Tickets atendidos</th><th>Participación</th></tr></thead><tbody>';
-  Object.keys(tecMap).sort(function(a,b){ return tecMap[b]-tecMap[a]; }).forEach(function(t){
-    var pct = Math.round(tecMap[t]/data.length*100);
-    html += '<tr><td><strong>'+escapeHtml(t)+'</strong></td>'
-      +'<td>'+tecMap[t]+'</td>'
-      +'<td><div class="inf-sla-wrap"><div class="inf-sla-bar-bg"><div class="inf-sla-bar" style="width:'+pct+'%;background:var(--blue);"></div></div>'
-      +'<span style="font-size:11px;font-weight:700;min-width:32px;text-align:right;">'+pct+'%</span></div></td></tr>';
+  var tecMap={};
+  data.forEach(function(r){var t=r.tecnico||'—';tecMap[t]=(tecMap[t]||0)+1;});
+
+  /* Pedidos del cliente */
+  var pedidos=data.filter(function(r){return r.pedido;});
+  var pedUnicos=Object.keys(pedidos.reduce(function(m,r){m[r.pedido]=r;return m;},{}));
+  var montosPEN=pedidos.filter(function(r){return r.moneda==='PEN';}).reduce(function(s,r){return s+(r.total||0);},0);
+  var montosUSD=pedidos.filter(function(r){return r.moneda==='USD';}).reduce(function(s,r){return s+(r.total||0);},0);
+
+  /* Filtros */
+  var anioF=(document.getElementById('inf-anio')  ||{value:''}).value||'';
+  var mesF =(document.getElementById('inf-mes')   ||{value:''}).value||'';
+  var semF =(document.getElementById('inf-semana')||{value:''}).value||'';
+  var perDesc=[anioF?'Año '+anioF:'',mesF?MES_NOMBRES[mesF-1]:'',semF?'Semana '+semF:''].filter(Boolean).join(' · ')||'Todo el período';
+  var slaColor=pctRes>=90?'#2FAE60':pctRes>=70?'#F59E0B':'#EF4444';
+  var slaLabel=pctRes>=90?'Excelente':pctRes>=70?'Regular':'Por mejorar';
+
+  /* ════════════ HTML del informe ════════════ */
+  var html='';
+
+  /* Header del cliente */
+  html+='<div style="background:linear-gradient(135deg,#0F2540 0%,#1A3A5C 60%,#1A86F1 100%);'
+    +'border-radius:14px;padding:24px 28px;margin-bottom:20px;color:#fff;">'
+    +'<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">'
+    +'<div style="width:52px;height:52px;background:rgba(255,255,255,0.15);border-radius:12px;'
+    +'display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;">🏢</div>'
+    +'<div style="flex:1;">'
+    +'<div style="font-size:12px;font-weight:700;letter-spacing:1px;opacity:.7;text-transform:uppercase;margin-bottom:4px;">Informe de Soporte Técnico</div>'
+    +'<div style="font-size:22px;font-weight:900;letter-spacing:-.3px;">'+escapeHtml(cli)+'</div>'
+    +'<div style="font-size:12px;opacity:.65;margin-top:4px;">Período: '+perDesc+'  ·  Generado '+fmtDate(new Date())+'</div>'
+    +'</div>'
+    +'<div style="text-align:right;">'
+    +'<div style="font-size:38px;font-weight:900;line-height:1;">'+data.length+'</div>'
+    +'<div style="font-size:11px;opacity:.7;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">tickets en el período</div>'
+    +'</div>'
+    +'</div></div>';
+
+  /* KPI row  */
+  function kpiCard(color, label, val, sub){
+    var cols={navy:'#0F2540',blue:'#1A86F1',green:'#10B981',red:'#EF4444',amber:'#F59E0B',purple:'#8B5CF6'};
+    var bg=cols[color]||color;
+    return '<div style="background:#fff;border:1.5px solid #E2E8F0;border-radius:12px;padding:16px 20px;'
+      +'border-top:4px solid '+bg+';flex:1;min-width:140px;">'
+      +'<div style="font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#94A3B8;margin-bottom:6px;">'+label+'</div>'
+      +'<div style="font-size:28px;font-weight:900;color:'+bg+';line-height:1;margin-bottom:4px;">'+val+'</div>'
+      +'<div style="font-size:11px;color:#64748B;">'+sub+'</div>'
+      +'</div>';
+  }
+
+  html+='<div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:20px;">';
+  html+=kpiCard('green',  'Resueltos',  cerrados.length, cerrados.length+' de '+data.length+' atendidos');
+  html+=kpiCard('red',    'Pendientes', data.length-cerrados.length, 'por resolver');
+  html+=kpiCard('blue',   'Tiempo prom.', formatSecondsToHMS(promSeg), 'por ticket');
+  html+=kpiCard('amber',  'Tiempo total', formatSecondsToHMS(segTotal), 'horas de soporte');
+  html+=kpiCard('purple', pedUnicos.length?'Pedidos':'Pedidos',
+                pedUnicos.length||'—',
+                pedUnicos.length?(fmtMoneyCompact(montosPEN,'PEN')+(montosUSD>0?' · '+fmtMoneyCompact(montosUSD,'USD'):'')):' — sin pedidos en el período');
+  html+='<div style="background:linear-gradient(135deg,'+slaColor+'15,'+slaColor+'08);border:1.5px solid '+slaColor+'40;'
+    +'border-radius:12px;padding:16px 20px;flex:1;min-width:140px;border-top:4px solid '+slaColor+';">'
+    +'<div style="font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#94A3B8;margin-bottom:6px;">% Resolución</div>'
+    +'<div style="font-size:28px;font-weight:900;color:'+slaColor+';line-height:1;margin-bottom:6px;">'+pctRes+'%</div>'
+    +'<div style="height:6px;background:'+slaColor+'20;border-radius:999px;overflow:hidden;margin-bottom:4px;">'
+    +'<div style="height:100%;width:'+pctRes+'%;background:'+slaColor+';border-radius:999px;"></div></div>'
+    +'<div style="font-size:11px;color:'+slaColor+';font-weight:700;">'+slaLabel+'</div>'
+    +'</div>';
+  html+='</div>';
+
+  /* Gráficos */
+  html+='<div style="display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:16px;">'
+    +'<div class="chart-card"><h4 style="font-size:12px;font-weight:800;color:#0F2540;margin-bottom:10px;">📅 Tickets por día</h4>'
+    +'<div class="chart-wrap"><canvas id="chartInfTendencia"></canvas></div></div>'
+    +'<div class="chart-card"><h4 style="font-size:12px;font-weight:800;color:#0F2540;margin-bottom:10px;">🔧 Por tipo de servicio</h4>'
+    +'<div class="chart-wrap"><canvas id="chartInfTipo"></canvas></div></div>'
+    +'</div>';
+  html+='<div class="chart-card" style="margin-bottom:20px;">'
+    +'<h4 style="font-size:12px;font-weight:800;color:#0F2540;margin-bottom:10px;">🖥 Equipos más atendidos (Top 8)</h4>'
+    +'<div class="chart-wrap" style="height:220px;"><canvas id="chartInfEquipos"></canvas></div></div>';
+
+  /* Técnicos */
+  html+='<div style="background:#fff;border:1.5px solid #E2E8F0;border-radius:12px;padding:18px 20px;margin-bottom:20px;">'
+    +'<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#94A3B8;margin-bottom:12px;">👨‍🔧 Técnicos asignados</div>'
+    +'<table style="width:100%;border-collapse:collapse;font-size:12.5px;">'
+    +'<thead><tr><th style="text-align:left;padding:8px 10px;background:#F8FAFC;border-radius:6px 0 0 6px;color:#475569;font-weight:700;">Técnico</th>'
+    +'<th style="text-align:center;padding:8px 10px;background:#F8FAFC;color:#475569;font-weight:700;">Tickets</th>'
+    +'<th style="text-align:left;padding:8px 10px;background:#F8FAFC;border-radius:0 6px 6px 0;color:#475569;font-weight:700;min-width:180px;">Participación</th></tr></thead>'
+    +'<tbody>';
+  Object.keys(tecMap).sort(function(a,b){return tecMap[b]-tecMap[a];}).forEach(function(t){
+    var pct=Math.round(tecMap[t]/data.length*100);
+    html+='<tr style="border-bottom:1px solid #F1F5F9;">'
+      +'<td style="padding:10px 10px;font-weight:600;">'+escapeHtml(t)+'</td>'
+      +'<td style="text-align:center;font-weight:800;color:#1A86F1;">'+tecMap[t]+'</td>'
+      +'<td style="padding:8px 10px;"><div style="display:flex;align-items:center;gap:8px;">'
+      +'<div style="flex:1;height:8px;background:#EFF6FF;border-radius:999px;overflow:hidden;">'
+      +'<div style="height:100%;width:'+pct+'%;background:#1A86F1;border-radius:999px;"></div></div>'
+      +'<span style="font-size:11.5px;font-weight:700;color:#1A86F1;min-width:35px;text-align:right;">'+pct+'%</span>'
+      +'</div></td></tr>';
   });
-  html += '</tbody></table></div></div>';
+  html+='</tbody></table></div>';
 
-  /* ── Tabla detalle de tickets — TODOS los filtrados, con columnas de verificación ── */
-  var DOC_COLS = ['Pedidos','COT. FIRMADA','OS Firmada','Factura','XML','Nota de Ingreso','Aceptada Portal'];
-  /* Clave localStorage para persistir los checks por ticket */
-  var LS_KEY = 'coseinco_inf_docs_v1';
-  var savedDocs = {};
-  try { savedDocs = JSON.parse(localStorage.getItem(LS_KEY)||'{}'); } catch(e){}
+  /* ──────────────────────────────────────────────────────────────
+     Tabla detalle de tickets — TODOS, con columnas de pedido
+     y columnas de verificación de documentos
+  ──────────────────────────────────────────────────────────────── */
+  var LS_KEY='coseinco_inf_docs_v1';
+  var savedDocs={};
+  try{savedDocs=JSON.parse(localStorage.getItem(LS_KEY)||'{}');}catch(e){}
+  var DOC_COLS=['Pedidos','COT. FIRMADA','OS Firmada','Factura','XML','Nota de Ingreso','Aceptada Portal'];
+  var hasPedidos=data.some(function(r){return r.pedido;});
 
-  html += '<div class="inf-section-title" style="margin-top:24px;"><h3>Detalle de tickets</h3><div class="line"></div>'
-    +'<span style="font-size:11.5px;color:var(--ink-muted);">'+data.length+' registros — todos los filtrados</span></div>';
-  html += '<div class="table-card"><div class="table-scroll"><table class="inf-table"><thead><tr>'
-    +'<th>N° Ticket</th><th>Estado</th><th>Tipo de Servicio</th><th>Técnico</th>'
-    +'<th>Equipo / Marca</th><th>Fecha Inicio</th><th>Duración</th>';
-  DOC_COLS.forEach(function(col){
-    html += '<th style="text-align:center;white-space:nowrap;">'+escapeHtml(col)+'</th>';
+  html+='<div style="background:#fff;border:1.5px solid #E2E8F0;border-radius:12px;overflow:hidden;margin-bottom:16px;">'
+    +'<div style="background:linear-gradient(90deg,#0F2540,#1A3A5C);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;">'
+    +'<div style="color:#fff;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;">📋 Detalle de tickets</div>'
+    +'<div style="color:rgba(255,255,255,.6);font-size:11.5px;">'+data.length+' registros · todos los filtrados</div>'
+    +'</div>'
+    +'<div class="table-scroll"><table class="ej-table" style="font-size:11.5px;"><thead><tr>'
+    +'<th style="white-space:nowrap;">N° Ticket</th>'
+    +'<th>Estado</th>'
+    +'<th>Reparación</th>'
+    +'<th>Tipo de Servicio</th>'
+    +'<th>Técnico</th>'
+    +'<th style="white-space:nowrap;">Tipo de Equipo · Marca</th>'
+    +'<th style="white-space:nowrap;">N° Activo</th>'
+    +'<th style="white-space:nowrap;">Fecha Inicio</th>'
+    +'<th style="white-space:nowrap;">Duración</th>';
+  if(hasPedidos){
+    html+='<th style="white-space:nowrap;color:#1A86F1;">N° Pedido</th>'
+      +'<th style="white-space:nowrap;color:#1A86F1;">Est. Pedido</th>'
+      +'<th style="white-space:nowrap;color:#1A86F1;">Monto</th>'
+      +'<th style="white-space:nowrap;color:#1A86F1;">Vendedor</th>';
+  }
+  DOC_COLS.forEach(function(c){
+    html+='<th style="text-align:center;white-space:nowrap;font-size:10px;color:#10B981;max-width:68px;">'+escapeHtml(c)+'</th>';
   });
-  html += '</tr></thead><tbody>';
+  html+='</tr></thead><tbody>';
 
-  data.slice().sort(function(a,b){ return (b.fechaInicio||0)-(a.fechaInicio||0); })
-    .forEach(function(r){
-      var est = (r.estadoTicket||'').toLowerCase();
-      var badgeCls = est.indexOf('cerr')!==-1||est.indexOf('resuel')!==-1 ? 'cerrado' : est.indexOf('abiert')!==-1 ? 'abierto' : 'otro';
-      var tid = escapeHtml(r.nroTicket||'');
-      var docState = savedDocs[tid] || {};
-      html += '<tr>'
-        +'<td><strong>'+escapeHtml(r.nroTicket||'—')+'</strong></td>'
-        +'<td><span class="inf-badge '+badgeCls+'">'+escapeHtml(r.estadoTicket||'—')+'</span></td>'
-        +'<td>'+escapeHtml(r.tipoServicio||'—')+'</td>'
-        +'<td>'+escapeHtml(r.tecnico||'—')+'</td>'
-        +'<td style="font-size:11.5px;">'+escapeHtml((r.tipoEquipo||'')+(r.marca?' · '+r.marca:''))+'</td>'
-        +'<td style="white-space:nowrap;font-size:11.5px;">'+fmtDate(r.fechaInicio)+'</td>'
-        +'<td style="font-size:11.5px;font-family:monospace;">'+escapeHtml(r.duracionStr||'—')+'</td>';
-      DOC_COLS.forEach(function(col, i){
-        var chkKey = 'c'+i;
-        var checked = docState[chkKey] ? ' checked' : '';
-        html += '<td style="text-align:center;">'
-          +'<input type="checkbox"'+checked
-          +' onchange="(function(el){try{var ls=JSON.parse(localStorage.getItem(\''+LS_KEY+'\')||\'{}\')||{};if(!ls[\''+tid+'\'])ls[\''+tid+'\']=={};ls[\''+tid+'\'][\'c'+i+'\']=el.checked;localStorage.setItem(\''+LS_KEY+'\',JSON.stringify(ls));}catch(e){}})(this)"'
-          +' style="width:16px;height:16px;accent-color:var(--blue);cursor:pointer;">'
-          +'</td>';
-      });
-      html += '</tr>';
+  data.slice().sort(function(a,b){
+    var fa=a.fechaInicio instanceof Date?a.fechaInicio:new Date(a.fechaInicio||0);
+    var fb=b.fechaInicio instanceof Date?b.fechaInicio:new Date(b.fechaInicio||0);
+    return fb-fa;
+  }).forEach(function(r){
+    var e=(r.estadoTicket||'').toLowerCase();
+    var isCerr=e.indexOf('cerr')!==-1||e.indexOf('resuel')!==-1||e.indexOf('finaliz')!==-1;
+    var estColor=isCerr?'background:#DCFCE7;color:#166534;':'background:#FEF3C7;color:#92400E;';
+    var repColor=(r.estadoReparacion||'').toUpperCase()==='POR COTIZAR'
+      ?'background:#FEE2E2;color:#991B1B;font-weight:700;':'color:#475569;';
+    var tid=escapeHtml(r.nroTicket||'');
+    var docSt=savedDocs[tid]||{};
+    html+='<tr>';
+    html+='<td><strong style="color:#0F2540;">'+escapeHtml(r.nroTicket||'—')+'</strong></td>';
+    html+='<td><span style="display:inline-block;padding:2px 8px;border-radius:99px;font-size:10.5px;font-weight:700;'+estColor+'">'+escapeHtml(r.estadoTicket||'—')+'</span></td>';
+    html+='<td style="font-size:10.5px;"><span style="display:inline-block;padding:2px 7px;border-radius:4px;'+repColor+'">'+escapeHtml(r.estadoReparacion||'—')+'</span></td>';
+    html+='<td>'+escapeHtml(r.tipoServicio||'—')+'</td>';
+    html+='<td>'+escapeHtml(r.tecnico||'—')+'</td>';
+    html+='<td style="font-size:10.5px;">'+escapeHtml((r.tipoEquipo||'—')+(r.marca&&r.marca!=='Sin especificar'?' · '+r.marca:''))+'</td>';
+    html+='<td style="font-family:monospace;font-size:10.5px;">'+escapeHtml(r.nActivo||'—')+'</td>';
+    html+='<td style="white-space:nowrap;font-size:10.5px;">'+fmtDate(r.fechaInicio)+'</td>';
+    html+='<td style="font-family:monospace;font-size:10.5px;">'+escapeHtml(r.duracionStr||'—')+'</td>';
+    if(hasPedidos){
+      html+='<td style="font-weight:700;color:#1A86F1;">'+escapeHtml(r.pedido||'—')+'</td>';
+      html+='<td style="font-size:10.5px;">'+escapeHtml(r.estadoPedido||'—')+'</td>';
+      var montoTxt=r.total>0?fmtMoneyCompact(r.total,r.moneda||'PEN'):'—';
+      html+='<td style="font-weight:700;white-space:nowrap;">'+escapeHtml(montoTxt)+'</td>';
+      html+='<td style="font-size:10.5px;">'+escapeHtml(r.vendedor||'—')+'</td>';
+    }
+    DOC_COLS.forEach(function(col,i){
+      var chkKey='c'+i;
+      var checked=docSt[chkKey]?' checked':'';
+      html+='<td style="text-align:center;padding:4px 6px;">'
+        +'<input type="checkbox"'+checked
+        +' onchange="(function(el){try{var k=\''+LS_KEY+'\';var ls=JSON.parse(localStorage.getItem(k)||\'{}\')||{};if(!ls[\''+tid+'\'])ls[\''+tid+'\']={};ls[\''+tid+'\'][\'c'+i+'\']=el.checked;localStorage.setItem(k,JSON.stringify(ls));}catch(e){}})(this)"'
+        +' style="width:15px;height:15px;accent-color:#10B981;cursor:pointer;"></td>';
     });
-  html += '</tbody></table></div></div>';
+    html+='</tr>';
+  });
+  html+='</tbody></table></div></div>';
 
-  content.insertAdjacentHTML('beforeend', '');
-  content.innerHTML = html;
+  content.innerHTML=html;
 
-  /* ── Renderizar gráficos ── */
-  /* 1. Tendencia POR DÍA */
+  /* ──── Gráficos ──── */
   destroyChart('infTendencia');
-  var ctxT = document.getElementById('chartInfTendencia');
-  if(ctxT && diaKeys.length){
-    CHARTS.infTendencia = new Chart(ctxT, {
+  var ctxT=document.getElementById('chartInfTendencia');
+  if(ctxT&&diaKeys.length){
+    CHARTS.infTendencia=new Chart(ctxT,{
       type:'bar',
       data:{
-        labels: diaKeys.map(function(k){ var p=k.split('-'); return p[2]+'/'+MES_NOMBRES[parseInt(p[1])-1].slice(0,3); }),
-        datasets:[{
-          label:'Tickets por día',
-          data: diaKeys.map(function(k){ return diaMap[k]; }),
-          backgroundColor:'#1A86F1', borderRadius:4
-        }]
+        labels:diaKeys.map(function(k){var p=k.split('-');return p[2]+'/'+MES_NOMBRES[parseInt(p[1])-1].slice(0,3);}),
+        datasets:[{label:'Tickets',data:diaKeys.map(function(k){return diaMap[k];}),
+          backgroundColor:'#1A86F1',borderRadius:5,borderSkipped:false}]
       },
-      options: Object.assign(baseBarOptions(), {
+      options:Object.assign(baseBarOptions(),{
         plugins:{legend:{display:false}},
-        scales:{x:{ticks:{maxRotation:45,minRotation:30,font:{size:10}}}}
+        scales:{x:{ticks:{maxRotation:45,minRotation:30,font:{size:9.5}}}}
       })
     });
   }
-
-  /* 2. Dona por tipo de servicio */
   destroyChart('infTipo');
-  var ctxD = document.getElementById('chartInfTipo');
-  if(ctxD){
-    CHARTS.infTipo = new Chart(ctxD, {
+  var ctxD=document.getElementById('chartInfTipo');
+  if(ctxD&&tiposOrd.length){
+    CHARTS.infTipo=new Chart(ctxD,{
       type:'doughnut',
-      data:{
-        labels: tiposOrdenados,
-        datasets:[{data: tiposOrdenados.map(function(t){ return tipoMap[t]; }), backgroundColor: CHART_PALETTE, borderWidth:2, borderColor:'#fff'}]
-      },
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:12,font:{size:11}}}}}
+      data:{labels:tiposOrd,datasets:[{data:tiposOrd.map(function(t){return tipoMap[t];}),
+        backgroundColor:CHART_PALETTE,borderWidth:2,borderColor:'#fff'}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:'right',labels:{boxWidth:11,font:{size:10.5}}}}}
     });
   }
-
-  /* 3. Barras horizontales equipos */
   destroyChart('infEquipos');
-  var ctxE = document.getElementById('chartInfEquipos');
-  var top8eq = equiposOrdenados.slice(0,8);
-  if(ctxE && top8eq.length){
-    CHARTS.infEquipos = new Chart(ctxE, {
+  var ctxE=document.getElementById('chartInfEquipos');
+  var top8=eqOrd.slice(0,8);
+  if(ctxE&&top8.length){
+    CHARTS.infEquipos=new Chart(ctxE,{
       type:'bar',
-      data:{
-        labels: top8eq,
-        datasets:[{label:'Tickets',data:top8eq.map(function(e){ return equipoMap[e]; }),backgroundColor:'#1A86F1',borderRadius:4}]
-      },
-      options: Object.assign(baseBarOptions(), {indexAxis:'y', plugins:{legend:{display:false}}})
+      data:{labels:top8,datasets:[{label:'Tickets',data:top8.map(function(e){return eqMap[e];}),
+        backgroundColor:CHART_PALETTE.slice(0,top8.length),borderRadius:5}]},
+      options:Object.assign(baseBarOptions(),{indexAxis:'y',plugins:{legend:{display:false}}})
     });
   }
 }
