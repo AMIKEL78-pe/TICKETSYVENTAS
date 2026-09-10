@@ -1516,27 +1516,8 @@ tickClock();
 /* Pipeline carga desde CSV importado — sin localStorage */
 trLoad();
 
-/* ── Auto-restaurar sesión guardada ── */
-(function(){
-  try {
-    var restaurado = restaurarSesion();
-    if(restaurado){
-      /* Re-inicializar el módulo activo si tiene datos */
-      setTimeout(function(){
-        var modActivo = document.querySelector('.module.active');
-        if(modActivo){
-          var mid = modActivo.id||'';
-          if(mid==='mod-ejecutivo')    ejInit();
-          if(mid==='mod-rentabilidad') rentInit();
-          if(mid==='mod-informes')     informesInit();
-          if(mid==='mod-clientes')     clientesInit();
-        }
-        cotizarInit();
-        facturaInit();
-      }, 100);
-    }
-  } catch(e){ console.warn('[Startup] Error al restaurar sesión:', e); }
-})();
+/* ── Auto-restaurar sesión guardada (IndexedDB, async) ── */
+restaurarSesion();   /* maneja todo internamente con callbacks */
 
 /* ── Auto-guardado silencioso cada 60 segundos ── */
 setInterval(function(){
@@ -5174,118 +5155,202 @@ handleFile = function(evt, mod){
    Claves: coseinco_session_tickets_v1 / coseinco_session_ventas_v1
 ============================================================ */
 
-var SESSION_T_KEY  = 'coseinco_session_tickets_v1';
-var SESSION_V_KEY  = 'coseinco_session_ventas_v1';
-var SESSION_TS_KEY = 'coseinco_session_ts_v1';
-var SESSION_UI_KEY = 'coseinco_session_ui_v1';   /* módulo activo + filtros */
+/* ============================================================
+   PERSISTENCIA — IndexedDB (sin límite de tamaño)
+   Igual que Inventario TI: guarda todo al importar y restaura
+   al abrir la página. No requiere acción del usuario.
+   localStorage solo para UI (módulo activo + filtros).
+============================================================ */
 
+var IDB_NAME    = 'coseinco_dashboard';
+var IDB_VERSION = 2;
+var IDB_ST_T    = 'tickets';
+var IDB_ST_V    = 'ventas';
+var SESSION_UI_KEY  = 'coseinco_session_ui_v1';
+var SESSION_TS_KEY  = 'coseinco_session_ts_v1';
+var _idb = null;   /* referencia global a la BD abierta */
+
+/* ── Abrir (o crear) la base de datos ── */
+function idbOpen(cb){
+  if(_idb){ cb(null, _idb); return; }
+  var req = indexedDB.open(IDB_NAME, IDB_VERSION);
+  req.onupgradeneeded = function(e){
+    var db = e.target.result;
+    [IDB_ST_T, IDB_ST_V].forEach(function(store){
+      if(!db.objectStoreNames.contains(store))
+        db.createObjectStore(store, {keyPath:'_idx', autoIncrement:true});
+    });
+  };
+  req.onsuccess = function(e){ _idb=e.target.result; cb(null,_idb); };
+  req.onerror   = function(e){ cb(e.target.error, null); };
+}
+
+/* ── Serializar fila (convierte Dates a timestamps) ── */
+function idbSerRow(r){
+  var out = {};
+  Object.keys(r).forEach(function(k){
+    var v = r[k];
+    out[k] = v instanceof Date ? v.getTime() : v;
+  });
+  return out;
+}
+
+/* ── Deserializar fila (convierte timestamps a Date) ── */
+var DATE_FIELDS = ['fechaInicio','fechaFin','fechaPedido'];
+function idbDeserRow(row){
+  var out = {};
+  Object.keys(row).forEach(function(k){
+    if(k==='_idx'){ return; }
+    out[k] = (DATE_FIELDS.indexOf(k)!==-1 && typeof row[k]==='number')
+             ? new Date(row[k]) : row[k];
+  });
+  return out;
+}
+
+/* ── Guardar un store completo ── */
+function idbSaveStore(storeName, rows, cb){
+  idbOpen(function(err, db){
+    if(err){ cb && cb(err); return; }
+    var tx = db.transaction(storeName, 'readwrite');
+    var st = tx.objectStore(storeName);
+    st.clear();
+    rows.forEach(function(r, i){ st.put(Object.assign(idbSerRow(r), {_idx: i+1})); });
+    tx.oncomplete = function(){ cb && cb(null); };
+    tx.onerror    = function(e){ cb && cb(e.target.error); };
+  });
+}
+
+/* ── Leer un store completo ── */
+function idbLoadStore(storeName, cb){
+  idbOpen(function(err, db){
+    if(err){ cb(err,[]); return; }
+    var tx = db.transaction(storeName, 'readonly');
+    var req = tx.objectStore(storeName).getAll();
+    req.onsuccess = function(e){ cb(null, e.target.result.map(idbDeserRow)); };
+    req.onerror   = function(e){ cb(e.target.error,[]); };
+  });
+}
+
+/* ── GUARDAR SESIÓN ── */
 function guardarSesion(manual){
+  /* Tickets */
+  if(STATE.tickets.raw.length){
+    idbSaveStore(IDB_ST_T, STATE.tickets.raw, function(err){
+      if(err) console.warn('[Sesión] Error guardando tickets:', err);
+    });
+  }
+  /* Ventas */
+  if(STATE.ventas.raw.length){
+    idbSaveStore(IDB_ST_V, STATE.ventas.raw, function(err){
+      if(err) console.warn('[Sesión] Error guardando ventas:', err);
+    });
+  }
+  /* UI en localStorage (pequeño) */
   try {
-    if(STATE.tickets.raw.length) localStorage.setItem(SESSION_T_KEY, JSON.stringify(STATE.tickets.raw));
-    if(STATE.ventas.raw.length)  localStorage.setItem(SESSION_V_KEY, JSON.stringify(STATE.ventas.raw));
-    /* Guardar estado de UI: módulo activo + valores de todos los filtros */
-    try {
-      var modActivo = '';
-      var modEl = document.querySelector('.module.active');
-      if(modEl) modActivo = modEl.id || '';
-      var filtros = {};
-      document.querySelectorAll('select[id],input[id]').forEach(function(el){
-        if(el.value !== undefined && el.value !== '') filtros[el.id] = el.value;
-      });
-      localStorage.setItem(SESSION_UI_KEY, JSON.stringify({mod: modActivo, filtros: filtros}));
-    } catch(eui){}
+    var modEl = document.querySelector('.module.active');
+    var filtros = {};
+    document.querySelectorAll('select[id]').forEach(function(el){
+      if(el.value) filtros[el.id] = el.value;
+    });
     var ts = new Date().toLocaleString('es-PE',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    localStorage.setItem(SESSION_UI_KEY, JSON.stringify({mod: modEl?modEl.id:'', filtros:filtros}));
     localStorage.setItem(SESSION_TS_KEY, ts);
-    /* Actualizar UI */
-    var ind=document.getElementById('sessionIndicator');
-    var indTxt=document.getElementById('sessionIndicatorTxt');
-    var indTs=document.getElementById('sessionIndicatorTs');
-    var btn=document.getElementById('btnGuardarSesion');
+    /* Actualizar indicador */
+    var ind    = document.getElementById('sessionIndicator');
+    var indTxt = document.getElementById('sessionIndicatorTxt');
+    var indTs  = document.getElementById('sessionIndicatorTs');
+    var btn    = document.getElementById('btnGuardarSesion');
     if(ind) ind.style.display='';
-    if(indTxt) indTxt.textContent=(STATE.tickets.raw.length?STATE.tickets.raw.length+' tickets':'')+(STATE.tickets.raw.length&&STATE.ventas.raw.length?' · ':'')+(STATE.ventas.raw.length?STATE.ventas.raw.length+' pedidos':'');
+    if(indTxt) indTxt.textContent=
+      (STATE.tickets.raw.length?STATE.tickets.raw.length+' tickets':'')
+      +(STATE.tickets.raw.length&&STATE.ventas.raw.length?' · ':'')
+      +(STATE.ventas.raw.length?STATE.ventas.raw.length+' pedidos':'');
     if(indTs) indTs.textContent='Guardado '+ts;
-    if(btn && manual){ btn.textContent='✓ Guardado'; setTimeout(function(){ btn.textContent='💾 Guardar sesión'; },2500); }
-    console.log('[Sesión] Datos guardados:', ts);
-  } catch(e) {
-    console.warn('[Sesión] Error al guardar:', e.message);
-    if(e.name==='QuotaExceededError') alert('El navegador no tiene espacio suficiente para guardar todos los datos.\nIntenta usar "Exportar datos" como respaldo.');
-  }
+    if(btn && manual){ btn.textContent='✓ Guardado'; setTimeout(function(){ btn.textContent='💾 Guardar ahora'; },2500); }
+  } catch(e){ console.warn('[Sesión] Error UI:', e.message); }
 }
 
+/* ── RESTAURAR SESIÓN ── (async, se llama al inicio) */
 function restaurarSesion(){
-  try {
-    var restaurado = false;
-    var tRaw = localStorage.getItem(SESSION_T_KEY);
-    if(tRaw){
-      var tickets = JSON.parse(tRaw);
-      tickets.forEach(function(r){
-        if(r.fechaInicio) r.fechaInicio = new Date(r.fechaInicio);
-        if(r.fechaFin)    r.fechaFin    = new Date(r.fechaFin);
-      });
-      STATE.tickets.raw = tickets;
-      restaurado = true;
-    }
-    var vRaw = localStorage.getItem(SESSION_V_KEY);
-    if(vRaw){
-      var ventas = JSON.parse(vRaw);
-      ventas.forEach(function(r){
-        if(r.fechaPedido) r.fechaPedido = new Date(r.fechaPedido);
-      });
-      STATE.ventas.raw = ventas;
-      restaurado = true;
-    }
-    if(restaurado){
-      var ts = localStorage.getItem(SESSION_TS_KEY)||'—';
-      /* Actualizar filtros y render */
-      if(STATE.tickets.raw.length){ buildFilterOptions('tickets'); applyFilters('tickets'); }
-      if(STATE.ventas.raw.length) { buildFilterOptions('ventas');  applyFilters('ventas');  }
-      /* Indicador en header */
-      var ind=document.getElementById('sessionIndicator');
-      var indTxt=document.getElementById('sessionIndicatorTxt');
-      var indTs=document.getElementById('sessionIndicatorTs');
-      if(ind) ind.style.display='';
-      if(indTxt) indTxt.textContent=(STATE.tickets.raw.length||0)+' tickets · '+(STATE.ventas.raw.length||0)+' pedidos';
-      if(indTs) indTs.textContent='Restaurado: '+ts;
-      /* Status en tabs de tickets y ventas */
-      var tSt=document.getElementById('ticketsStatus');
-      if(tSt && STATE.tickets.raw.length) tSt.textContent=STATE.tickets.raw.length+' tickets (sesión restaurada)';
-      var vSt=document.getElementById('ventasStatus');
-      if(vSt && STATE.ventas.raw.length) vSt.textContent=STATE.ventas.raw.length+' pedidos (sesión restaurada)';
-      /* Restaurar estado de UI */
-      try {
-        var uiRaw = localStorage.getItem(SESSION_UI_KEY);
-        if(uiRaw){
-          var ui = JSON.parse(uiRaw);
-          /* Restaurar filtros */
-          if(ui.filtros){
-            Object.keys(ui.filtros).forEach(function(id){
-              var el = document.getElementById(id);
-              if(el && el.tagName==='SELECT') el.value = ui.filtros[id];
-            });
-          }
-          /* Restaurar módulo activo (con pequeño delay para que el DOM esté listo) */
-          if(ui.mod){
-            setTimeout(function(){
-              try { switchModule(ui.mod.replace('mod-','')); } catch(e){}
-            }, 150);
-          }
+  idbOpen(function(err, db){
+    if(err){ console.warn('[Sesión] IndexedDB no disponible:', err); return; }
+    /* Cargar tickets */
+    idbLoadStore(IDB_ST_T, function(errT, tickets){
+      if(!errT && tickets.length){
+        STATE.tickets.raw = tickets;
+        try { buildFilterOptions('tickets'); applyFilters('tickets'); } catch(e){}
+        var tSt=document.getElementById('ticketsStatus');
+        if(tSt) tSt.textContent=tickets.length+' tickets (sesión restaurada)';
+      }
+      /* Cargar ventas */
+      idbLoadStore(IDB_ST_V, function(errV, ventas){
+        if(!errV && ventas.length){
+          STATE.ventas.raw = ventas;
+          try { buildFilterOptions('ventas'); applyFilters('ventas'); } catch(e){}
+          var vSt=document.getElementById('ventasStatus');
+          if(vSt) vSt.textContent=ventas.length+' pedidos (sesión restaurada)';
         }
-      } catch(eui){ console.warn('[Sesión] UI no restaurada:', eui.message); }
-      console.log('[Sesión] Datos restaurados desde:', ts);
-    }
-    return restaurado;
-  } catch(e) {
-    console.warn('[Sesión] Error al restaurar:', e.message);
-    return false;
-  }
+        var hayDatos = STATE.tickets.raw.length || STATE.ventas.raw.length;
+        if(!hayDatos) return;
+        /* Actualizar indicador */
+        try {
+          var ts = localStorage.getItem(SESSION_TS_KEY)||'—';
+          var ind=document.getElementById('sessionIndicator');
+          var indTxt=document.getElementById('sessionIndicatorTxt');
+          var indTs=document.getElementById('sessionIndicatorTs');
+          if(ind) ind.style.display='';
+          if(indTxt) indTxt.textContent=(STATE.tickets.raw.length||0)+' tickets · '+(STATE.ventas.raw.length||0)+' pedidos';
+          if(indTs) indTs.textContent='Restaurado: '+ts;
+        } catch(e){}
+        /* Restaurar módulo activo y filtros */
+        try {
+          var uiRaw = localStorage.getItem(SESSION_UI_KEY);
+          if(uiRaw){
+            var ui = JSON.parse(uiRaw);
+            if(ui.filtros) Object.keys(ui.filtros).forEach(function(id){
+              var el=document.getElementById(id);
+              if(el && el.tagName==='SELECT') el.value=ui.filtros[id];
+            });
+            if(ui.mod) setTimeout(function(){
+              try { switchModule(ui.mod.replace('mod-','')); } catch(e){}
+            }, 200);
+          }
+        } catch(e){}
+        /* Inicializar paneles derivados */
+        setTimeout(function(){
+          try { cotizarInit(); } catch(e){}
+          try { facturaInit(); } catch(e){}
+          try {
+            var modActivo = document.querySelector('.module.active');
+            if(modActivo){
+              var mid = modActivo.id||'';
+              if(mid==='mod-ejecutivo')    ejInit();
+              if(mid==='mod-rentabilidad') rentInit();
+              if(mid==='mod-informes')     informesInit();
+              if(mid==='mod-clientes')     clientesInit();
+            }
+          } catch(e){}
+        }, 300);
+        console.log('[Sesión] Datos restaurados: tickets='+STATE.tickets.raw.length+' ventas='+STATE.ventas.raw.length);
+      });
+    });
+  });
 }
 
+/* ── BORRAR SESIÓN ── */
 function borrarSesion(){
   if(!confirm('¿Borrar todos los datos guardados en el navegador (tickets y pedidos)?\n\nEsta acción no elimina los respaldos exportados como .json')) return;
-  [SESSION_T_KEY, SESSION_V_KEY, SESSION_TS_KEY, SESSION_UI_KEY].forEach(function(k){ try{localStorage.removeItem(k);}catch(e){} });
-  STATE.tickets.raw=[];  STATE.ventas.raw=[];
+  idbOpen(function(err, db){
+    if(!err){
+      [IDB_ST_T, IDB_ST_V].forEach(function(sn){
+        try { db.transaction(sn,'readwrite').objectStore(sn).clear(); } catch(e){}
+      });
+    }
+  });
+  [SESSION_UI_KEY, SESSION_TS_KEY].forEach(function(k){ try{localStorage.removeItem(k);}catch(e){} });
+  STATE.tickets.raw=[]; STATE.ventas.raw=[];
   var ind=document.getElementById('sessionIndicator'); if(ind) ind.style.display='none';
-  applyFilters('tickets'); applyFilters('ventas');
+  try { applyFilters('tickets'); applyFilters('ventas'); } catch(e){}
   alert('Sesión borrada. Importa nuevos datos desde CSV.');
 }
 
@@ -5563,18 +5628,14 @@ function informesRender(){
     +'<div class="table-scroll"><table class="ej-table" style="font-size:11.5px;"><thead><tr>'
     +'<th style="white-space:nowrap;">N° Ticket</th>'
     +'<th>Estado</th>'
-    +'<th>Reparación</th>'
     +'<th>Tipo de Servicio</th>'
     +'<th>Técnico</th>'
-    +'<th style="white-space:nowrap;">Tipo de Equipo · Marca</th>'
-    +'<th style="white-space:nowrap;">N° Activo</th>'
     +'<th style="white-space:nowrap;">Fecha Inicio</th>'
     +'<th style="white-space:nowrap;">Duración</th>';
   if(hasPedidos){
     html+='<th style="white-space:nowrap;color:#1A86F1;">N° Pedido</th>'
       +'<th style="white-space:nowrap;color:#1A86F1;">Est. Pedido</th>'
-      +'<th style="white-space:nowrap;color:#1A86F1;">Monto</th>'
-      +'<th style="white-space:nowrap;color:#1A86F1;">Vendedor</th>';
+      +'<th style="white-space:nowrap;color:#1A86F1;">Monto</th>';
   }
   DOC_COLS.forEach(function(c){
     html+='<th style="text-align:center;white-space:nowrap;font-size:10px;color:#10B981;max-width:68px;">'+escapeHtml(c)+'</th>';
@@ -5596,11 +5657,8 @@ function informesRender(){
     html+='<tr>';
     html+='<td><strong style="color:#0F2540;">'+escapeHtml(r.nroTicket||'—')+'</strong></td>';
     html+='<td><span style="display:inline-block;padding:2px 8px;border-radius:99px;font-size:10.5px;font-weight:700;'+estColor+'">'+escapeHtml(r.estadoTicket||'—')+'</span></td>';
-    html+='<td style="font-size:10.5px;"><span style="display:inline-block;padding:2px 7px;border-radius:4px;'+repColor+'">'+escapeHtml(r.estadoReparacion||'—')+'</span></td>';
     html+='<td>'+escapeHtml(r.tipoServicio||'—')+'</td>';
     html+='<td>'+escapeHtml(r.tecnico||'—')+'</td>';
-    html+='<td style="font-size:10.5px;">'+escapeHtml((r.tipoEquipo||'—')+(r.marca&&r.marca!=='Sin especificar'?' · '+r.marca:''))+'</td>';
-    html+='<td style="font-family:monospace;font-size:10.5px;">'+escapeHtml(r.nActivo||'—')+'</td>';
     html+='<td style="white-space:nowrap;font-size:10.5px;">'+fmtDate(r.fechaInicio)+'</td>';
     html+='<td style="font-family:monospace;font-size:10.5px;">'+escapeHtml(r.duracionStr||'—')+'</td>';
     if(hasPedidos){
@@ -5608,7 +5666,6 @@ function informesRender(){
       html+='<td style="font-size:10.5px;">'+escapeHtml(r.estadoPedido||'—')+'</td>';
       var montoTxt=r.total>0?fmtMoneyCompact(r.total,r.moneda||'PEN'):'—';
       html+='<td style="font-weight:700;white-space:nowrap;">'+escapeHtml(montoTxt)+'</td>';
-      html+='<td style="font-size:10.5px;">'+escapeHtml(r.vendedor||'—')+'</td>';
     }
     DOC_COLS.forEach(function(col,i){
       var chkKey='c'+i;
