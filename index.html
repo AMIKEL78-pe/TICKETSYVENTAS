@@ -1706,19 +1706,33 @@ var TICKETS_HEADER_MAP = {
   'tipo de equipo': 'tipoEquipo',
   'marca': 'marca',
   'n activo': 'nActivo',
+  'n serie': 'nSerie',
+  'no serie': 'nSerie',
+  'serie': 'nSerie',
+  'diagnostico': 'diagnostico',
+  'diagnostico:': 'diagnostico',
   'fecha inicio ticket': 'fechaInicioStr',
   'fecha fin ticket': 'fechaFinStr',
   'duracion de ticket': 'duracionStr',
   /* ── Columnas de Pedido integradas en el mismo CSV ── */
   'pedido': 'pedido',
-  'estado': 'estadoPedido',        /* "ESTADO" = estado del pedido */
+  'estado': 'estadoPedido',
   'estado pedido': 'estadoPedido',
   'fecha pedido': 'fechaPedidoStr',
   'vendedor': 'vendedor',
   'categorias': 'categoria',
   'categoria': 'categoria',
   'total': 'totalStr',
-  'moneda': 'moneda'
+  'moneda': 'moneda',
+  /* ── Columnas de verificación de documentos ── */
+  'cot firmada': 'cotFirmada',
+  'cot. firmada': 'cotFirmada',
+  'os firmada': 'osFirmada',
+  'factura y xml': 'facturaXml',
+  'factura': 'facturaXml',
+  'xml': 'xmlDoc',
+  'nota de ingreso': 'notaIngreso',
+  'aceptada portal': 'aceptadaPortal'
 };
 
 var VENTAS_HEADER_MAP = {
@@ -1804,8 +1818,10 @@ function handleFile(evt, mod){
               cliente: (r.cliente||'').trim() || '',
               tecnico: (r.tecnico||'').trim() || 'Sin asignar',
               tipoEquipo: (r.tipoEquipo||'').trim() || 'Sin especificar',
-              marca: (r.marca||'').trim() || 'Sin especificar',
+              marca: (r.marca||'').trim() || '',
               nActivo: r.nActivo || '',
+              nSerie: (r.nSerie||'').trim(),
+              diagnostico: (r.diagnostico||'').trim(),
               fechaInicio: fIni,
               fechaFin: fFin,
               anio: fIni ? fIni.getFullYear() : null,
@@ -1814,13 +1830,20 @@ function handleFile(evt, mod){
               duracionStr: r.duracionStr || '00:00:00',
               duracionSeg: parseDurationToSeconds(r.duracionStr),
               /* ── Campos de Pedido integrados ── */
-              pedido: (r.pedido||'').trim(),
+              pedido: (function(v){ var s=(v||'').trim(); return s==='FALSO'||s.toLowerCase()==='false'?'':s; })(r.pedido),
               estadoPedido: (r.estadoPedido||'').trim(),
               fechaPedido: fPed,
               vendedor: (r.vendedor||'').trim(),
               categoria: (r.categoria||'').trim(),
               total: parseMoneyLocale(r.totalStr),
-              moneda: (r.moneda||'').trim()
+              moneda: (r.moneda||'').trim(),
+              /* ── Verificación de documentos (del CSV) ── */
+              cotFirmada: !!(r.cotFirmada||'').trim() && /^(verdadero|true|si|s[ií]|x|1)$/i.test((r.cotFirmada||'').trim()),
+              osFirmada:  !!(r.osFirmada||'').trim()  && /^(verdadero|true|si|s[ií]|x|1)$/i.test((r.osFirmada||'').trim()),
+              facturaXml: !!(r.facturaXml||'').trim()  && /^(verdadero|true|si|s[ií]|x|1)$/i.test((r.facturaXml||'').trim()),
+              xmlDoc:     !!(r.xmlDoc||'').trim()      && /^(verdadero|true|si|s[ií]|x|1)$/i.test((r.xmlDoc||'').trim()),
+              notaIngreso:!!(r.notaIngreso||'').trim() && /^(verdadero|true|si|s[ií]|x|1)$/i.test((r.notaIngreso||'').trim()),
+              aceptadaPortal: !!(r.aceptadaPortal||'').trim() && /^(verdadero|true|si|s[ií]|x|1)$/i.test((r.aceptadaPortal||'').trim())
             };
           }).filter(function(r){ return r.fechaInicio !== null; });
 
@@ -5614,31 +5637,31 @@ function informesRender(){
      Tabla detalle de tickets — TODOS, con columnas de pedido
      y columnas de verificación de documentos
   ──────────────────────────────────────────────────────────────── */
-  var LS_KEY='coseinco_inf_docs_v1';
-  var savedDocs={};
-  try{savedDocs=JSON.parse(localStorage.getItem(LS_KEY)||'{}');}catch(e){}
-  var DOC_COLS=['Pedidos','COT. FIRMADA','OS Firmada','Factura','XML','Nota de Ingreso','Aceptada Portal'];
-  var hasPedidos=data.some(function(r){return r.pedido;});
-
+  var hasPedidos = data.some(function(r){ return r.pedido; });
+  var DOC_HDRS = ['Pedidos','COT. FIRMADA','OS Firmada','Factura','XML','Nota de Ingreso','Aceptada Portal'];
   html+='<div style="background:#fff;border:1.5px solid #E2E8F0;border-radius:12px;overflow:hidden;margin-bottom:16px;">'
     +'<div style="background:linear-gradient(90deg,#0F2540,#1A3A5C);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;">'
     +'<div style="color:#fff;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;">📋 Detalle de tickets</div>'
     +'<div style="color:rgba(255,255,255,.6);font-size:11.5px;">'+data.length+' registros · todos los filtrados</div>'
     +'</div>'
-    +'<div class="table-scroll"><table class="ej-table" style="font-size:11.5px;"><thead><tr>'
+    +'<div class="table-scroll"><table class="ej-table" style="font-size:11px;"><thead><tr>'
     +'<th style="white-space:nowrap;">N° Ticket</th>'
     +'<th>Estado</th>'
-    +'<th>Tipo de Servicio</th>'
-    +'<th>Técnico</th>'
+    +'<th style="min-width:150px;">Tipo de Servicio</th>'
+    +'<th style="white-space:nowrap;">Técnico</th>'
+    +'<th>Marca</th>'
+    +'<th style="white-space:nowrap;">N° Serie</th>'
+    +'<th style="min-width:160px;">Diagnóstico</th>'
+    +'<th>Categoría</th>'
     +'<th style="white-space:nowrap;">Fecha Inicio</th>'
     +'<th style="white-space:nowrap;">Duración</th>';
   if(hasPedidos){
-    html+='<th style="white-space:nowrap;color:#1A86F1;">N° Pedido</th>'
-      +'<th style="white-space:nowrap;color:#1A86F1;">Est. Pedido</th>'
-      +'<th style="white-space:nowrap;color:#1A86F1;">Monto</th>';
+    html+='<th style="white-space:nowrap;color:#1A86F1;background:#EFF6FF;">N° Pedido</th>'
+      +'<th style="white-space:nowrap;color:#1A86F1;background:#EFF6FF;">Est. Pedido</th>'
+      +'<th style="white-space:nowrap;color:#1A86F1;background:#EFF6FF;">Monto</th>';
   }
-  DOC_COLS.forEach(function(c){
-    html+='<th style="text-align:center;white-space:nowrap;font-size:10px;color:#10B981;max-width:68px;">'+escapeHtml(c)+'</th>';
+  DOC_HDRS.forEach(function(c){
+    html+='<th style="text-align:center;white-space:nowrap;font-size:9.5px;font-weight:800;color:#059669;background:#ECFDF5;padding:6px 4px;">'+escapeHtml(c)+'</th>';
   });
   html+='</tr></thead><tbody>';
 
@@ -5650,30 +5673,52 @@ function informesRender(){
     var e=(r.estadoTicket||'').toLowerCase();
     var isCerr=e.indexOf('cerr')!==-1||e.indexOf('resuel')!==-1||e.indexOf('finaliz')!==-1;
     var estColor=isCerr?'background:#DCFCE7;color:#166534;':'background:#FEF3C7;color:#92400E;';
-    var repColor=(r.estadoReparacion||'').toUpperCase()==='POR COTIZAR'
-      ?'background:#FEE2E2;color:#991B1B;font-weight:700;':'color:#475569;';
     var tid=escapeHtml(r.nroTicket||'');
-    var docSt=savedDocs[tid]||{};
+    /* Leer overrides guardados por el usuario */
+    var docOv={};
+    try{ var _d=localStorage.getItem('csdoc_'+tid); if(_d) docOv=JSON.parse(_d); }catch(ex){}
+    function docVal(csvBool, k){ return k in docOv ? docOv[k] : !!csvBool; }
+    var docVals=[
+      docVal(!!r.pedido,       'ped'),
+      docVal(r.cotFirmada,     'cot'),
+      docVal(r.osFirmada,      'os'),
+      docVal(r.facturaXml,     'fac'),
+      docVal(r.xmlDoc||r.facturaXml,'xml'),
+      docVal(r.notaIngreso,    'nota'),
+      docVal(r.aceptadaPortal, 'portal')
+    ];
+    var docOvKeys=['ped','cot','os','fac','xml','nota','portal'];
     html+='<tr>';
     html+='<td><strong style="color:#0F2540;">'+escapeHtml(r.nroTicket||'—')+'</strong></td>';
-    html+='<td><span style="display:inline-block;padding:2px 8px;border-radius:99px;font-size:10.5px;font-weight:700;'+estColor+'">'+escapeHtml(r.estadoTicket||'—')+'</span></td>';
-    html+='<td>'+escapeHtml(r.tipoServicio||'—')+'</td>';
-    html+='<td>'+escapeHtml(r.tecnico||'—')+'</td>';
+    html+='<td><span style="display:inline-block;padding:2px 7px;border-radius:99px;font-size:10px;font-weight:700;'+estColor+'">'+escapeHtml(r.estadoTicket||'—')+'</span></td>';
+    html+='<td style="font-size:10px;">'+escapeHtml(r.tipoServicio||'—')+'</td>';
+    html+='<td style="font-size:10.5px;white-space:nowrap;">'+escapeHtml(r.tecnico||'—')+'</td>';
+    html+='<td style="font-size:10.5px;">'+escapeHtml(r.marca||'—')+'</td>';
+    html+='<td style="font-family:monospace;font-size:10px;">'+escapeHtml(r.nSerie||'—')+'</td>';
+    html+='<td style="font-size:10px;max-width:200px;word-break:break-word;">'+escapeHtml(r.diagnostico||'—')+'</td>';
+    html+='<td style="font-size:10px;">'+escapeHtml(r.categoria||'—')+'</td>';
     html+='<td style="white-space:nowrap;font-size:10.5px;">'+fmtDate(r.fechaInicio)+'</td>';
     html+='<td style="font-family:monospace;font-size:10.5px;">'+escapeHtml(r.duracionStr||'—')+'</td>';
     if(hasPedidos){
-      html+='<td style="font-weight:700;color:#1A86F1;">'+escapeHtml(r.pedido||'—')+'</td>';
-      html+='<td style="font-size:10.5px;">'+escapeHtml(r.estadoPedido||'—')+'</td>';
+      html+='<td style="font-weight:700;color:#1A86F1;background:#EFF6FF;">'+escapeHtml(r.pedido||'—')+'</td>';
+      html+='<td style="font-size:10px;background:#EFF6FF;">'+escapeHtml(r.estadoPedido||'—')+'</td>';
       var montoTxt=r.total>0?fmtMoneyCompact(r.total,r.moneda||'PEN'):'—';
-      html+='<td style="font-weight:700;white-space:nowrap;">'+escapeHtml(montoTxt)+'</td>';
+      html+='<td style="font-weight:700;white-space:nowrap;background:#EFF6FF;">'+escapeHtml(montoTxt)+'</td>';
     }
-    DOC_COLS.forEach(function(col,i){
-      var chkKey='c'+i;
-      var checked=docSt[chkKey]?' checked':'';
-      html+='<td style="text-align:center;padding:4px 6px;">'
+    docVals.forEach(function(val,idx){
+      var ovK=docOvKeys[idx];
+      var checked=val?' checked':'';
+      var onch="(function(el){"
+        +"try{"
+        +"var key='csdoc_'+"+JSON.stringify(tid)+";"
+        +"var ov={};var _x=localStorage.getItem(key);if(_x)ov=JSON.parse(_x);"
+        +"ov['"+ovK+"']=el.checked;"
+        +"localStorage.setItem(key,JSON.stringify(ov));"
+        +"}catch(e){}})(this)";
+      html+='<td style="text-align:center;padding:3px 4px;background:#F0FDF4;">'
         +'<input type="checkbox"'+checked
-        +' onchange="(function(el){try{var k=\''+LS_KEY+'\';var ls=JSON.parse(localStorage.getItem(k)||\'{}\')||{};if(!ls[\''+tid+'\'])ls[\''+tid+'\']={};ls[\''+tid+'\'][\'c'+i+'\']=el.checked;localStorage.setItem(k,JSON.stringify(ls));}catch(e){}})(this)"'
-        +' style="width:15px;height:15px;accent-color:#10B981;cursor:pointer;"></td>';
+        +' onchange="'+onch+'"'
+        +' style="width:14px;height:14px;accent-color:#059669;cursor:pointer;"></td>';
     });
     html+='</tr>';
   });
