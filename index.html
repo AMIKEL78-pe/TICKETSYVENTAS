@@ -645,6 +645,21 @@ License: MIT
   .inf-section-hdr-v{background:linear-gradient(90deg,#065F46,#059669);}
   .inf-section-hdr-title{color:#fff;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;flex:1;}
   .inf-section-hdr-sub{color:rgba(255,255,255,.6);font-size:11.5px;}
+  /* Columna N° TICKET fija al hacer scroll horizontal */
+  .inf-ticket-table{ border-collapse: separate; border-spacing: 0; }
+  .inf-ticket-table th:first-child,
+  .inf-ticket-table td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    background: #fff;
+    border-right: 2px solid #E2E8F0;
+    min-width: 80px;
+  }
+  .inf-ticket-table thead th:first-child {
+    background: #F8FAFC;
+    z-index: 4;
+  }
 </style>
 </head>
 <body>
@@ -5779,13 +5794,11 @@ function informesRender(){
     var DOC_HDRS=['Pedidos','COT. FIRMADA','OS Firmada','Factura','XML','Nota de Ingreso','Aceptada Portal'];
     html+='<div style="margin-top:6px;">'
       +'<div style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#94A3B8;margin-bottom:8px;">📋 Detalle de Tickets ('+tickets.length+' registros)</div>'
-      +'<div class="table-scroll"><table class="ej-table" style="font-size:11px;"><thead><tr>'
-      +'<th>N° Ticket</th><th>Estado</th><th>Tipo de Servicio</th><th>Técnico</th>'
-      +'<th>Marca</th><th style="white-space:nowrap;">N° Serie</th><th>Categoría</th>'
+      +'<div class="table-scroll"><table class="ej-table inf-ticket-table" style="font-size:11px;"><thead><tr>'
+      +'<th>N° Ticket</th><th>Estado</th><th>Tipo de Servicio</th><th>Categoría</th>'
       +'<th style="white-space:nowrap;">Fecha Inicio</th><th>Duración</th>';
     if(hasPedidos){
       html+='<th style="color:#1A86F1;background:#EFF6FF;">N° Pedido</th>'
-        +'<th style="color:#1A86F1;background:#EFF6FF;">Est. Pedido</th>'
         +'<th style="color:#1A86F1;background:#EFF6FF;white-space:nowrap;">Monto</th>';
     }
     DOC_HDRS.forEach(function(c){
@@ -5812,15 +5825,11 @@ function informesRender(){
       html+='<td><strong style="color:#0F2540;">'+escapeHtml(r.nroTicket||'—')+'</strong></td>';
       html+='<td><span style="display:inline-block;padding:2px 7px;border-radius:99px;font-size:10px;font-weight:700;'+estColor+'">'+escapeHtml(r.estadoTicket||'—')+'</span></td>';
       html+='<td style="font-size:10px;">'+escapeHtml(r.tipoServicio||'—')+'</td>';
-      html+='<td style="font-size:10.5px;white-space:nowrap;">'+escapeHtml(r.tecnico||'—')+'</td>';
-      html+='<td style="font-size:10.5px;">'+escapeHtml(r.marca||'—')+'</td>';
-      html+='<td style="font-family:monospace;font-size:10px;">'+escapeHtml(r.nSerie||'—')+'</td>';
       html+='<td style="font-size:10px;">'+escapeHtml(r.categoria||'—')+'</td>';
       html+='<td style="white-space:nowrap;font-size:10.5px;">'+fmtDate(r.fechaInicio)+'</td>';
       html+='<td style="font-family:monospace;font-size:10.5px;">'+escapeHtml(r.duracionStr||'—')+'</td>';
       if(hasPedidos){
         html+='<td style="font-weight:700;color:#1A86F1;background:#EFF6FF;">'+escapeHtml(r.pedido||'—')+'</td>';
-        html+='<td style="font-size:10px;background:#EFF6FF;">'+escapeHtml(r.estadoPedido||'—')+'</td>';
         var mT=r.total>0?fmtMoneyCompact(r.total,r.moneda||'PEN'):'—';
         html+='<td style="font-weight:700;white-space:nowrap;background:#EFF6FF;">'+escapeHtml(mT)+'</td>';
       }
@@ -5967,10 +5976,10 @@ function informesExportHtml(){
 function informesExportCsv(){
   var data=informesGetData();
   if(!data.length){alert('Sin tickets para exportar');return;}
-  var cols=['N° Ticket','Estado','Tipo de Servicio','Técnico','Marca','N° Serie','Categoría','Fecha Inicio','Duración','N° Pedido','Estado Pedido','Monto','Moneda'];
+  var cols=['N° Ticket','Estado','Tipo de Servicio','Categoría','Fecha Inicio','Duración','N° Pedido','Estado Pedido','Monto','Moneda'];
   var rows=[cols.join(',')];
   data.forEach(function(r){
-    rows.push([r.nroTicket,r.estadoTicket,r.tipoServicio,r.tecnico,r.marca,r.nSerie,r.categoria,
+    rows.push([r.nroTicket,r.estadoTicket,r.tipoServicio,r.categoria,
       fmtDate(r.fechaInicio),r.duracionStr||'—',r.pedido||'',r.estadoPedido||'',r.total||'',r.moneda||'']
       .map(function(v){return '"'+(v||'').toString().replace(/"/g,'""')+'"';}).join(','));
   });
