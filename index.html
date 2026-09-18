@@ -5651,7 +5651,7 @@ function informesRender(){
     +'<th style="white-space:nowrap;">Técnico</th>'
     +'<th>Marca</th>'
     +'<th style="white-space:nowrap;">N° Serie</th>'
-    +'<th style="min-width:160px;">Diagnóstico</th>'
+
     +'<th>Categoría</th>'
     +'<th style="white-space:nowrap;">Fecha Inicio</th>'
     +'<th style="white-space:nowrap;">Duración</th>';
@@ -5695,7 +5695,7 @@ function informesRender(){
     html+='<td style="font-size:10.5px;white-space:nowrap;">'+escapeHtml(r.tecnico||'—')+'</td>';
     html+='<td style="font-size:10.5px;">'+escapeHtml(r.marca||'—')+'</td>';
     html+='<td style="font-family:monospace;font-size:10px;">'+escapeHtml(r.nSerie||'—')+'</td>';
-    html+='<td style="font-size:10px;max-width:200px;word-break:break-word;">'+escapeHtml(r.diagnostico||'—')+'</td>';
+
     html+='<td style="font-size:10px;">'+escapeHtml(r.categoria||'—')+'</td>';
     html+='<td style="white-space:nowrap;font-size:10.5px;">'+fmtDate(r.fechaInicio)+'</td>';
     html+='<td style="font-family:monospace;font-size:10.5px;">'+escapeHtml(r.duracionStr||'—')+'</td>';
