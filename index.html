@@ -1439,6 +1439,42 @@ License: MIT
             <div class="infms-footer"><button onclick="infMsAll('infms-tec')">Todos</button><button onclick="infMsNone('infms-tec')">Ninguno</button></div>
           </div>
         </div>
+        <!-- Categoría -->
+        <div class="infms-wrap" id="infms-cat">
+          <button class="infms-btn" onclick="infMsToggle('infms-cat')">
+            <span class="infms-label">🏷 Categoría</span>
+            <span class="infms-badge all" id="infms-cat-badge">Todas</span>
+            <span class="infms-arrow">▾</span>
+          </button>
+          <div class="infms-panel" id="infms-cat-panel">
+            <div class="infms-list" id="infms-cat-list"></div>
+            <div class="infms-footer"><button onclick="infMsAll('infms-cat')">Todas</button><button onclick="infMsNone('infms-cat')">Ninguna</button></div>
+          </div>
+        </div>
+        <!-- Estado de Ticket -->
+        <div class="infms-wrap" id="infms-est">
+          <button class="infms-btn" onclick="infMsToggle('infms-est')">
+            <span class="infms-label">🎫 Est. Ticket</span>
+            <span class="infms-badge all" id="infms-est-badge">Todos</span>
+            <span class="infms-arrow">▾</span>
+          </button>
+          <div class="infms-panel" id="infms-est-panel">
+            <div class="infms-list" id="infms-est-list"></div>
+            <div class="infms-footer"><button onclick="infMsAll('infms-est')">Todos</button><button onclick="infMsNone('infms-est')">Ninguno</button></div>
+          </div>
+        </div>
+        <!-- Estado de Pedido -->
+        <div class="infms-wrap" id="infms-estped">
+          <button class="infms-btn" onclick="infMsToggle('infms-estped')">
+            <span class="infms-label">📦 Est. Pedido</span>
+            <span class="infms-badge all" id="infms-estped-badge">Todos</span>
+            <span class="infms-arrow">▾</span>
+          </button>
+          <div class="infms-panel" id="infms-estped-panel">
+            <div class="infms-list" id="infms-estped-list"></div>
+            <div class="infms-footer"><button onclick="infMsAll('infms-estped')">Todos</button><button onclick="infMsNone('infms-estped')">Ninguno</button></div>
+          </div>
+        </div>
         <button class="btn btn-ghost" style="font-size:11.5px;padding:6px 12px;" onclick="informesLimpiarFiltros()">✕ Limpiar</button>
       </div>
 
@@ -5482,7 +5518,7 @@ function borrarSesion(){
    ══════════════════════════════════════════════════════════════ */
 
 /* ── Utilidades Multi-Select (prefijo infMs) ── */
-var INF_MS_IDS = ['infms-cliente','infms-anio','infms-mes','infms-semana','infms-tipo','infms-tec'];
+var INF_MS_IDS = ['infms-cliente','infms-anio','infms-mes','infms-semana','infms-tipo','infms-tec','infms-cat','infms-est','infms-estped'];
 
 function infMsToggle(id){
   /* Cerrar todos primero */
@@ -5585,6 +5621,14 @@ function informesInit(){
   infMsPopulate('infms-semana', uniq(t.map(function(r){return r.semana?String(r.semana):'';})).filter(Boolean), function(s){return 'Semana '+s;});
   infMsPopulate('infms-tipo', uniq(t.map(function(r){return (r.tipoServicio||'').trim();})).filter(Boolean));
   infMsPopulate('infms-tec', uniq(t.map(function(r){return (r.tecnico||'').trim();})).filter(Boolean));
+  infMsPopulate('infms-cat', uniq(t.map(function(r){return (r.categoria||'').trim();})).filter(Boolean));
+  infMsPopulate('infms-est', uniq(t.map(function(r){return (r.estadoTicket||'').trim();})).filter(Boolean));
+  /* Estado de Pedido — de ventas + de tickets unificados */
+  var estPedVals = uniq(
+    v.map(function(r){return (r.estadoPedido||'').trim();}).concat(
+    t.map(function(r){return (r.estadoPedido||'').trim();}))
+  ).filter(Boolean);
+  infMsPopulate('infms-estped', estPedVals);
   if(statusEl) statusEl.textContent=t.length+' tickets · '+v.length+' pedidos · '+allCli.length+' clientes';
   informesRender();
 }
@@ -5596,34 +5640,42 @@ function informesLimpiarFiltros(){
 
 /* ── Obtener tickets filtrados ── */
 function informesGetData(){
-  var cli   =infMsGetSelected('infms-cliente');
-  var anios =infMsGetSelected('infms-anio');
-  var meses =infMsGetSelected('infms-mes');
-  var sems  =infMsGetSelected('infms-semana');
-  var tipos =infMsGetSelected('infms-tipo');
-  var tecs  =infMsGetSelected('infms-tec');
+  var cli    =infMsGetSelected('infms-cliente');
+  var anios  =infMsGetSelected('infms-anio');
+  var meses  =infMsGetSelected('infms-mes');
+  var sems   =infMsGetSelected('infms-semana');
+  var tipos  =infMsGetSelected('infms-tipo');
+  var tecs   =infMsGetSelected('infms-tec');
+  var cats   =infMsGetSelected('infms-cat');
+  var ests   =infMsGetSelected('infms-est');
+  var estpeds=infMsGetSelected('infms-estped');
   return STATE.tickets.raw.filter(function(r){
-    if(cli.length   && cli.indexOf((r.cliente||'').trim())===-1) return false;
-    if(anios.length && anios.indexOf(String(r.anio))===-1)       return false;
-    if(meses.length && meses.indexOf(String(r.mes))===-1)        return false;
-    if(sems.length  && sems.indexOf(String(r.semana))===-1)      return false;
-    if(tipos.length && tipos.indexOf((r.tipoServicio||'').trim())===-1) return false;
-    if(tecs.length  && tecs.indexOf((r.tecnico||'').trim())===-1)       return false;
+    if(cli.length    && cli.indexOf((r.cliente||'').trim())===-1)       return false;
+    if(anios.length  && anios.indexOf(String(r.anio))===-1)             return false;
+    if(meses.length  && meses.indexOf(String(r.mes))===-1)              return false;
+    if(sems.length   && sems.indexOf(String(r.semana))===-1)            return false;
+    if(tipos.length  && tipos.indexOf((r.tipoServicio||'').trim())===-1) return false;
+    if(tecs.length   && tecs.indexOf((r.tecnico||'').trim())===-1)       return false;
+    if(cats.length   && cats.indexOf((r.categoria||'').trim())===-1)     return false;
+    if(ests.length   && ests.indexOf((r.estadoTicket||'').trim())===-1)  return false;
+    if(estpeds.length && estpeds.indexOf((r.estadoPedido||'').trim())===-1) return false;
     return true;
   });
 }
 
 /* ── Obtener ventas filtradas por los mismos clientes/período ── */
 function informesGetVentas(){
-  var cli  =infMsGetSelected('infms-cliente');
-  var anios=infMsGetSelected('infms-anio');
-  var meses=infMsGetSelected('infms-mes');
-  var sems =infMsGetSelected('infms-semana');
+  var cli    =infMsGetSelected('infms-cliente');
+  var anios  =infMsGetSelected('infms-anio');
+  var meses  =infMsGetSelected('infms-mes');
+  var sems   =infMsGetSelected('infms-semana');
+  var estpeds=infMsGetSelected('infms-estped');
   return STATE.ventas.raw.filter(function(r){
-    if(cli.length   && cli.indexOf((r.cliente||'').trim())===-1) return false;
-    if(anios.length && anios.indexOf(String(r.anio))===-1)       return false;
-    if(meses.length && meses.indexOf(String(r.mes))===-1)        return false;
-    if(sems.length  && sems.indexOf(String(r.semana))===-1)      return false;
+    if(cli.length    && cli.indexOf((r.cliente||'').trim())===-1)           return false;
+    if(anios.length  && anios.indexOf(String(r.anio))===-1)                 return false;
+    if(meses.length  && meses.indexOf(String(r.mes))===-1)                  return false;
+    if(sems.length   && sems.indexOf(String(r.semana))===-1)                return false;
+    if(estpeds.length && estpeds.indexOf((r.estadoPedido||'').trim())===-1) return false;
     return true;
   });
 }
