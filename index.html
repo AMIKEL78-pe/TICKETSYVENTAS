@@ -1146,6 +1146,21 @@ License: MIT
           </div>
           <div class="ms-tags" id="ms-tags-vf-moneda"></div>
         </div>
+        <div class="filter-field">
+          <label>Tipo de Servicio</label>
+          <div class="ms-wrap" id="ms-wrap-vf-tiposervicio">
+            <button type="button" class="ms-trigger" onclick="msToggle('vf-tiposervicio')" id="ms-btn-vf-tiposervicio">
+              <span class="ms-label" id="ms-lbl-vf-tiposervicio">Todos</span>
+              <span class="ms-caret">▼</span>
+            </button>
+            <div class="ms-dropdown" id="ms-dd-vf-tiposervicio">
+              <label class="ms-option ms-all">
+                <input type="checkbox" id="ms-all-vf-tiposervicio" onchange="msToggleAll('vf-tiposervicio')" checked> Todos
+              </label>
+            </div>
+          </div>
+          <div class="ms-tags" id="ms-tags-vf-tiposervicio"></div>
+        </div>
         <div class="filters-actions">
           <button class="btn btn-ghost" onclick="resetFilters('ventas')">Limpiar filtros</button>
         </div>
@@ -1963,6 +1978,7 @@ function handleFile(evt, mod){
               fechaPedido: fPed,
               vendedor: (r.vendedor||'').trim(),
               categoria: (r.categoria||'').trim(),
+              tipoServicio: (r.tipoServicio||'').trim(),
               total: parseMoneyLocale(r.totalStr),
               moneda: (r.moneda||'').trim(),
               /* ── Verificación de documentos (del CSV) ── */
@@ -1999,6 +2015,7 @@ function handleFile(evt, mod){
                 vendedor:  r.vendedor || 'Sin asignar',
                 cliente:   r.cliente  || 'Sin cliente',
                 categoria: r.categoria || 'Sin categoría',
+                tipoServicio: (r.tipoServicio||'').trim(),
                 total:     r.total    || 0,
                 moneda:    r.moneda   || '—'
               });
@@ -2090,6 +2107,7 @@ function buildFilterOptions(mod){
     var estados2 = uniqSorted(data.map(function(r){return r.estadoPedido;}));
     var categorias2 = uniqSorted(data.map(function(r){return r.categoria;}));
     var monedas2 = uniqSorted(data.map(function(r){return r.moneda;}));
+    var tiposServicioV = uniqSorted(data.map(function(r){return (r.tipoServicio||'').trim();})).filter(Boolean);
     msFillDynamic('vf-anio',     anios2.map(String));
     msFillDynamic('vf-mes',      mesesV.map(function(m){ return {value:String(m), label:MES_NOMBRES[m-1]}; }), true);
     msFillDynamic('vf-semana',   semanas2.map(function(s){ return {value:String(s), label:'Semana '+s}; }), true);
@@ -2098,6 +2116,7 @@ function buildFilterOptions(mod){
     msFillDynamic('vf-estado',   estados2);
     msFillDynamic('vf-categoria',categorias2);
     msFillDynamic('vf-moneda',   monedas2);
+    if(tiposServicioV.length) msFillDynamic('vf-tiposervicio', tiposServicioV);
   }
 }
 
@@ -2159,6 +2178,7 @@ function applyFilters(mod){
     var estadosV  = msGetSelected('vf-estado');
     var categorias= msGetSelected('vf-categoria');
     var monedas   = msGetSelected('vf-moneda');
+    var tiposServV = msGetSelected('vf-tiposervicio');
     STATE.ventas.filtered = STATE.ventas.raw.filter(function(r){
       if(aniosV.length    && aniosV.indexOf(String(r.anio))===-1)    return false;
       if(mesesV.length    && mesesV.indexOf(String(r.mes))===-1)     return false;
@@ -2168,6 +2188,7 @@ function applyFilters(mod){
       if(estadosV.length  && estadosV.indexOf(r.estadoPedido)===-1)  return false;
       if(categorias.length && categorias.indexOf(r.categoria)===-1)  return false;
       if(monedas.length   && monedas.indexOf(r.moneda)===-1)         return false;
+      if(tiposServV.length && tiposServV.indexOf((r.tipoServicio||'').trim())===-1) return false;
       return true;
     });
     renderVentas();
@@ -2357,7 +2378,7 @@ function categoryPickHandler(selectId, mod){
 /* Versión de categoryPickHandler para multi-selects: hace toggle del valor clicado */
 var MS_ALL_KEYS = [
   'tf-anio','tf-mes','tf-semana','tecnico','estado','reparacion','tf-tiposervicio','tf-cliente-t',
-  'vf-anio','vf-mes','vf-semana','vf-vendedor','vf-cliente','vf-estado','vf-categoria','vf-moneda',
+  'vf-anio','vf-mes','vf-semana','vf-vendedor','vf-cliente','vf-estado','vf-categoria','vf-moneda','vf-tiposervicio',
   'ej-estado','ej-moneda','ej-categoria',
   'rent-estado','rent-moneda','rent-anio','rent-mes','rent-categoria'
 ];
@@ -2826,6 +2847,7 @@ function buildVentasSkeleton(){
   + '<div class="charts-grid">'
   +   '<div class="chart-card"><h4>Ventas por vendedor <span class="chart-hint">clic para filtrar</span></h4><div class="chart-wrap"><canvas id="chartVendedor"></canvas></div></div>'
   +   '<div class="chart-card"><h4>Distribución por categoría</h4><div class="chart-wrap"><canvas id="chartCategoria"></canvas></div></div>'
+  +   '<div class="chart-card"><h4>Ventas por Tipo de Servicio</h4><div class="chart-wrap"><canvas id="chartTipoServV"></canvas></div></div>'
   + '</div>'
   + '<div class="charts-grid" style="margin-top:16px;">'
   +   '<div class="chart-card"><h4 style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">Evolución de ventas <span class="chart-hint">clic para filtrar</span><span style="margin-left:auto;display:flex;gap:4px;"><button id="btnTendSemana" onclick="setTendenciaModo(\'semana\')" style="padding:3px 10px;font-size:10.5px;font-weight:700;border-radius:20px;border:1.5px solid var(--blue);background:var(--blue);color:#fff;cursor:pointer;">Por semana</button><button id="btnTendMes" onclick="setTendenciaModo(\'mes\')" style="padding:3px 10px;font-size:10.5px;font-weight:700;border-radius:20px;border:1.5px solid var(--border);background:#fff;color:var(--ink-muted);cursor:pointer;">Por mes</button></span></h4><div class="chart-wrap"><canvas id="chartTendenciaVenta"></canvas></div></div>'
@@ -2904,7 +2926,13 @@ function renderVentasHighlights(data, porMoneda){
 
   var items = [
     renderHighlightCard('🏆','Mejor vendedor', mejorVendedorLines.length ? mejorVendedorLines.join(' · ') : '—', monedas.length>1?'un ganador por moneda':''),
-    renderHighlightCard('📦','Categoría más vendida', topCategoria||'—', topCategoria?(porCategoria[topCategoria]+' pedidos'):'')
+    renderHighlightCard('📦','Categoría más vendida', topCategoria||'—', topCategoria?(porCategoria[topCategoria]+' pedidos'):''),
+  (function(){
+    var porTS={};
+    data.forEach(function(r){ var t=(r.tipoServicio||'').trim(); if(t) porTS[t]=(porTS[t]||0)+1; });
+    var topTS=Object.keys(porTS).sort(function(a,b){return porTS[b]-porTS[a];})[0]||null;
+    return renderHighlightCard('🔧','Servicio más vendido', topTS||'—', topTS?(porTS[topTS]+' pedidos'):'');
+  })()
   ];
   document.getElementById('ventasHighlights').innerHTML = items.join('');
 }
@@ -2943,6 +2971,31 @@ function renderVentasCharts(data){
   var porCategoria = {};
   data.forEach(function(r){ porCategoria[r.categoria] = (porCategoria[r.categoria]||0)+1; });
   var categorias = Object.keys(porCategoria);
+  /* ── Tipo de Servicio ── */
+  var tipoServMap={};
+  data.forEach(function(r){ var t=(r.tipoServicio||'Sin tipo').trim(); if(t) tipoServMap[t]=(tipoServMap[t]||0)+1; });
+  var tipoServOrd=Object.keys(tipoServMap).filter(function(t){return t!=='Sin tipo';}).sort(function(a,b){return tipoServMap[b]-tipoServMap[a];});
+  destroyChart('tipoServV');
+  var ctxTS=document.getElementById('chartTipoServV');
+  if(ctxTS && tipoServOrd.length){
+    CHARTS.tipoServV = new Chart(ctxTS, {
+      type:'bar',
+      data:{
+        labels: tipoServOrd.slice(0,10),
+        datasets:[{
+          label:'Pedidos',
+          data: tipoServOrd.slice(0,10).map(function(t){return tipoServMap[t];}),
+          backgroundColor: CHART_PALETTE.slice(0,tipoServOrd.length),
+          borderRadius:4
+        }]
+      },
+      options: Object.assign(baseBarOptions(), {
+        indexAxis:'y',
+        plugins:{legend:{display:false}}
+      })
+    });
+  }
+
   destroyChart('categoria');
   CHARTS.categoria = new Chart(document.getElementById('chartCategoria'), {
     type:'doughnut',
