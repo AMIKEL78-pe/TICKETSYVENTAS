@@ -660,6 +660,19 @@ License: MIT
     background: #F8FAFC;
     z-index: 4;
   }
+  /* ── Informes: sistema de tabs ── */
+  .inf-tabs-bar{display:flex;gap:4px;flex-wrap:wrap;padding:4px 4px 0;background:var(--surface-alt);border-radius:10px 10px 0 0;border:1.5px solid var(--border);border-bottom:none;}
+  .inf-tab-btn{padding:8px 16px;font-size:11.5px;font-weight:700;border:none;border-radius:7px 7px 0 0;cursor:pointer;background:transparent;color:var(--ink-muted);transition:all .15s;white-space:nowrap;}
+  .inf-tab-btn:hover{background:rgba(26,134,241,.08);color:var(--blue);}
+  .inf-tab-btn.active{background:#fff;color:var(--blue);box-shadow:0 -2px 0 var(--blue) inset;}
+  .inf-tab-pane{display:none;}
+  .inf-tab-pane.active{display:block;}
+  .inf-tab-content{background:#fff;border:1.5px solid var(--border);border-radius:0 0 10px 10px;padding:18px 20px;}
+  .inf-kpi-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;}
+  .inf-kpi-box{background:#fff;border-top:4px solid #ccc;border:1.5px solid #E2E8F0;border-radius:10px;padding:14px 18px;flex:1;min-width:130px;}
+  .inf-kpi-box-label{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#94A3B8;margin-bottom:5px;}
+  .inf-kpi-box-val{font-size:26px;font-weight:900;line-height:1;margin-bottom:3px;}
+  .inf-kpi-box-sub{font-size:11px;color:#64748B;}
 </style>
 </head>
 <body>
@@ -5743,332 +5756,282 @@ function informesRender(){
   if(!content) return;
   var btnHtml=document.getElementById('informesBtnHtml');
   var btnCsv =document.getElementById('informesBtnCsv');
+  if(btnHtml) btnHtml.style.display='none';
+  if(btnCsv)  btnCsv.style.display='none';
 
   var tickets =informesGetData();
   var ventas  =informesGetVentas();
 
-  /* Clientes seleccionados para mostrar en el header */
-  var cliSel=infMsGetSelected('infms-cliente');
-  var cliDesc=cliSel.length===0?'Todos los clientes':cliSel.length===1?cliSel[0]:cliSel.length+' clientes seleccionados';
-
   if(!tickets.length && !ventas.length){
-    if(btnHtml) btnHtml.style.display='none';
-    if(btnCsv)  btnCsv.style.display='none';
-    content.innerHTML='<div class="inf-empty"><div class="inf-empty-icon">📭</div><h4>Sin datos para los filtros seleccionados</h4><p>Ajusta los filtros o importa más datos.</p></div>';
+    content.innerHTML='<div class="inf-empty"><div class="inf-empty-icon">📭</div>'
+      +'<h4>Sin datos para los filtros seleccionados</h4>'
+      +'<p>Ajusta los filtros o importa más datos.</p></div>';
     return;
   }
-  if(btnHtml) btnHtml.style.display='inline-flex';
-  if(btnCsv)  btnCsv.style.display='inline-flex';
 
-  /* ── Cálculos Soporte ── */
-  var cerrados=tickets.filter(function(r){var e=(r.estadoTicket||'').toLowerCase();return e.indexOf('cerr')!==-1||e.indexOf('resuel')!==-1||e.indexOf('finaliz')!==-1;});
+  /* ── Calcular todo una vez ── */
+  /* Tickets */
+  var cerrados=tickets.filter(function(r){var e=(r.estadoTicket||'').toLowerCase();return /cerr|resuel|finaliz/.test(e);});
+  var pendientes=tickets.filter(function(r){var e=(r.estadoTicket||'').toLowerCase();return !/cerr|resuel|finaliz/.test(e);});
   var pctRes=tickets.length?Math.round(cerrados.length/tickets.length*100):0;
   var segTotal=tickets.reduce(function(s,r){return s+(r.duracionSeg||0);},0);
   var promSeg=tickets.length?Math.round(segTotal/tickets.length):0;
-  var tipoMap={},eqMap={},tecMap={},marcaMap={};
-  tickets.forEach(function(r){
-    var t=r.tipoServicio||'—'; tipoMap[t]=(tipoMap[t]||0)+1;
-    var e=r.tipoEquipo||'—';  eqMap[e]=(eqMap[e]||0)+1;
-    var tc=r.tecnico||'—';    tecMap[tc]=(tecMap[tc]||0)+1;
-    var m=r.marca||'—';       marcaMap[m]=(marcaMap[m]||0)+1;
-  });
-  var tiposOrd=Object.keys(tipoMap).sort(function(a,b){return tipoMap[b]-tipoMap[a];});
   var slaColor=pctRes>=90?'#10B981':pctRes>=70?'#F59E0B':'#EF4444';
-  var slaLabel=pctRes>=90?'Excelente':pctRes>=70?'Regular':'Por mejorar';
 
-  /* Tendencia por día */
-  var diaMap={};
+  /* Gráficos tickets */
+  var diaMap={}, tipoMap={}, catMapT={};
   tickets.forEach(function(r){
     var fi=r.fechaInicio instanceof Date?r.fechaInicio:new Date(r.fechaInicio||'');
-    if(isNaN(fi.getTime())) return;
-    var k=fi.getFullYear()+'-'+String(fi.getMonth()+1).padStart(2,'0')+'-'+String(fi.getDate()).padStart(2,'0');
-    diaMap[k]=(diaMap[k]||0)+1;
+    if(!isNaN(fi.getTime())){
+      var k=fi.getFullYear()+'-'+String(fi.getMonth()+1).padStart(2,'0')+'-'+String(fi.getDate()).padStart(2,'0');
+      diaMap[k]=(diaMap[k]||0)+1;
+    }
+    var t=(r.tipoServicio||'Sin tipo').trim(); tipoMap[t]=(tipoMap[t]||0)+1;
+    var c=(r.categoria||'Sin categoría').trim(); catMapT[c]=(catMapT[c]||0)+1;
   });
   var diaKeys=Object.keys(diaMap).sort();
+  var tiposOrd=Object.keys(tipoMap).filter(function(t){return t!=='Sin tipo';}).sort(function(a,b){return tipoMap[b]-tipoMap[a];}).slice(0,10);
+  var catOrdT=Object.keys(catMapT).filter(function(c){return c!=='Sin categoría';}).sort(function(a,b){return catMapT[b]-catMapT[a];}).slice(0,10);
 
-  /* ── Cálculos Ventas ── */
+  /* Ventas */
+  function sumPEN(a){return a.reduce(function(s,r){return s+(r.moneda==='PEN'?(r.total||0):0);},0);}
+  function sumUSD(a){return a.reduce(function(s,r){return s+(r.moneda==='USD'?(r.total||0):0);},0);}
   var ordenesV=ventas.filter(function(r){return /orden|venta/i.test(r.estadoPedido||'');});
   var cotizV  =ventas.filter(function(r){return /cotiz/i.test(r.estadoPedido||'');});
-  function sumPEN(arr){return arr.reduce(function(s,r){return s+(r.moneda==='PEN'?(r.total||0):0);},0);}
-  function sumUSD(arr){return arr.reduce(function(s,r){return s+(r.moneda==='USD'?(r.total||0):0);},0);}
-  var catMap={},cliVMap={},mesVMap={};
-  ventas.forEach(function(r){
-    var c=r.categoria||'—'; catMap[c]=(catMap[c]||0)+(r.total||0);
-    var cl=(r.cliente||'—').trim();
-    if(!cliVMap[cl]) cliVMap[cl]={pen:0,usd:0,pedidos:0};
-    cliVMap[cl].pen+=(r.moneda==='PEN'?(r.total||0):0);
-    cliVMap[cl].usd+=(r.moneda==='USD'?(r.total||0):0);
-    cliVMap[cl].pedidos+=1;
-    var mk=(r.anio||'?')+'-'+String(r.mes||'?').padStart(2,'0');
-    if(!mesVMap[mk]) mesVMap[mk]={pen:0,usd:0};
-    mesVMap[mk].pen+=(r.moneda==='PEN'?(r.total||0):0);
-    mesVMap[mk].usd+=(r.moneda==='USD'?(r.total||0):0);
-  });
-  var catOrd=Object.keys(catMap).sort(function(a,b){return catMap[b]-catMap[a];});
-  var mesVKeys=Object.keys(mesVMap).sort();
+  var catMapV={};
+  ventas.forEach(function(r){var c=(r.categoria||'Sin categoría').trim();catMapV[c]=(catMapV[c]||0)+(r.total||0);});
+  var catOrdV=Object.keys(catMapV).sort(function(a,b){return catMapV[b]-catMapV[a];}).slice(0,10);
 
-  /* ════ CONSTRUIR HTML ════ */
-  function kpiCard(bg, label, val, sub){
-    return '<div style="background:#fff;border-top:4px solid '+bg+';border:1.5px solid #E2E8F0;border-radius:12px;padding:14px 18px;flex:1;min-width:130px;">'
-      +'<div style="font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#94A3B8;margin-bottom:6px;">'+label+'</div>'
-      +'<div style="font-size:26px;font-weight:900;color:'+bg+';line-height:1;margin-bottom:3px;">'+val+'</div>'
-      +'<div style="font-size:11px;color:#64748B;">'+sub+'</div>'
+  /* ── KPI helper ── */
+  function kpi(color,label,val,sub){
+    return '<div class="inf-kpi-box" style="border-top-color:'+color+';">'
+      +'<div class="inf-kpi-box-label">'+label+'</div>'
+      +'<div class="inf-kpi-box-val" style="color:'+color+';">'+val+'</div>'
+      +'<div class="inf-kpi-box-sub">'+sub+'</div>'
       +'</div>';
   }
 
-  var html='';
-
-  /* ── Header general ── */
-  html+='<div style="background:linear-gradient(135deg,#0F2540,#1A3A5C 60%,#1A86F1);border-radius:14px;padding:20px 24px;margin-bottom:20px;color:#fff;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">'
-    +'<div style="flex:1;">'
-    +'<div style="font-size:11px;font-weight:700;letter-spacing:1px;opacity:.7;text-transform:uppercase;">Informe Consolidado</div>'
-    +'<div style="font-size:20px;font-weight:900;margin:4px 0;">'+escapeHtml(cliDesc)+'</div>'
-    +'<div style="font-size:11.5px;opacity:.6;">Generado el '+fmtDate(new Date())+'</div>'
-    +'</div>'
-    +'<div style="display:flex;gap:20px;flex-wrap:wrap;">'
-    +(tickets.length?'<div style="text-align:center;"><div style="font-size:32px;font-weight:900;">'+tickets.length+'</div><div style="font-size:10px;opacity:.7;text-transform:uppercase;letter-spacing:.5px;">Tickets</div></div>':'')
-    +(ventas.length?'<div style="text-align:center;"><div style="font-size:32px;font-weight:900;">'+ventas.length+'</div><div style="font-size:10px;opacity:.7;text-transform:uppercase;letter-spacing:.5px;">Pedidos</div></div>':'')
-    +'</div></div>';
-
-  /* ══════════════════════════════════════════════
-     SECCIÓN 1: SOPORTE TÉCNICO
-  ══════════════════════════════════════════════ */
-  if(tickets.length){
-    html+='<div class="inf-section-card">'
-      +'<div class="inf-section-hdr inf-section-hdr-t">'
-      +'<div class="inf-section-hdr-title">🔵 Soporte Técnico</div>'
-      +'<div class="inf-section-hdr-sub">Basado en '+tickets.length+' tickets · Tickets de Servicio CSV</div>'
-      +'</div>'
-      +'<div style="padding:18px 20px;">';
-
-    /* KPIs soporte */
-    html+='<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px;">';
-    html+=kpiCard('#10B981','Resueltos',      cerrados.length, 'de '+tickets.length+' atendidos');
-    html+=kpiCard('#EF4444','Pendientes',     tickets.length-cerrados.length, 'por resolver');
-    html+=kpiCard('#1A86F1','Tiempo promedio',formatSecondsToHMS(promSeg), 'por ticket');
-    html+=kpiCard('#8B5CF6','Tiempo total',   formatSecondsToHMS(segTotal), 'horas de soporte');
-    html+=kpiCard('#F59E0B','Tipos de serv.', tiposOrd.length, 'categorías distintas');
-    /* SLA */
-    html+='<div style="background:#fff;border-top:4px solid '+slaColor+';border:1.5px solid #E2E8F0;border-radius:12px;padding:14px 18px;flex:1;min-width:130px;">'
-      +'<div style="font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#94A3B8;margin-bottom:6px;">% Resolución</div>'
-      +'<div style="font-size:26px;font-weight:900;color:'+slaColor+';line-height:1;margin-bottom:6px;">'+pctRes+'%</div>'
-      +'<div style="height:6px;background:'+slaColor+'20;border-radius:999px;overflow:hidden;margin-bottom:3px;"><div style="height:100%;width:'+pctRes+'%;background:'+slaColor+';border-radius:999px;"></div></div>'
-      +'<div style="font-size:11px;color:'+slaColor+';font-weight:700;">'+slaLabel+'</div>'
-      +'</div>';
-    html+='</div>';
-
-    /* Gráficos soporte */
-    html+='<div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:14px;">'
-      +'<div class="chart-card"><h4 style="font-size:11.5px;font-weight:800;margin-bottom:8px;color:#0F2540;">📅 Tickets por día</h4><div class="chart-wrap"><canvas id="chartInfTendencia"></canvas></div></div>'
-      +'<div class="chart-card"><h4 style="font-size:11.5px;font-weight:800;margin-bottom:8px;color:#0F2540;">🔧 Por tipo de servicio</h4><div class="chart-wrap"><canvas id="chartInfTipo"></canvas></div></div>'
-      +'</div>';
-
-    /* Técnicos */
-    var tecOrd=Object.keys(tecMap).sort(function(a,b){return tecMap[b]-tecMap[a];});
-    html+='<div style="margin-bottom:16px;">'
-      +'<div style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#94A3B8;margin-bottom:10px;">👨‍🔧 Rendimiento por Técnico</div>'
-      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;">';
-    tecOrd.forEach(function(t){
-      var pct=Math.round(tecMap[t]/tickets.length*100);
-      html+='<div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;">'
-        +'<div style="flex:1;">'
-        +'<div style="font-size:12px;font-weight:700;color:#0F2540;">'+escapeHtml(t)+'</div>'
-        +'<div style="height:5px;background:#E2E8F0;border-radius:999px;overflow:hidden;margin-top:5px;">'
-        +'<div style="height:100%;width:'+pct+'%;background:#1A86F1;border-radius:999px;"></div></div>'
-        +'</div>'
-        +'<div style="font-size:13px;font-weight:900;color:#1A86F1;min-width:28px;text-align:right;">'+tecMap[t]+'</div>'
-        +'<div style="font-size:10.5px;color:#94A3B8;min-width:32px;text-align:right;">'+pct+'%</div>'
-        +'</div>';
-    });
-    html+='</div></div>';
-
-    /* Marcas más atendidas */
-    var marcaOrd=Object.keys(marcaMap).filter(function(m){return m!=='—'&&m!=='Sin especificar';}).sort(function(a,b){return marcaMap[b]-marcaMap[a];}).slice(0,8);
-    if(marcaOrd.length){
-      html+='<div style="margin-bottom:16px;">'
-        +'<div style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#94A3B8;margin-bottom:10px;">🖥 Marcas más atendidas</div>'
-        +'<div style="display:flex;flex-wrap:wrap;gap:6px;">';
-      marcaOrd.forEach(function(m){
-        html+='<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:6px;padding:4px 10px;font-size:11.5px;font-weight:700;color:#1E40AF;">'+escapeHtml(m)+' <span style="font-weight:400;color:#60A5FA;">×'+marcaMap[m]+'</span></div>';
-      });
-      html+='</div></div>';
-    }
-
-    /* Tabla detalle tickets */
-    var hasPedidos=tickets.some(function(r){return r.pedido;});
+  /* ── Tabla tickets helper ── */
+  function buildTicketsTable(rows){
+    if(!rows.length) return '<p style="color:var(--ink-muted);font-size:12.5px;padding:16px 0;">Sin tickets para los filtros seleccionados.</p>';
+    var hasPedidos=rows.some(function(r){return r.pedido;});
     var DOC_HDRS=['Pedidos','COT. FIRMADA','OS Firmada','Factura','XML','Nota de Ingreso','Aceptada Portal'];
-    html+='<div style="margin-top:6px;">'
-      +'<div style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#94A3B8;margin-bottom:8px;">📋 Detalle de Tickets ('+tickets.length+' registros)</div>'
-      +'<div class="table-scroll"><table class="ej-table inf-ticket-table" style="font-size:11px;"><thead><tr>'
+    var DOC_OVK =['ped','cot','os','fac','xml','nota','portal'];
+    var h='<div class="table-scroll"><table class="ej-table inf-ticket-table" style="font-size:11px;">'
+      +'<thead><tr>'
       +'<th>N° Ticket</th><th>Estado</th><th>Tipo de Servicio</th><th>Categoría</th>'
       +'<th style="white-space:nowrap;">Fecha Inicio</th><th>Duración</th>';
     if(hasPedidos){
-      html+='<th style="color:#1A86F1;background:#EFF6FF;">N° Pedido</th>'
+      h+='<th style="color:#1A86F1;background:#EFF6FF;">N° Pedido</th>'
         +'<th style="color:#1A86F1;background:#EFF6FF;white-space:nowrap;">Monto</th>';
     }
     DOC_HDRS.forEach(function(c){
-      html+='<th style="text-align:center;font-size:9.5px;font-weight:800;color:#059669;background:#ECFDF5;white-space:nowrap;padding:6px 4px;">'+escapeHtml(c)+'</th>';
+      h+='<th style="text-align:center;font-size:9.5px;font-weight:800;color:#059669;background:#ECFDF5;white-space:nowrap;padding:6px 4px;">'+escapeHtml(c)+'</th>';
     });
-    html+='</tr></thead><tbody>';
-
-    tickets.slice().sort(function(a,b){
+    h+='</tr></thead><tbody>';
+    rows.slice().sort(function(a,b){
       var fa=a.fechaInicio instanceof Date?a.fechaInicio:new Date(a.fechaInicio||0);
       var fb=b.fechaInicio instanceof Date?b.fechaInicio:new Date(b.fechaInicio||0);
       return fb-fa;
     }).forEach(function(r){
       var e=(r.estadoTicket||'').toLowerCase();
-      var isCerr=e.indexOf('cerr')!==-1||e.indexOf('resuel')!==-1||e.indexOf('finaliz')!==-1;
-      var estColor=isCerr?'background:#DCFCE7;color:#166534;':'background:#FEF3C7;color:#92400E;';
+      var isCerr=/cerr|resuel|finaliz/.test(e);
+      var estCss=isCerr?'background:#DCFCE7;color:#166534;':'background:#FEF3C7;color:#92400E;';
       var tid=escapeHtml(r.nroTicket||'');
       var docOv={};try{var _d=localStorage.getItem('csdoc_'+tid);if(_d)docOv=JSON.parse(_d);}catch(ex){}
-      function docVal(csvBool,k){return k in docOv?docOv[k]:!!csvBool;}
-      var docVals=[docVal(!!r.pedido,'ped'),docVal(r.cotFirmada,'cot'),docVal(r.osFirmada,'os'),
-                   docVal(r.facturaXml,'fac'),docVal(r.xmlDoc||r.facturaXml,'xml'),
-                   docVal(r.notaIngreso,'nota'),docVal(r.aceptadaPortal,'portal')];
-      var docOvKeys=['ped','cot','os','fac','xml','nota','portal'];
-      html+='<tr>';
-      html+='<td><strong style="color:#0F2540;">'+escapeHtml(r.nroTicket||'—')+'</strong></td>';
-      html+='<td><span style="display:inline-block;padding:2px 7px;border-radius:99px;font-size:10px;font-weight:700;'+estColor+'">'+escapeHtml(r.estadoTicket||'—')+'</span></td>';
-      html+='<td style="font-size:10px;">'+escapeHtml(r.tipoServicio||'—')+'</td>';
-      html+='<td style="font-size:10px;">'+escapeHtml(r.categoria||'—')+'</td>';
-      html+='<td style="white-space:nowrap;font-size:10.5px;">'+fmtDate(r.fechaInicio)+'</td>';
-      html+='<td style="font-family:monospace;font-size:10.5px;">'+escapeHtml(r.duracionStr||'—')+'</td>';
+      function dv(csv,k){return k in docOv?docOv[k]:!!csv;}
+      var dvs=[dv(!!r.pedido,'ped'),dv(r.cotFirmada,'cot'),dv(r.osFirmada,'os'),
+               dv(r.facturaXml,'fac'),dv(r.xmlDoc||r.facturaXml,'xml'),
+               dv(r.notaIngreso,'nota'),dv(r.aceptadaPortal,'portal')];
+      h+='<tr>';
+      h+='<td><strong style="color:#0F2540;">'+tid+'</strong></td>';
+      h+='<td><span style="display:inline-block;padding:2px 7px;border-radius:99px;font-size:10px;font-weight:700;'+estCss+'">'+escapeHtml(r.estadoTicket||'—')+'</span></td>';
+      h+='<td style="font-size:10px;">'+escapeHtml(r.tipoServicio||'—')+'</td>';
+      h+='<td style="font-size:10px;">'+escapeHtml(r.categoria||'—')+'</td>';
+      h+='<td style="white-space:nowrap;font-size:10.5px;">'+fmtDate(r.fechaInicio)+'</td>';
+      h+='<td style="font-family:monospace;font-size:10.5px;">'+escapeHtml(r.duracionStr||'—')+'</td>';
       if(hasPedidos){
-        html+='<td style="font-weight:700;color:#1A86F1;background:#EFF6FF;">'+escapeHtml(r.pedido||'—')+'</td>';
+        h+='<td style="font-weight:700;color:#1A86F1;background:#EFF6FF;">'+escapeHtml(r.pedido||'—')+'</td>';
         var mT=r.total>0?fmtMoneyCompact(r.total,r.moneda||'PEN'):'—';
-        html+='<td style="font-weight:700;white-space:nowrap;background:#EFF6FF;">'+escapeHtml(mT)+'</td>';
+        h+='<td style="font-weight:700;white-space:nowrap;background:#EFF6FF;">'+mT+'</td>';
       }
-      docVals.forEach(function(val,idx){
-        var ovK=docOvKeys[idx];
-        var checked=val?' checked':'';
-        var onch="(function(el){try{var key='csdoc_'+"+JSON.stringify(tid)+";var ov={};var _x=localStorage.getItem(key);if(_x)ov=JSON.parse(_x);ov['"+ovK+"']=el.checked;localStorage.setItem(key,JSON.stringify(ov));}catch(e){}})(this)";
-        html+='<td style="text-align:center;padding:3px 4px;background:#F0FDF4;">'
-          +'<input type="checkbox"'+checked+' onchange="'+onch+'" style="width:14px;height:14px;accent-color:#059669;cursor:pointer;"></td>';
+      dvs.forEach(function(val,idx){
+        var ovK=DOC_OVK[idx];
+        var chk=val?' checked':'';
+        var onch="(function(el){try{var key='csdoc_'+"+JSON.stringify(tid)+
+          ";var ov={};var _x=localStorage.getItem(key);if(_x)ov=JSON.parse(_x);ov['"+ovK+"']=el.checked;localStorage.setItem(key,JSON.stringify(ov));}catch(e){}})(this)";
+        h+='<td style="text-align:center;padding:3px 4px;background:#F0FDF4;">'
+          +'<input type="checkbox"'+chk+' onchange="'+onch+'" style="width:14px;height:14px;accent-color:#059669;cursor:pointer;"></td>';
       });
-      html+='</tr>';
+      h+='</tr>';
     });
-    html+='</tbody></table></div></div>';
-    html+='</div></div>';  /* cierra padding + inf-section-card */
+    return h+'</tbody></table></div>';
   }
 
-  /* ══════════════════════════════════════════════
-     SECCIÓN 2: ACTIVIDAD COMERCIAL
-  ══════════════════════════════════════════════ */
-  if(ventas.length){
-    html+='<div class="inf-section-card">'
-      +'<div class="inf-section-hdr inf-section-hdr-v">'
-      +'<div class="inf-section-hdr-title">🟢 Actividad Comercial</div>'
-      +'<div class="inf-section-hdr-sub">Basado en '+ventas.length+' pedidos · Ventas CSV</div>'
-      +'</div>'
-      +'<div style="padding:18px 20px;">';
-
-    /* KPIs ventas */
-    var penTotal=sumPEN(ventas), usdTotal=sumUSD(ventas);
-    html+='<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px;">';
-    html+=kpiCard('#059669','Total pedidos',ventas.length, ordenesV.length+' confirmados · '+cotizV.length+' en cotización');
-    if(penTotal>0) html+=kpiCard('#0F766E','Facturado S/ PEN',fmtMoneyCompact(penTotal,'PEN'),'monto acumulado en soles');
-    if(usdTotal>0) html+=kpiCard('#0369A1','Facturado US$ USD',fmtMoneyCompact(usdTotal,'USD'),'monto acumulado en dólares');
-    if(ordenesV.length) html+=kpiCard('#065F46','Órdenes confirmadas',ordenesV.length,'listas para facturar');
-    if(cotizV.length)   html+=kpiCard('#92400E','Cotizaciones activas',cotizV.length,'pendientes de confirmación');
-    if(penTotal>0||usdTotal>0) html+=kpiCard('#1E40AF','Total equiv. S/',fmtMoneyCompact(penTotal+usdTotal*3.8,'PEN'),'TC 3.8 para USD');
-    html+='</div>';
-
-    /* Gráficos ventas */
-    html+='<div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:14px;">'
-      +'<div class="chart-card"><h4 style="font-size:11.5px;font-weight:800;margin-bottom:8px;color:#065F46;">📊 Monto mensual (S/ PEN)</h4><div class="chart-wrap"><canvas id="chartVentaMes"></canvas></div></div>'
-      +'<div class="chart-card"><h4 style="font-size:11.5px;font-weight:800;margin-bottom:8px;color:#065F46;">🏷 Por categoría</h4><div class="chart-wrap"><canvas id="chartVentaCat"></canvas></div></div>'
-      +'</div>';
-
-    /* Tabla resumen por cliente */
-    var cliVOrd=Object.keys(cliVMap).sort(function(a,b){return (cliVMap[b].pen+cliVMap[b].usd*3.8)-(cliVMap[a].pen+cliVMap[a].usd*3.8);});
-    html+='<div style="margin-bottom:16px;">'
-      +'<div style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#94A3B8;margin-bottom:8px;">💼 Resumen por Cliente</div>'
-      +'<div class="table-scroll"><table class="ej-table" style="font-size:11.5px;"><thead><tr>'
-      +'<th>Cliente</th><th>Pedidos</th><th>Monto S/ PEN</th><th>Monto US$ USD</th><th>Total equiv. S/</th>'
-      +'</tr></thead><tbody>';
-    cliVOrd.forEach(function(c){
-      var g=cliVMap[c];
-      html+='<tr>'
-        +'<td><strong>'+escapeHtml(c)+'</strong></td>'
-        +'<td style="font-weight:800;color:#059669;">'+g.pedidos+'</td>'
-        +'<td>'+(g.pen>0?fmtMoneyCompact(g.pen,'PEN'):'—')+'</td>'
-        +'<td>'+(g.usd>0?fmtMoneyCompact(g.usd,'USD'):'—')+'</td>'
-        +'<td style="font-weight:800;">'+fmtMoneyCompact(g.pen+g.usd*3.8,'PEN')+'</td>'
-        +'</tr>';
-    });
-    html+='</tbody></table></div></div>';
-
-    /* Tabla detalle pedidos */
-    html+='<div>'
-      +'<div style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#94A3B8;margin-bottom:8px;">📋 Detalle de Pedidos ('+ventas.length+' registros)</div>'
-      +'<div class="table-scroll"><table class="ej-table" style="font-size:11px;"><thead><tr>'
-      +'<th>N° Pedido</th><th>Cliente</th><th>Categoría</th><th>Vendedor</th><th>Estado</th><th>Fecha</th><th>Monto</th><th>Moneda</th>'
-      +'</tr></thead><tbody>';
-    ventas.slice().sort(function(a,b){
+  /* ── Tabla pedidos helper ── */
+  function buildVentasTable(rows){
+    if(!rows.length) return '<p style="color:var(--ink-muted);font-size:12.5px;padding:16px 0;">Sin pedidos para los filtros seleccionados.</p>';
+    var h='<div class="table-scroll"><table class="ej-table" style="font-size:11.5px;">'
+      +'<thead><tr><th>N° Pedido</th><th>Cliente</th><th>Categoría</th><th>Tipo de Servicio</th>'
+      +'<th>Vendedor</th><th>Estado</th><th>Fecha</th><th>Monto</th><th>Moneda</th></tr></thead><tbody>';
+    rows.slice().sort(function(a,b){
       var fa=a.fechaPedido instanceof Date?a.fechaPedido:new Date(a.fechaPedido||0);
       var fb=b.fechaPedido instanceof Date?b.fechaPedido:new Date(b.fechaPedido||0);
       return fb-fa;
     }).forEach(function(r){
       var esOrden=/orden|venta/i.test(r.estadoPedido||'');
-      var estColorV=esOrden?'background:#DCFCE7;color:#166534;':'background:#FEF3C7;color:#92400E;';
-      html+='<tr>'
+      var eCss=esOrden?'background:#DCFCE7;color:#166534;':'background:#FEF3C7;color:#92400E;';
+      h+='<tr>'
         +'<td><strong style="color:#059669;">'+escapeHtml(r.pedido||'—')+'</strong></td>'
         +'<td>'+escapeHtml(r.cliente||'—')+'</td>'
         +'<td style="font-size:10.5px;">'+escapeHtml(r.categoria||'—')+'</td>'
+        +'<td style="font-size:10.5px;">'+escapeHtml(r.tipoServicio||'—')+'</td>'
         +'<td style="font-size:10.5px;">'+escapeHtml(r.vendedor||'—')+'</td>'
-        +'<td><span style="display:inline-block;padding:2px 7px;border-radius:99px;font-size:10px;font-weight:700;'+estColorV+'">'+escapeHtml(r.estadoPedido||'—')+'</span></td>'
+        +'<td><span style="display:inline-block;padding:2px 7px;border-radius:99px;font-size:10px;font-weight:700;'+eCss+'">'+escapeHtml(r.estadoPedido||'—')+'</span></td>'
         +'<td style="white-space:nowrap;font-size:10.5px;">'+fmtDate(r.fechaPedido)+'</td>'
         +'<td style="font-weight:700;white-space:nowrap;">'+fmtMoneyCompact(r.total||0,r.moneda||'PEN')+'</td>'
         +'<td>'+escapeHtml(r.moneda||'—')+'</td>'
         +'</tr>';
     });
-    html+='</tbody></table></div></div>';
-    html+='</div></div>';  /* cierra padding + inf-section-card */
+    return h+'</tbody></table></div>';
   }
 
+  /* ══ TABS HTML ══ */
+  var html='<div class="inf-tabs-bar">'
+    +'<button class="inf-tab-btn active" onclick="infTabSwitch(\'tkt\',this)">📋 Tickets ('+tickets.length+')</button>'
+    +'<button class="inf-tab-btn" onclick="infTabSwitch(\'ped\',this)">💼 Pedidos ('+ventas.length+')</button>'
+    +'<button class="inf-tab-btn" onclick="infTabSwitch(\'dash-tkt\',this)">📊 Atenciones Tickets</button>'
+    +'<button class="inf-tab-btn" onclick="infTabSwitch(\'dash-ped\',this)">📊 Atenciones Pedidos</button>'
+    +'<button class="inf-tab-btn" onclick="infTabSwitch(\'dia\',this)">📅 Tickets por Día</button>'
+    +'<button class="inf-tab-btn" onclick="infTabSwitch(\'tipo\',this)">🔧 Por Tipo de Servicio</button>'
+    +'<button class="inf-tab-btn" onclick="infTabSwitch(\'cat\',this)">🏷 Por Categoría</button>'
+    +'</div>'
+    +'<div class="inf-tab-content">';
+
+  /* TAB 1 — Tickets */
+  html+='<div class="inf-tab-pane active" id="inf-pane-tkt">'+buildTicketsTable(tickets)+'</div>';
+
+  /* TAB 2 — Pedidos */
+  html+='<div class="inf-tab-pane" id="inf-pane-ped">'+buildVentasTable(ventas)+'</div>';
+
+  /* TAB 3 — Dashboard atenciones Tickets */
+  html+='<div class="inf-tab-pane" id="inf-pane-dash-tkt">';
+  html+='<div class="inf-kpi-row">';
+  html+=kpi('#1A86F1','Total de tickets', tickets.length, 'en el período filtrado');
+  html+=kpi('#10B981','Resueltos / Cerrados', cerrados.length, 'de '+tickets.length+' atendidos');
+  html+=kpi('#EF4444','Pendientes', pendientes.length, 'por resolver');
+  html+=kpi('#8B5CF6','Tiempo promedio', formatSecondsToHMS(promSeg), 'por ticket');
+  html+=kpi('#F59E0B','Tiempo total', formatSecondsToHMS(segTotal), 'horas de soporte');
+  html+='<div class="inf-kpi-box" style="border-top-color:'+slaColor+';">'
+    +'<div class="inf-kpi-box-label">% Resolución (SLA)</div>'
+    +'<div class="inf-kpi-box-val" style="color:'+slaColor+';">'+pctRes+'%</div>'
+    +'<div style="height:6px;background:'+slaColor+'20;border-radius:999px;overflow:hidden;margin:6px 0;">'
+    +'<div style="height:100%;width:'+pctRes+'%;background:'+slaColor+';border-radius:999px;"></div></div>'
+    +'<div class="inf-kpi-box-sub" style="color:'+slaColor+';font-weight:700;">'+(pctRes>=90?'Excelente':pctRes>=70?'Regular':'Por mejorar')+'</div>'
+    +'</div>';
+  html+='</div></div>';
+
+  /* TAB 4 — Dashboard atenciones Pedidos */
+  html+='<div class="inf-tab-pane" id="inf-pane-dash-ped">';
+  if(!ventas.length){
+    html+='<p style="color:var(--ink-muted);font-size:12.5px;padding:16px 0;">Sin pedidos para los filtros seleccionados.</p>';
+  } else {
+    html+='<div class="inf-kpi-row">';
+    html+=kpi('#059669','Total pedidos', ventas.length, ordenesV.length+' confirmados · '+cotizV.length+' cotizaciones');
+    var penT=sumPEN(ventas), usdT=sumUSD(ventas);
+    if(penT>0) html+=kpi('#0F766E','Monto S/ PEN', fmtMoneyCompact(penT,'PEN'), 'facturado en soles');
+    if(usdT>0) html+=kpi('#0369A1','Monto US$ USD', fmtMoneyCompact(usdT,'USD'), 'facturado en dólares');
+    if(ordenesV.length) html+=kpi('#065F46','Órdenes confirmadas', ordenesV.length, 'listas para facturar');
+    if(cotizV.length)   html+=kpi('#92400E','Cotizaciones activas', cotizV.length, 'pendientes de confirmación');
+    if(penT>0||usdT>0)  html+=kpi('#1E40AF','Total equiv. S/', fmtMoneyCompact(penT+usdT*3.8,'PEN'), 'TC 3.8 para USD');
+    html+='</div>';
+  }
+  html+='</div>';
+
+  /* TAB 5 — Tickets por Día */
+  html+='<div class="inf-tab-pane" id="inf-pane-dia">'
+    +'<div class="chart-card" style="max-width:100%;"><div class="chart-wrap" style="height:320px;">'
+    +'<canvas id="chartInfTendencia"></canvas></div></div>'
+    +'</div>';
+
+  /* TAB 6 — Por Tipo de Servicio */
+  html+='<div class="inf-tab-pane" id="inf-pane-tipo">'
+    +'<div class="chart-card" style="max-width:100%;"><div class="chart-wrap" style="height:320px;">'
+    +'<canvas id="chartInfTipo"></canvas></div></div>'
+    +'</div>';
+
+  /* TAB 7 — Por Categoría */
+  html+='<div class="inf-tab-pane" id="inf-pane-cat">'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">'
+    +'<div class="chart-card"><h4 style="font-size:12px;font-weight:800;margin-bottom:8px;color:#0F2540;">🏷 Tickets por Categoría</h4>'
+    +'<div class="chart-wrap" style="height:260px;"><canvas id="chartInfCatT"></canvas></div></div>'
+    +(ventas.length?'<div class="chart-card"><h4 style="font-size:12px;font-weight:800;margin-bottom:8px;color:#065F46;">🏷 Monto Pedidos por Categoría</h4>'
+    +'<div class="chart-wrap" style="height:260px;"><canvas id="chartInfCatV"></canvas></div></div>':'')
+    +'</div></div>';
+
+  html+='</div>';  /* cierra inf-tab-content */
   content.innerHTML=html;
 
-  /* ── Gráficos soporte ── */
+  /* ── Renderizar gráficos de las tabs de charts ── */
   destroyChart('infTendencia');
   var ctxT=document.getElementById('chartInfTendencia');
   if(ctxT&&diaKeys.length){
-    CHARTS.infTendencia=new Chart(ctxT,{
-      type:'bar',
+    CHARTS.infTendencia=new Chart(ctxT,{type:'bar',
       data:{labels:diaKeys.map(function(k){var p=k.split('-');return p[2]+'/'+MES_NOMBRES[parseInt(p[1])-1].slice(0,3);}),
         datasets:[{label:'Tickets',data:diaKeys.map(function(k){return diaMap[k];}),backgroundColor:'#1A86F1',borderRadius:4}]},
-      options:Object.assign(baseBarOptions(),{plugins:{legend:{display:false}},scales:{x:{ticks:{maxRotation:45,minRotation:30,font:{size:9}}}}})
+      options:Object.assign(baseBarOptions(),{plugins:{legend:{display:false}},scales:{x:{ticks:{maxRotation:45,font:{size:9}}}}})
     });
   }
+
   destroyChart('infTipo');
-  var ctxD=document.getElementById('chartInfTipo');
-  if(ctxD&&tiposOrd.length){
-    CHARTS.infTipo=new Chart(ctxD,{type:'doughnut',
-      data:{labels:tiposOrd,datasets:[{data:tiposOrd.map(function(t){return tipoMap[t];}),backgroundColor:CHART_PALETTE,borderWidth:2,borderColor:'#fff'}]},
+  var ctxTp=document.getElementById('chartInfTipo');
+  if(ctxTp&&tiposOrd.length){
+    CHARTS.infTipo=new Chart(ctxTp,{type:'bar',
+      data:{labels:tiposOrd,datasets:[{label:'Tickets',data:tiposOrd.map(function(t){return tipoMap[t];}),
+        backgroundColor:CHART_PALETTE.slice(0,tiposOrd.length),borderRadius:4}]},
+      options:Object.assign(baseBarOptions(),{indexAxis:'y',plugins:{legend:{display:false}}})
+    });
+  }
+
+  destroyChart('infCatT');
+  var ctxCT=document.getElementById('chartInfCatT');
+  if(ctxCT&&catOrdT.length){
+    CHARTS.infCatT=new Chart(ctxCT,{type:'doughnut',
+      data:{labels:catOrdT,datasets:[{data:catOrdT.map(function(c){return catMapT[c];}),
+        backgroundColor:CHART_PALETTE,borderWidth:2,borderColor:'#fff'}]},
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:11,font:{size:10}}}}}
     });
   }
-  /* ── Gráficos ventas ── */
-  destroyChart('ventaMes');
-  var ctxVM=document.getElementById('chartVentaMes');
-  if(ctxVM&&mesVKeys.length){
-    CHARTS.ventaMes=new Chart(ctxVM,{type:'bar',
-      data:{labels:mesVKeys,
-        datasets:[
-          {label:'S/ PEN',data:mesVKeys.map(function(k){return mesVMap[k].pen||0;}),backgroundColor:'#059669',borderRadius:4},
-          {label:'US$ USD',data:mesVKeys.map(function(k){return mesVMap[k].usd||0;}),backgroundColor:'#0369A1',borderRadius:4}
-        ]},
-      options:Object.assign(baseBarOptions(),{scales:{x:{ticks:{font:{size:9}}}}})
-    });
-  }
-  destroyChart('ventaCat');
-  var ctxVC=document.getElementById('chartVentaCat');
-  if(ctxVC&&catOrd.length){
-    CHARTS.ventaCat=new Chart(ctxVC,{type:'doughnut',
-      data:{labels:catOrd.slice(0,8),datasets:[{data:catOrd.slice(0,8).map(function(c){return catMap[c];}),backgroundColor:CHART_PALETTE,borderWidth:2,borderColor:'#fff'}]},
+
+  destroyChart('infCatV');
+  var ctxCV=document.getElementById('chartInfCatV');
+  if(ctxCV&&catOrdV.length){
+    CHARTS.infCatV=new Chart(ctxCV,{type:'doughnut',
+      data:{labels:catOrdV,datasets:[{data:catOrdV.map(function(c){return catMapV[c];}),
+        backgroundColor:CHART_PALETTE,borderWidth:2,borderColor:'#fff'}]},
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:11,font:{size:10}}}}}
     });
   }
 }
+
+/* ── Cambiar tab activo ── */
+function infTabSwitch(tabId, btn){
+  /* Botones */
+  var bar=btn.closest('.inf-tabs-bar');
+  if(bar) bar.querySelectorAll('.inf-tab-btn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  /* Panes */
+  var content=document.getElementById('informesContent');
+  if(!content) return;
+  content.querySelectorAll('.inf-tab-pane').forEach(function(p){p.classList.remove('active');});
+  var pane=document.getElementById('inf-pane-'+tabId);
+  if(pane) pane.classList.add('active');
+  /* Re-renderizar charts si hace falta (canvas puede estar oculto al primer render) */
+  if(tabId==='dia')      { if(CHARTS.infTendencia) CHARTS.infTendencia.resize(); }
+  if(tabId==='tipo')     { if(CHARTS.infTipo)      CHARTS.infTipo.resize(); }
+  if(tabId==='cat')      { if(CHARTS.infCatT) CHARTS.infCatT.resize(); if(CHARTS.infCatV) CHARTS.infCatV.resize(); }
+}
+
 
 /* ── Exportar informe como HTML autocontenido ── */
 function informesExportHtml(){
