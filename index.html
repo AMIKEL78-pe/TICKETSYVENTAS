@@ -6432,7 +6432,7 @@ function informesRender(){
       var isCerr=/cerr|resuel|finaliz/.test(e);
       var estCss=isCerr?'background:#DCFCE7;color:#166534;':'background:#FEF3C7;color:#92400E;';
       var tid=escapeHtml(r.nroTicket||'');
-      var docOv={};try{var _d=localStorage.getItem('csdoc_'+tid);if(_d)docOv=JSON.parse(_d);}catch(ex){}
+      var docOv=fichaDocLoad(tid);
       function dv(csv,k){return k in docOv?docOv[k]:!!csv;}
       var dvs=[dv(!!r.pedido,'ped'),dv(r.cotFirmada,'cot'),dv(r.osFirmada,'os'),
                dv(r.facturaXml,'fac'),dv(r.xmlDoc||r.facturaXml,'xml'),
@@ -6452,8 +6452,7 @@ function informesRender(){
       dvs.forEach(function(val,idx){
         var ovK=DOC_OVK[idx];
         var chk=val?' checked':'';
-        var onch="(function(el){try{var key='csdoc_'+"+JSON.stringify(tid)+
-          ";var ov={};var _x=localStorage.getItem(key);if(_x)ov=JSON.parse(_x);ov['"+ovK+"']=el.checked;localStorage.setItem(key,JSON.stringify(ov));}catch(e){}})(this)";
+                var onch="fichaDocSave('"+tid.replace(/'/g,"\\\'")+"','"+ovK+"',this.checked)";
         h+='<td style="text-align:center;padding:3px 4px;background:#F0FDF4;">'
           +'<input type="checkbox"'+chk+' onchange="'+onch+'" style="width:14px;height:14px;accent-color:#059669;cursor:pointer;"></td>';
       });
@@ -6659,6 +6658,20 @@ function informesExportCsv(){
    sola vista scrollable, sin pestañas.
 ══════════════════════════════════════════════════════════════ */
 
+
+/* ── Persistencia de checkboxes de documentos por ticket ── */
+function fichaDocSave(tid, ovK, checked){
+  try{
+    var key='csdoc_'+tid;
+    var ov={}; var _x=localStorage.getItem(key); if(_x) ov=JSON.parse(_x);
+    ov[ovK]=checked;
+    localStorage.setItem(key, JSON.stringify(ov));
+  }catch(e){}
+}
+function fichaDocLoad(tid){
+  try{ var _d=localStorage.getItem('csdoc_'+tid); return _d?JSON.parse(_d):{};
+  }catch(e){ return {}; }
+}
 function fichaInit(){
   var sel=document.getElementById('ficha-cliente');
   if(!sel) return;
@@ -6668,9 +6681,12 @@ function fichaInit(){
   var uniq=function(arr){return Array.from(new Set(arr.filter(Boolean))).sort();};
   var allCli=uniq(t.map(function(r){return (r.cliente||'').trim();}).concat(
                   v.map(function(r){return (r.cliente||'').trim();})));
+  /* Restaurar último cliente guardado */
+  var lastCli=''; try{lastCli=localStorage.getItem('ficha_lastCli')||'';}catch(e){}
+  var selVal=cur||lastCli;
   sel.innerHTML='<option value="">— Elige un cliente —</option>'
-    +allCli.map(function(c){return '<option value="'+escapeHtml(c)+'"'+(c===cur?' selected':'')+'>'+escapeHtml(c)+'</option>';}).join('');
-  if(cur) fichaRender();
+    +allCli.map(function(c){return '<option value="'+escapeHtml(c)+'"'+(c===selVal?' selected':'')+'>'+escapeHtml(c)+'</option>';}).join('');
+  if(selVal && allCli.indexOf(selVal)>=0){ sel.value=selVal; fichaRender(); }
 }
 
 function fichaRender(){
@@ -6685,6 +6701,8 @@ function fichaRender(){
       +'<div style="font-size:12.5px;">Elige un cliente del selector para ver su ficha completa.</div></div>';
     return;
   }
+  /* Guardar último cliente en localStorage */
+  try{if(cli) localStorage.setItem('ficha_lastCli',cli);}catch(e){}
   /* Filtrar datos: cliente */
   var _allTkt=STATE.tickets.raw.filter(function(r){return (r.cliente||'').trim()===cli;});
   var _allVta=STATE.ventas.raw.filter(function(r){return (r.cliente||'').trim()===cli;});
@@ -6798,9 +6816,7 @@ function fichaRender(){
       }
       dvs.forEach(function(val,idx){
         var ovK=DOC_K[idx];var chk=val?' checked':'';
-        var onch="(function(el){try{var key='csdoc_'+"+JSON.stringify(tid)
-          +";var ov={};var _x=localStorage.getItem(key);if(_x)ov=JSON.parse(_x);"
-          +"ov['"+ovK+"']=el.checked;localStorage.setItem(key,JSON.stringify(ov));}catch(e){}})(this)";
+        var onch="fichaDocSave('"+tid.replace(/'/g,"\\\'")+"','"+ovK+"',this.checked)";
         h+='<td style="text-align:center;padding:3px 4px;background:#F0FDF4;">'
           +'<input type="checkbox"'+chk+' onchange="'+onch+'" style="width:14px;height:14px;accent-color:#059669;cursor:pointer;"></td>';
       });
