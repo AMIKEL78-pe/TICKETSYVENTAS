@@ -2536,8 +2536,9 @@ function handleFile(evt, mod){
           applyFilters('ventas');
         }
       } catch(err){
-        console.error(err);
-        statusEl.textContent = 'Error al procesar el archivo. Verifica las columnas del CSV.';
+        console.error('CSV Import Error:', err && err.stack ? err.stack : err);
+        var msg = err && err.message ? err.message : 'Verifica las columnas del CSV.';
+        statusEl.textContent = 'Error al procesar: ' + msg;
         statusEl.className = 'file-status';
       }
     },
@@ -2671,6 +2672,59 @@ function applyFilters(mod){
 /* ============================================================
    RENDER: TICKETS
 ============================================================ */
+function renderKpiCard(c){
+  return '<div class="kpi-card '+(c.cls||'')+'">'
+    + '<div class="kpi-label">'+escapeHtml(c.label)+'</div>'
+    + '<div class="kpi-value'+(c.small?' small':'')+'">'+escapeHtml(c.value)+'</div>'
+    + (c.sub?'<div class="kpi-sub">'+escapeHtml(c.sub)+'</div>':'')
+    + '</div>';
+}
+
+function renderMoneyKpiCard(label, currencyMap, sub, cls){
+  var monedas = Object.keys(currencyMap).sort(function(a,b){ return currencyMap[b]-currencyMap[a]; });
+  var rows = monedas.length
+    ? monedas.map(function(m){
+        return '<div class="money-row"><span class="money-currency">'+escapeHtml(currencySymbol(m))+'</span><span class="money-amount">'+fmtMoneyCompact(currencyMap[m], m)+'</span></div>';
+      }).join('')
+    : '<div class="money-row"><span class="money-amount">—</span></div>';
+  return '<div class="kpi-card money '+(cls||'')+'">'
+    + '<div class="kpi-label">'+escapeHtml(label)+'</div>'
+    + '<div class="money-rows">'+rows+'</div>'
+    + (sub?'<div class="kpi-sub">'+escapeHtml(sub)+'</div>':'')
+    + '</div>';
+}
+
+function renderHighlightCard(icon, label, value, sub){
+  return '<div class="highlight-card">'
+    + '<div class="highlight-icon">'+icon+'</div>'
+    + '<div class="highlight-body">'
+    +   '<div class="highlight-label">'+escapeHtml(label)+'</div>'
+    +   '<div class="highlight-value" title="'+escapeHtml(value)+'">'+escapeHtml(value)+'</div>'
+    +   (sub?'<div class="highlight-sub">'+escapeHtml(sub)+'</div>':'')
+    + '</div></div>';
+}
+
+function renderTicketsHighlights(data){
+  var porTecnico = {};
+  data.forEach(function(r){ porTecnico[r.tecnico] = (porTecnico[r.tecnico]||0)+1; });
+  var topTecnico = Object.keys(porTecnico).sort(function(a,b){return porTecnico[b]-porTecnico[a];})[0];
+
+  var porServicio = {};
+  data.forEach(function(r){ porServicio[r.tipoServicio] = (porServicio[r.tipoServicio]||0)+1; });
+  var topServicio = Object.keys(porServicio).sort(function(a,b){return porServicio[b]-porServicio[a];})[0];
+
+  var porEquipo = {};
+  data.forEach(function(r){ var key = r.tipoEquipo + (r.marca && r.marca!=='Sin especificar' ? ' · '+r.marca : ''); porEquipo[key] = (porEquipo[key]||0)+1; });
+  var topEquipo = Object.keys(porEquipo).sort(function(a,b){return porEquipo[b]-porEquipo[a];})[0];
+
+  var items = [
+    renderHighlightCard('👤','Técnico con más tickets', topTecnico||'—', topTecnico?(porTecnico[topTecnico]+' tickets atendidos'):''),
+    renderHighlightCard('🛠','Servicio más solicitado', topServicio||'—', topServicio?(porServicio[topServicio]+' tickets'):''),
+    renderHighlightCard('💻','Equipo / marca recurrente', topEquipo||'—', topEquipo?(porEquipo[topEquipo]+' tickets'):'')
+  ];
+  document.getElementById('ticketsHighlights').innerHTML = items.join('');
+}
+
 function computeAndRenderTicketsKPIs(data){
   var total = data.length;
   var estadoCounts = {};
