@@ -1424,47 +1424,97 @@ footer{ display:none !important; }
       <!-- Filtros Dashboard Ejecutivo -->
       <div class="filters" id="ejFilters" style="display:none;">
         <div class="filter-field">
-          <label>Estado de Pedido</label>
-          <div class="ms-wrap" id="ms-wrap-ej-estado">
-            <button type="button" class="ms-trigger" onclick="msToggle('ej-estado')" id="ms-btn-ej-estado">
-              <span class="ms-label" id="ms-lbl-ej-estado">Todos</span>
+          <label>Año</label>
+          <div class="ms-wrap" id="ms-wrap-ej-anio">
+            <button type="button" class="ms-trigger" onclick="msToggle('ej-anio')" id="ms-btn-ej-anio">
+              <span class="ms-label" id="ms-lbl-ej-anio">Todos</span>
               <span class="ms-caret">▼</span>
             </button>
-            <div class="ms-dropdown" id="ms-dd-ej-estado">
-              <label class="ms-option ms-all"><input type="checkbox" id="ms-all-ej-estado" onchange="msToggleAll('ej-estado')" checked> Todos</label>
+            <div class="ms-dropdown" id="ms-dd-ej-anio">
+              <label class="ms-option ms-all"><input type="checkbox" id="ms-all-ej-anio" class="ms-cb-ej-anio" onchange="msToggleAll('ej-anio')" checked> Todos</label>
             </div>
           </div>
-          <div class="ms-tags" id="ms-tags-ej-estado"></div>
+          <div class="ms-tags" id="ms-tags-ej-anio"></div>
         </div>
         <div class="filter-field">
-          <label>Moneda</label>
-          <div class="ms-wrap" id="ms-wrap-ej-moneda">
-            <button type="button" class="ms-trigger" onclick="msToggle('ej-moneda')" id="ms-btn-ej-moneda">
-              <span class="ms-label" id="ms-lbl-ej-moneda">Todas</span>
+          <label>Mes</label>
+          <div class="ms-wrap" id="ms-wrap-ej-mes">
+            <button type="button" class="ms-trigger" onclick="msToggle('ej-mes')" id="ms-btn-ej-mes">
+              <span class="ms-label" id="ms-lbl-ej-mes">Todos</span>
               <span class="ms-caret">▼</span>
             </button>
-            <div class="ms-dropdown" id="ms-dd-ej-moneda">
-              <label class="ms-option ms-all"><input type="checkbox" id="ms-all-ej-moneda" onchange="msToggleAll('ej-moneda')" checked> Todas</label>
+            <div class="ms-dropdown" id="ms-dd-ej-mes">
+              <label class="ms-option ms-all"><input type="checkbox" id="ms-all-ej-mes" class="ms-cb-ej-mes" onchange="msToggleAll('ej-mes')" checked> Todos</label>
             </div>
           </div>
-          <div class="ms-tags" id="ms-tags-ej-moneda"></div>
+          <div class="ms-tags" id="ms-tags-ej-mes"></div>
         </div>
         <div class="filter-field">
-          <label>Categoría</label>
-          <div class="ms-wrap" id="ms-wrap-ej-categoria">
-            <button type="button" class="ms-trigger" onclick="msToggle('ej-categoria')" id="ms-btn-ej-categoria">
-              <span class="ms-label" id="ms-lbl-ej-categoria">Todas</span>
+          <label>Semana del año</label>
+          <div class="ms-wrap" id="ms-wrap-ej-semana">
+            <button type="button" class="ms-trigger" onclick="msToggle('ej-semana')" id="ms-btn-ej-semana">
+              <span class="ms-label" id="ms-lbl-ej-semana">Todos</span>
               <span class="ms-caret">▼</span>
             </button>
-            <div class="ms-dropdown" id="ms-dd-ej-categoria">
-              <label class="ms-option ms-all"><input type="checkbox" id="ms-all-ej-categoria" onchange="msToggleAll('ej-categoria')" checked> Todas</label>
+            <div class="ms-dropdown" id="ms-dd-ej-semana">
+              <label class="ms-option ms-all"><input type="checkbox" id="ms-all-ej-semana" class="ms-cb-ej-semana" onchange="msToggleAll('ej-semana')" checked> Todos</label>
             </div>
           </div>
-          <div class="ms-tags" id="ms-tags-ej-categoria"></div>
+          <div class="ms-tags" id="ms-tags-ej-semana"></div>
         </div>
-        <div class="filters-actions">
-          <button class="btn btn-ghost" onclick="ejLimpiarFiltros()">Limpiar filtros</button>
+        <div class="filter-field">
+          <label>Estado Ticket</label>
+          <div class="ms-wrap" id="ms-wrap-ej-estado-tkt">
+            <button type="button" class="ms-trigger" onclick="msToggle('ej-estado-tkt')" id="ms-btn-ej-estado-tkt">
+              <span class="ms-label" id="ms-lbl-ej-estado-tkt">Todos</span>
+              <span class="ms-caret">▼</span>
+            </button>
+            <div class="ms-dropdown" id="ms-dd-ej-estado-tkt">
+              <label class="ms-option ms-all"><input type="checkbox" id="ms-all-ej-estado-tkt" class="ms-cb-ej-estado-tkt" onchange="msToggleAll('ej-estado-tkt')" checked> Todos</label>
+            </div>
+          </div>
+          <div class="ms-tags" id="ms-tags-ej-estado-tkt"></div>
         </div>
+        <div class="filter-field">
+          <label>Estado Pedido</label>
+          <div class="ms-wrap" id="ms-wrap-ej-estado-ped">
+            <button type="button" class="ms-trigger" onclick="msToggle('ej-estado-ped')" id="ms-btn-ej-estado-ped">
+              <span class="ms-label" id="ms-lbl-ej-estado-ped">Todos</span>
+              <span class="ms-caret">▼</span>
+            </button>
+            <div class="ms-dropdown" id="ms-dd-ej-estado-ped">
+              <label class="ms-option ms-all"><input type="checkbox" id="ms-all-ej-estado-ped" class="ms-cb-ej-estado-ped" onchange="msToggleAll('ej-estado-ped')" checked> Todos</label>
+            </div>
+          </div>
+          <div class="ms-tags" id="ms-tags-ej-estado-ped"></div>
+        </div>
+        <div class="filter-field">
+          <label>Cliente</label>
+          <div class="ms-wrap" id="ms-wrap-ej-cliente">
+            <button type="button" class="ms-trigger" onclick="msToggle('ej-cliente')" id="ms-btn-ej-cliente">
+              <span class="ms-label" id="ms-lbl-ej-cliente">Todos</span>
+              <span class="ms-caret">▼</span>
+            </button>
+            <div class="ms-dropdown" id="ms-dd-ej-cliente">
+              <label class="ms-option ms-all"><input type="checkbox" id="ms-all-ej-cliente" class="ms-cb-ej-cliente" onchange="msToggleAll('ej-cliente')" checked> Todos</label>
+            </div>
+          </div>
+          <div class="ms-tags" id="ms-tags-ej-cliente"></div>
+        </div>
+        <div class="filter-field">
+          <label>Tipo de Servicio</label>
+          <div class="ms-wrap" id="ms-wrap-ej-tipo-srv">
+            <button type="button" class="ms-trigger" onclick="msToggle('ej-tipo-srv')" id="ms-btn-ej-tipo-srv">
+              <span class="ms-label" id="ms-lbl-ej-tipo-srv">Todos</span>
+              <span class="ms-caret">▼</span>
+            </button>
+            <div class="ms-dropdown" id="ms-dd-ej-tipo-srv">
+              <label class="ms-option ms-all"><input type="checkbox" id="ms-all-ej-tipo-srv" class="ms-cb-ej-tipo-srv" onchange="msToggleAll('ej-tipo-srv')" checked> Todos</label>
+            </div>
+          </div>
+          <div class="ms-tags" id="ms-tags-ej-tipo-srv"></div>
+        </div>
+        <div class="filter-field"><button class="btn btn-ghost" onclick="ejLimpiarFiltros()" style="padding:5px 12px;font-size:11px;">✕ Limpiar</button></div>
       </div>
       <div id="ejContent">
         <div class="empty-state">
@@ -2258,6 +2308,359 @@ function fmtMoneyCompact(amount, moneda){
 /* ============================================================
    MODULE SWITCH
 ============================================================ */
+
+/* ============================================================
+   RESUMEN EJECUTIVO — Diseño según wireframe
+   ============================================================ */
+
+function ejInit(){
+  var t=STATE.tickets.raw, v=STATE.ventas.raw;
+  var statusEl=document.getElementById('ejStatus');
+  var container=document.getElementById('ejContent');
+  var filtersEl=document.getElementById('ejFilters');
+  if(!container) return;
+  if(!t.length && !v.length){
+    if(statusEl) statusEl.textContent='Importa Tickets y/o Ventas para ver el resumen';
+    container.innerHTML='<div class="empty-state"><div class="icon">📊</div><h4>Sin datos</h4><p>Importa CSV de Tickets y/o Ventas.</p></div>';
+    if(filtersEl) filtersEl.style.display='none';
+    return;
+  }
+  if(statusEl){statusEl.textContent=t.length+' tickets · '+v.length+' pedidos';statusEl.className='file-status ok';}
+  if(filtersEl) filtersEl.style.display='flex';
+  var anios=Array.from(new Set(t.concat(v).map(function(r){return r.anio;}).filter(Boolean))).sort(function(a,b){return a-b;});
+  var meses=Array.from(new Set(t.concat(v).map(function(r){return r.mes;}).filter(Boolean))).sort(function(a,b){return a-b;});
+  var sems=Array.from(new Set(t.concat(v).map(function(r){return r.semana;}).filter(Boolean))).sort(function(a,b){return a-b;});
+  msFillDynamic('ej-anio',anios.map(String));
+  msFillDynamic('ej-mes',meses.map(function(m){return {value:String(m),label:MES_NOMBRES[m-1]||String(m)};},),true);
+  msFillDynamic('ej-semana',sems.map(function(s){return {value:String(s),label:'Sem '+s};},),true);
+  msFillDynamic('ej-estado-tkt',Array.from(new Set(t.map(function(r){return r.estadoTicket||'';}).filter(Boolean))).sort());
+  msFillDynamic('ej-estado-ped',Array.from(new Set(v.map(function(r){return r.estadoPedido||'';}).filter(Boolean))).sort());
+  msFillDynamic('ej-cliente',Array.from(new Set(t.concat(v).map(function(r){return r.cliente||'';}).filter(Boolean))).sort());
+  msFillDynamic('ej-tipo-srv',Array.from(new Set(t.map(function(r){return r.tipoServicio||'';}).filter(Boolean))).sort());
+  ejRender(t,v);
+}
+
+function ejLimpiarFiltros(){
+  ['ej-anio','ej-mes','ej-semana','ej-estado-tkt','ej-estado-ped','ej-cliente','ej-tipo-srv'].forEach(function(k){msReset(k);});
+  ejRender(STATE.tickets.raw,STATE.ventas.raw);
+}
+
+function ejGetFiltrado(){
+  var sA=msGetSelected('ej-anio'),sM=msGetSelected('ej-mes'),sSem=msGetSelected('ej-semana');
+  var sETkt=msGetSelected('ej-estado-tkt'),sEPed=msGetSelected('ej-estado-ped');
+  var sCli=msGetSelected('ej-cliente'),sTipo=msGetSelected('ej-tipo-srv');
+  var t=STATE.tickets.raw.filter(function(r){
+    if(sA.length&&!sA.includes(String(r.anio||'')))return false;
+    if(sM.length&&!sM.includes(String(r.mes||'')))return false;
+    if(sSem.length&&!sSem.includes(String(r.semana||'')))return false;
+    if(sETkt.length&&!sETkt.includes(r.estadoTicket||''))return false;
+    if(sCli.length&&!sCli.some(function(c){return c.toLowerCase()===(r.cliente||'').toLowerCase();}))return false;
+    if(sTipo.length&&!sTipo.includes(r.tipoServicio||''))return false;
+    return true;
+  });
+  var v=STATE.ventas.raw.filter(function(r){
+    if(sA.length&&!sA.includes(String(r.anio||'')))return false;
+    if(sM.length&&!sM.includes(String(r.mes||'')))return false;
+    if(sSem.length&&!sSem.includes(String(r.semana||'')))return false;
+    if(sEPed.length&&!sEPed.includes(r.estadoPedido||''))return false;
+    if(sCli.length&&!sCli.some(function(c){return c.toLowerCase()===(r.cliente||'').toLowerCase();}))return false;
+    if(sTipo.length&&!sTipo.includes(r.tipoServicio||''))return false;
+    return true;
+  });
+  return {t:t,v:v};
+}
+
+function ejRender(t,v){
+  var container=document.getElementById('ejContent');
+  if(!container)return;
+  var fd=ejGetFiltrado(); t=fd.t; v=fd.v;
+
+  var ahora=new Date(),mesAct=ahora.getMonth()+1,anioAct=ahora.getFullYear();
+  var MES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  var TC=3.8;
+
+  /* ── Kanban de Tickets: últimos del mes actual ── */
+  var KANBAN_COLS=[
+    {key:'nuevo',  label:'Nuevo Ingreso', color:'#10B981', bg:'#F0FDF4', border:'#10B981',
+     match:function(r){var e=(r.estadoReparacion||'').toLowerCase();return !e||e==='nuevo'||e==='nuevo ingreso';}},
+    {key:'cotizar',label:'Por Cotizar',   color:'#F97316', bg:'#FFF7ED', border:'#F97316',
+     match:function(r){return /cotiz/i.test(r.estadoReparacion||'');}},
+    {key:'repar',  label:'Reparando',     color:'#EAB308', bg:'#FEFCE8', border:'#EAB308',
+     match:function(r){return /repar|proceso|ejecuc/i.test(r.estadoReparacion||'');}},
+    {key:'confirm',label:'Confirmado',    color:'#84CC16', bg:'#F7FEE7', border:'#84CC16',
+     match:function(r){return /confirm|aprob|listo/i.test(r.estadoReparacion||'');}}
+  ];
+  var tMes=t.filter(function(r){return r.mes===mesAct&&r.anio===anioAct;});
+  var tMesSrt=tMes.slice().sort(function(a,b){
+    var fa=a.fechaInicio instanceof Date?a.fechaInicio:new Date(0);
+    var fb=b.fechaInicio instanceof Date?b.fechaInicio:new Date(0);
+    return fb-fa;
+  });
+
+  function kanbanCard(r,col){
+    var cli=(r.cliente||'').length>18?(r.cliente||'').slice(0,18)+'…':(r.cliente||'—');
+    return '<div style="border:2px solid '+col.border+';background:'+col.bg+';border-radius:8px;padding:7px 10px;margin-bottom:6px;font-size:11.5px;line-height:1.3;">'
+      +'<div style="font-weight:700;color:'+col.color+';">'+escapeHtml(cli)+'</div>'
+      +'<div style="color:#64748B;font-size:10.5px;">#'+escapeHtml(r.nroTicket||'—')+'</div>'
+      +'</div>';
+  }
+
+  var kanbanHTML='<div style="background:#fff;border:1.5px solid #DDE4ED;border-radius:12px;padding:16px;margin-bottom:16px;">'
+    +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">'
+    +'<h3 style="margin:0;font-size:15px;font-weight:800;color:#0B1F3A;">🗂 Kanban de Tickets</h3>'
+    +'<span style="font-size:11px;color:#64748B;padding:3px 8px;background:#F0F4F8;border-radius:99px;">Últimos tickets del mes de '+escapeHtml(MES[(mesAct-1)]||'')+' '+anioAct+' ('+tMes.length+')</span>'
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">';
+
+  KANBAN_COLS.forEach(function(col){
+    var cards=tMesSrt.filter(col.match).slice(0,8);
+    kanbanHTML+='<div>'
+      +'<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:'+col.color+';border-bottom:2px solid '+col.border+';padding-bottom:5px;margin-bottom:8px;">'+escapeHtml(col.label)+'</div>';
+    if(cards.length){
+      cards.forEach(function(r){kanbanHTML+=kanbanCard(r,col);});
+    } else {
+      kanbanHTML+='<div style="color:#CBD5E1;font-size:11px;text-align:center;padding:12px 0;">Sin tickets</div>';
+    }
+    kanbanHTML+='</div>';
+  });
+  kanbanHTML+='</div></div>';
+
+  /* ── KPIs Tickets Abiertos + Cerrados ── */
+  var tAbiertos=t.filter(function(r){return !/cerr|resuel|finaliz/i.test(r.estadoTicket||'');});
+  var tCerrados=t.filter(function(r){return /cerr|resuel|finaliz/i.test(r.estadoTicket||'');});
+  var tCerMes=tCerrados.filter(function(r){return r.mes===mesAct&&r.anio===anioAct;});
+  var pctRes=tMes.length?Math.round(tCerMes.length/tMes.length*100):0;
+  var promDurAb=tAbiertos.length?Math.round(tAbiertos.reduce(function(s,r){return s+(r.duracionSeg||0);},0)/tAbiertos.length):0;
+  var promDurCerr=tCerMes.length?Math.round(tCerMes.reduce(function(s,r){return s+(r.duracionSeg||0);},0)/tCerMes.length):0;
+  var tecCarga={};
+  tAbiertos.forEach(function(r){var k=r.tecnico||'Sin asignar';tecCarga[k]=(tecCarga[k]||0)+1;});
+  var topTec=Object.keys(tecCarga).sort(function(a,b){return tecCarga[b]-tecCarga[a];})[0]||'—';
+
+  function kpiBox(label, val, sub, color){
+    return '<div style="background:#F8FAFC;border:1.5px solid #DDE4ED;border-radius:10px;padding:12px 14px;text-align:center;">'
+      +'<div style="font-size:22px;font-weight:900;color:'+(color||'#152B44')+';">'+val+'</div>'
+      +'<div style="font-size:10.5px;font-weight:700;color:#64748B;margin-top:2px;">'+label+'</div>'
+      +(sub?'<div style="font-size:10px;color:#94A3B8;margin-top:1px;">'+sub+'</div>':'')
+      +'</div>';
+  }
+
+  var kpiTktHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">'
+    // Tickets Abiertos
+    +'<div style="background:#fff;border:1.5px solid #DDE4ED;border-radius:12px;padding:14px;">'
+    +'<h4 style="margin:0 0 10px;font-size:13px;font-weight:800;color:#F59E0B;display:flex;align-items:center;gap:6px;">⚡ KPIs de Tickets Abiertos</h4>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
+    +kpiBox('Total abiertos', tAbiertos.length, 'acumulado', '#F59E0B')
+    +kpiBox('Duración prom.', formatSecondsToHMS(promDurAb), 'por ticket abierto', '#94A3B8')
+    +kpiBox('Técnico c/más carga', topTec.slice(0,14), tecCarga[topTec]+' tickets', '#EF4444')
+    +kpiBox('Abiertos este mes', tMes.filter(function(r){return !/cerr|resuel|finaliz/i.test(r.estadoTicket||'');}).length, 'del total del mes', '#F97316')
+    +'</div></div>'
+    // Tickets Cerrados
+    +'<div style="background:#fff;border:1.5px solid #DDE4ED;border-radius:12px;padding:14px;">'
+    +'<h4 style="margin:0 0 10px;font-size:13px;font-weight:800;color:#10B981;display:flex;align-items:center;gap:6px;">✅ KPIs de Tickets Cerrados</h4>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
+    +kpiBox('Cerrados este mes', tCerMes.length, 'del total '+tMes.length+' tickets', '#10B981')
+    +kpiBox('% Resolución', pctRes+'%', 'mes actual', pctRes>=80?'#10B981':pctRes>=50?'#F59E0B':'#EF4444')
+    +kpiBox('Duración prom.', formatSecondsToHMS(promDurCerr), 'por ticket cerrado', '#94A3B8')
+    +kpiBox('Total cerrados', tCerrados.length, 'histórico', '#64748B')
+    +'</div></div>'
+    +'</div>';
+
+  /* ── KPIs de Tickets por Mes ── */
+  var porMesTkt={};
+  t.forEach(function(r){
+    var k=String(r.anio||'')+'-'+String(r.mes||'00').padStart(2,'0');
+    if(!porMesTkt[k])porMesTkt[k]={total:0,cerr:0};
+    porMesTkt[k].total++;
+    if(/cerr|resuel|finaliz/i.test(r.estadoTicket||''))porMesTkt[k].cerr++;
+  });
+  var mesesTkt=Object.keys(porMesTkt).filter(function(k){return k!=='undefined-00';}).sort().slice(-12);
+
+  var kpiMesHTML='<div style="background:#fff;border:1.5px solid #DDE4ED;border-radius:12px;padding:14px;margin-bottom:16px;">'
+    +'<h4 style="margin:0 0 12px;font-size:13px;font-weight:800;color:#1A86F1;">📈 KPIs de Tickets por Mes <span style="font-size:10.5px;font-weight:500;color:#94A3B8;">(últimos 12 meses)</span></h4>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">'
+    +'<div class="chart-wrap" style="height:200px;"><canvas id="chartEjTktMes"></canvas></div>'
+    +'<div class="chart-wrap" style="height:200px;"><canvas id="chartEjTktEst"></canvas></div>'
+    +'</div></div>';
+
+  /* ── Kanban de Pedidos ── */
+  var PED_COLS=[
+    {key:'cot',   label:'Cotización',       color:'#8B5CF6', bg:'#F5F3FF', border:'#8B5CF6',
+     match:function(r){return /cotiz/i.test(r.estadoPedido||'');}},
+    {key:'orden', label:'Orden de Venta',    color:'#1A86F1', bg:'#EFF6FF', border:'#1A86F1',
+     match:function(r){return /orden|venta/i.test(r.estadoPedido||'');}},
+    {key:'pfac',  label:'Por Facturar',      color:'#F59E0B', bg:'#FFFBEB', border:'#F59E0B',
+     match:function(r){return /factur/i.test(r.estadoPedido||'');}},
+    {key:'otro',  label:'Otros estados',     color:'#64748B', bg:'#F8FAFC', border:'#CBD5E1',
+     match:function(r){
+       return !/cotiz|orden|venta|factur/i.test(r.estadoPedido||'');
+     }}
+  ];
+  var vMes=v.filter(function(r){return r.mes===mesAct&&r.anio===anioAct;});
+  var vMesSrt=vMes.slice().sort(function(a,b){
+    var fa=a.fechaPedido instanceof Date?a.fechaPedido:new Date(0);
+    var fb=b.fechaPedido instanceof Date?b.fechaPedido:new Date(0);
+    return fb-fa;
+  });
+
+  function kanbanCardPed(r,col){
+    var cli=(r.cliente||'').length>18?(r.cliente||'').slice(0,18)+'…':(r.cliente||'—');
+    var mon=r.moneda==='USD'?'US$ '+(r.total||0).toFixed(0):'S/ '+(r.total||0).toFixed(0);
+    return '<div style="border:2px solid '+col.border+';background:'+col.bg+';border-radius:8px;padding:7px 10px;margin-bottom:6px;font-size:11.5px;line-height:1.3;">'
+      +'<div style="font-weight:700;color:'+col.color+';">'+escapeHtml(r.pedido||'—')+'</div>'
+      +'<div style="color:#475569;font-size:10.5px;">'+escapeHtml(cli)+'</div>'
+      +'<div style="color:#94A3B8;font-size:10px;">'+escapeHtml(mon)+'</div>'
+      +'</div>';
+  }
+
+  var kanbanPedHTML='<div style="background:#fff;border:1.5px solid #DDE4ED;border-radius:12px;padding:16px;margin-bottom:16px;">'
+    +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">'
+    +'<h3 style="margin:0;font-size:15px;font-weight:800;color:#0B1F3A;">📦 Kanban de Pedidos</h3>'
+    +'<span style="font-size:11px;color:#64748B;padding:3px 8px;background:#F0F4F8;border-radius:99px;">Pedidos del mes de '+escapeHtml(MES[(mesAct-1)]||'')+' '+anioAct+' ('+vMes.length+')</span>'
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">';
+  PED_COLS.forEach(function(col){
+    var cards=vMesSrt.filter(col.match).slice(0,8);
+    kanbanPedHTML+='<div>'
+      +'<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:'+col.color+';border-bottom:2px solid '+col.border+';padding-bottom:5px;margin-bottom:8px;">'+escapeHtml(col.label)+'</div>';
+    if(cards.length){
+      cards.forEach(function(r){kanbanPedHTML+=kanbanCardPed(r,col);});
+    } else {
+      kanbanPedHTML+='<div style="color:#CBD5E1;font-size:11px;text-align:center;padding:12px 0;">Sin pedidos</div>';
+    }
+    kanbanPedHTML+='</div>';
+  });
+  kanbanPedHTML+='</div></div>';
+
+  /* ── Gráficos de Pedidos ── */
+  var grafHTML='<div style="background:#fff;border:1.5px solid #DDE4ED;border-radius:12px;padding:14px;margin-bottom:16px;">'
+    +'<h4 style="margin:0 0 12px;font-size:13px;font-weight:800;color:#0B1F3A;">📊 Análisis de Pedidos</h4>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">'
+    +'<div><div style="font-size:11px;font-weight:700;color:#64748B;margin-bottom:6px;">Tendencia mensual: Órdenes vs Cotizaciones</div><div class="chart-wrap" style="height:180px;"><canvas id="chartEjPedTend"></canvas></div></div>'
+    +'<div><div style="font-size:11px;font-weight:700;color:#64748B;margin-bottom:6px;">Distribución por tipo de servicio</div><div class="chart-wrap" style="height:180px;"><canvas id="chartEjPedTipo"></canvas></div></div>'
+    +'<div><div style="font-size:11px;font-weight:700;color:#64748B;margin-bottom:6px;">Top 8 clientes por monto (S/ equiv.)</div><div class="chart-wrap" style="height:180px;"><canvas id="chartEjPedCli"></canvas></div></div>'
+    +'<div><div style="font-size:11px;font-weight:700;color:#64748B;margin-bottom:6px;">Monto mensual PEN vs USD</div><div class="chart-wrap" style="height:180px;"><canvas id="chartEjPedMon"></canvas></div></div>'
+    +'</div></div>';
+
+  /* ── KPIs de Pedidos: Por Facturar + Cotización Activa ── */
+  var vFacturar=v.filter(function(r){return /factur|pfac/i.test(r.estadoPedido||'');});
+  var vCotActiva=v.filter(function(r){return /cotiz/i.test(r.estadoPedido||'');});
+  var vOrdenes=v.filter(function(r){return /orden|venta/i.test(r.estadoPedido||'');});
+
+  function sumMon(arr,mon){return arr.reduce(function(s,r){return s+(r.moneda===mon?r.total:0);},0);}
+  var facPEN=sumMon(vFacturar,'PEN'),facUSD=sumMon(vFacturar,'USD');
+  var cotPEN=sumMon(vCotActiva,'PEN'),cotUSD=sumMon(vCotActiva,'USD');
+  var ordPEN=sumMon(vOrdenes,'PEN'),ordUSD=sumMon(vOrdenes,'USD');
+
+  var kpiPedHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">'
+    // Por Facturar
+    +'<div style="background:#fff;border:1.5px solid #DDE4ED;border-radius:12px;padding:14px;">'
+    +'<h4 style="margin:0 0 10px;font-size:13px;font-weight:800;color:#F59E0B;display:flex;align-items:center;gap:6px;">💰 KPIs de Pedidos por Facturar</h4>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
+    +kpiBox('Total pedidos',vFacturar.length,'para facturar','#F59E0B')
+    +kpiBox('Monto PEN','S/ '+Math.round(facPEN).toLocaleString(),'acumulado','#1A86F1')
+    +kpiBox('Monto USD','US$ '+Math.round(facUSD).toLocaleString(),'acumulado','#10B981')
+    +kpiBox('Total equiv.','S/ '+Math.round(facPEN+facUSD*TC).toLocaleString(),'al tipo '+TC,'#8B5CF6')
+    +'</div></div>'
+    // Cotización Activa
+    +'<div style="background:#fff;border:1.5px solid #DDE4ED;border-radius:12px;padding:14px;">'
+    +'<h4 style="margin:0 0 10px;font-size:13px;font-weight:800;color:#8B5CF6;display:flex;align-items:center;gap:6px;">📋 KPIs de Pedidos con Cotización Activa</h4>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
+    +kpiBox('Cotizaciones',vCotActiva.length,'activas','#8B5CF6')
+    +kpiBox('Monto PEN','S/ '+Math.round(cotPEN).toLocaleString(),'en cotización','#1A86F1')
+    +kpiBox('Monto USD','US$ '+Math.round(cotUSD).toLocaleString(),'en cotización','#10B981')
+    +kpiBox('Órdenes de venta',vOrdenes.length,'confirmadas','#10B981')
+    +'</div></div>'
+    +'</div>';
+
+  container.innerHTML = kanbanHTML + kpiTktHTML + kpiMesHTML + kanbanPedHTML + grafHTML + kpiPedHTML;
+
+  /* ── Renderizar gráficos ── */
+  /* Tickets por mes */
+  destroyChart('ejTktMes');
+  var ctTktMes=document.getElementById('chartEjTktMes');
+  if(ctTktMes&&mesesTkt.length){
+    CHARTS.ejTktMes=new Chart(ctTktMes,{type:'bar',data:{
+      labels:mesesTkt.map(function(k){var p=k.split('-');return (MES_NOMBRES[parseInt(p[1])-1]||p[1]).slice(0,3)+' '+p[0].slice(2);}),
+      datasets:[
+        {label:'Total',data:mesesTkt.map(function(k){return porMesTkt[k].total;}),backgroundColor:'rgba(26,134,241,.6)',borderRadius:3},
+        {label:'Cerrados',data:mesesTkt.map(function(k){return porMesTkt[k].cerr;}),backgroundColor:'rgba(16,185,129,.6)',borderRadius:3}
+      ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:10,font:{size:10}}}},scales:{x:{ticks:{font:{size:9}}},y:{ticks:{font:{size:9}}}}}});
+  }
+
+  /* Distribución estado tickets */
+  destroyChart('ejTktEst');
+  var ctTktEst=document.getElementById('chartEjTktEst');
+  var estMap={};
+  t.forEach(function(r){var e=r.estadoTicket||'Sin estado';estMap[e]=(estMap[e]||0)+1;});
+  var estKeys=Object.keys(estMap).sort(function(a,b){return estMap[b]-estMap[a];}).slice(0,6);
+  if(ctTktEst&&estKeys.length){
+    var CL=['#1A86F1','#10B981','#F59E0B','#EF4444','#8B5CF6','#06B6D4'];
+    CHARTS.ejTktEst=new Chart(ctTktEst,{type:'doughnut',data:{labels:estKeys,datasets:[{data:estKeys.map(function(e){return estMap[e];}),backgroundColor:CL,borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:10,font:{size:10}}}}}});
+  }
+
+  /* Tendencia pedidos por mes */
+  destroyChart('ejPedTend');
+  var ctPedTend=document.getElementById('chartEjPedTend');
+  var porMesPed={};
+  v.forEach(function(r){
+    var k=String(r.anio||'')+'-'+String(r.mes||'00').padStart(2,'0');
+    if(!porMesPed[k])porMesPed[k]={ord:0,cot:0};
+    if(/orden|venta/i.test(r.estadoPedido||''))porMesPed[k].ord++;
+    else if(/cotiz/i.test(r.estadoPedido||''))porMesPed[k].cot++;
+  });
+  var mesesPed=Object.keys(porMesPed).filter(function(k){return k!=='undefined-00';}).sort().slice(-12);
+  if(ctPedTend&&mesesPed.length){
+    CHARTS.ejPedTend=new Chart(ctPedTend,{type:'line',data:{
+      labels:mesesPed.map(function(k){var p=k.split('-');return (MES_NOMBRES[parseInt(p[1])-1]||p[1]).slice(0,3)+' '+p[0].slice(2);}),
+      datasets:[
+        {label:'Órdenes',data:mesesPed.map(function(k){return porMesPed[k].ord;}),borderColor:'#10B981',backgroundColor:'rgba(16,185,129,.1)',tension:0.4,fill:true,pointRadius:2},
+        {label:'Cotizaciones',data:mesesPed.map(function(k){return porMesPed[k].cot;}),borderColor:'#8B5CF6',backgroundColor:'rgba(139,92,246,.1)',tension:0.4,fill:false,pointRadius:2}
+      ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:10,font:{size:10}}}},scales:{x:{ticks:{font:{size:9}}},y:{ticks:{font:{size:9}}}}}});
+  }
+
+  /* Tipo de servicio pedidos */
+  destroyChart('ejPedTipo');
+  var ctPedTipo=document.getElementById('chartEjPedTipo');
+  var tipoMap={};
+  var vConTipo=v.filter(function(r){return r.tipoServicio;});
+  (vConTipo.length?vConTipo:t).forEach(function(r){var e=r.tipoServicio||'Sin tipo';tipoMap[e]=(tipoMap[e]||0)+1;});
+  var tipoKeys=Object.keys(tipoMap).sort(function(a,b){return tipoMap[b]-tipoMap[a];}).slice(0,6);
+  if(ctPedTipo&&tipoKeys.length){
+    var CL2=['#1A86F1','#10B981','#F59E0B','#EF4444','#8B5CF6','#06B6D4'];
+    CHARTS.ejPedTipo=new Chart(ctPedTipo,{type:'doughnut',data:{labels:tipoKeys.map(function(t){return t.slice(0,20);}),datasets:[{data:tipoKeys.map(function(e){return tipoMap[e];}),backgroundColor:CL2,borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:9,font:{size:9}}}}}});
+  }
+
+  /* Top clientes por monto */
+  destroyChart('ejPedCli');
+  var ctPedCli=document.getElementById('chartEjPedCli');
+  var cliMonMap={};
+  v.forEach(function(r){var c=(r.cliente||'Sin cliente').slice(0,20);if(!cliMonMap[c])cliMonMap[c]=0;cliMonMap[c]+=(r.moneda==='USD'?r.total*TC:r.total)||0;});
+  var top8Cli=Object.keys(cliMonMap).sort(function(a,b){return cliMonMap[b]-cliMonMap[a];}).slice(0,8);
+  if(ctPedCli&&top8Cli.length){
+    CHARTS.ejPedCli=new Chart(ctPedCli,{type:'bar',data:{labels:top8Cli,datasets:[{data:top8Cli.map(function(c){return Math.round(cliMonMap[c]);}),backgroundColor:'#1A86F1',borderRadius:3}]},options:Object.assign({},baseBarOptions(),{indexAxis:'y',plugins:{legend:{display:false}}})});
+  }
+
+  /* Monto mensual PEN vs USD */
+  destroyChart('ejPedMon');
+  var ctPedMon=document.getElementById('chartEjPedMon');
+  var porMesMon={};
+  v.forEach(function(r){
+    var k=String(r.anio||'')+'-'+String(r.mes||'00').padStart(2,'0');
+    if(!porMesMon[k])porMesMon[k]={pen:0,usd:0};
+    if(r.moneda==='USD')porMesMon[k].usd+=r.total||0;
+    else porMesMon[k].pen+=r.total||0;
+  });
+  var mesesMon=Object.keys(porMesMon).filter(function(k){return k!=='undefined-00';}).sort().slice(-12);
+  if(ctPedMon&&mesesMon.length){
+    CHARTS.ejPedMon=new Chart(ctPedMon,{type:'bar',data:{
+      labels:mesesMon.map(function(k){var p=k.split('-');return (MES_NOMBRES[parseInt(p[1])-1]||p[1]).slice(0,3)+' '+p[0].slice(2);}),
+      datasets:[
+        {label:'S/ PEN',data:mesesMon.map(function(k){return Math.round(porMesMon[k].pen);}),backgroundColor:'rgba(26,134,241,.7)',borderRadius:3},
+        {label:'US$ USD',data:mesesMon.map(function(k){return Math.round(porMesMon[k].usd);}),backgroundColor:'rgba(16,185,129,.7)',borderRadius:3}
+      ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:10,font:{size:10}}}},scales:{x:{ticks:{font:{size:9}}},y:{ticks:{font:{size:9}}}}}});
+  }
+}
+
 function switchModule(mod){
   document.querySelectorAll('.module-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.mod===mod); });
   document.getElementById('mod-ejecutivo').classList.toggle('active', mod==='ejecutivo');
@@ -2833,6 +3236,8 @@ var MS_ALL_KEYS = [
   'vf-anio','vf-mes','vf-semana','vf-vendedor','vf-cliente','vf-estado','vf-categoria','vf-moneda','vf-tiposervicio',
   'ej-estado','ej-moneda','ej-categoria',
   'rent-estado','rent-moneda','rent-anio','rent-mes','rent-categoria'
+,
+  'ej-anio','ej-mes','ej-semana','ej-estado-tkt','ej-estado-ped','ej-cliente','ej-tipo-srv'
 ];
 function msToggle(key){
   var dd = document.getElementById('ms-dd-'+key);
@@ -4745,265 +5150,15 @@ function tcliRenderDetalle(){
    Muestra KPIs, tendencias, top clientes, carga técnicos y conversión.
 ============================================================ */
 
-function ejInit(){
-  var t = STATE.tickets.raw, v = STATE.ventas.raw;
-  var statusEl = document.getElementById('ejStatus');
-  var container = document.getElementById('ejContent');
-  if(!container) return;
 
-  if(!t.length && !v.length){
-    if(statusEl) statusEl.textContent = 'Importa Tickets y/o Ventas para ver el resumen';
-    container.innerHTML = '<div class="empty-state"><div class="icon">📊</div><h4>Sin datos</h4><p>Importa un CSV en Tickets de Servicio o Ventas / Pedidos.</p></div>';
-    var ejF = document.getElementById('ejFilters');
-    if(ejF) ejF.style.display = 'none';
-    return;
-  }
 
-  /* Poblar filtros de ventas */
-  if(v.length){
-    var estados = Array.from(new Set(v.map(function(r){return r.estadoPedido||'';}).filter(Boolean))).sort();
-    var monedas = Array.from(new Set(v.map(function(r){return r.moneda||'';}).filter(Boolean))).sort();
-    var categorias = Array.from(new Set(v.map(function(r){return r.categoria||'';}).filter(Boolean))).sort();
-    msFillDynamic('ej-estado',    estados);
-    msFillDynamic('ej-moneda',    monedas);
-    msFillDynamic('ej-categoria', categorias);
-    var ejF = document.getElementById('ejFilters');
-    if(ejF) ejF.style.display = '';
-  }
 
-  if(statusEl) statusEl.textContent = t.length+' tickets · '+v.length+' pedidos';
-  ejRenderFromState();
-}
 
-function ejLimpiarFiltros(){
-  ['ej-estado','ej-moneda','ej-categoria'].forEach(function(k){ msReset(k); });
-  ejRenderFromState();
-}
 
-function ejGetVentas(){
-  var estados   = msGetSelected('ej-estado');
-  var monedas   = msGetSelected('ej-moneda');
-  var categorias= msGetSelected('ej-categoria');
-  return STATE.ventas.raw.filter(function(r){
-    if(estados.length    && estados.indexOf(r.estadoPedido)===-1) return false;
-    if(monedas.length    && monedas.indexOf(r.moneda)===-1)       return false;
-    if(categorias.length && categorias.indexOf(r.categoria)===-1) return false;
-    return true;
-  });
-}
 
-function ejRenderFromState(){
-  ejRender(STATE.tickets.raw, ejGetVentas());
-  /* Cerrar todos los dropdowns ej- tras actualizar el panel */
-  ['ej-estado','ej-moneda','ej-categoria'].forEach(function(k){
-    var d=document.getElementById('ms-dd-'+k);
-    if(d) d.classList.remove('open');
-  });
-}
 
-function ejRender(t, v){
-  var container = document.getElementById('ejContent');
-  if(!container) return;
 
-  var ahora = new Date();
-  var mesActual = ahora.getMonth() + 1;
-  var anioActual = ahora.getFullYear();
-  var mesAnterior = mesActual === 1 ? 12 : mesActual - 1;
-  var anioAnterior = mesActual === 1 ? anioActual - 1 : anioActual;
 
-  /* ── KPIs de Tickets ── */
-  var tMes    = t.filter(function(r){ return r.mes===mesActual && r.anio===anioActual; });
-  var tMesAnt = t.filter(function(r){ return r.mes===mesAnterior && r.anio===anioAnterior; });
-  var tCerrados = tMes.filter(function(r){ var e=(r.estadoTicket||'').toLowerCase(); return e.indexOf('cerr')!==-1||e.indexOf('resuel')!==-1; });
-  var tPendientes = t.filter(function(r){ var e=(r.estadoTicket||'').toLowerCase(); return e.indexOf('cerr')===-1&&e.indexOf('resuel')===-1; });
-  var pctRes = tMes.length ? Math.round(tCerrados.length/tMes.length*100) : 0;
-  var promDurSeg = tMes.length ? Math.round(tMes.reduce(function(s,r){return s+(r.duracionSeg||0);},0)/tMes.length) : 0;
-
-  /* ── KPIs de Ventas ── */
-  var vMes    = v.filter(function(r){ return r.mes===mesActual && r.anio===anioActual; });
-  var vMesAnt = v.filter(function(r){ return r.mes===mesAnterior && r.anio===anioAnterior; });
-  var ingPEN  = vMes.reduce(function(s,r){return s+(r.moneda==='PEN'?r.total:0);},0);
-  var ingUSD  = vMes.reduce(function(s,r){return s+(r.moneda==='USD'?r.total:0);},0);
-  var ingPENAnt = vMesAnt.reduce(function(s,r){return s+(r.moneda==='PEN'?r.total:0);},0);
-  var ingUSDant = vMesAnt.reduce(function(s,r){return s+(r.moneda==='USD'?r.total:0);},0);
-  var deltaPEN = ingPENAnt > 0 ? Math.round((ingPEN-ingPENAnt)/ingPENAnt*100) : null;
-  var deltaUSD = ingUSDant > 0 ? Math.round((ingUSD-ingUSDant)/ingUSDant*100) : null;
-
-  var ordenes = v.filter(function(r){ return (r.estadoPedido||'').toLowerCase().indexOf('orden')!==-1||(r.estadoPedido||'').toLowerCase().indexOf('venta')!==-1; });
-  var cotizaciones = v.filter(function(r){ return (r.estadoPedido||'').toLowerCase().indexOf('cotiz')!==-1; });
-  var conv = (0+ordenes.length) > 0 ? Math.round(ordenes.length/(0+ordenes.length)*100) : 0;
-  var clientes = new Set(v.map(function(r){return r.cliente;}));
-
-  /* ── Top 5 clientes por monto (PEN) ── */
-  var clienteMap = {};
-  v.forEach(function(r){
-    var c = r.cliente||'Sin cliente';
-    if(!clienteMap[c]) clienteMap[c]={pen:0,usd:0,pedidos:0};
-    clienteMap[c][r.moneda==='USD'?'usd':'pen'] += r.total||0;
-    clienteMap[c].pedidos++;
-  });
-  var top5 = Object.keys(clienteMap).sort(function(a,b){
-    return (clienteMap[b].pen+clienteMap[b].usd*3.8) - (clienteMap[a].pen+clienteMap[a].usd*3.8);
-  }).slice(0,5);
-  var maxTop5 = top5.length ? (clienteMap[top5[0]].pen+clienteMap[top5[0]].usd*3.8) : 1;
-
-  /* ── Carga de técnicos (tickets pendientes) ── */
-  var tecMap = {};
-  tPendientes.forEach(function(r){
-    var t2 = (r.tecnico||'Sin asignar').trim();
-    if(!tecMap[t2]) tecMap[t2]={open:0,total:0};
-    tecMap[t2].open++;
-  });
-  t.forEach(function(r){
-    var t2 = (r.tecnico||'Sin asignar').trim();
-    if(!tecMap[t2]) tecMap[t2]={open:0,total:0};
-    tecMap[t2].total++;
-  });
-  var tecRank = Object.keys(tecMap).sort(function(a,b){return tecMap[b].open-tecMap[a].open;}).slice(0,6);
-  var maxOpen = tecRank.length ? (tecMap[tecRank[0]].open||1) : 1;
-
-  /* ── Tendencia mensual de ingresos (últimos 6 meses) ── */
-  var meses6 = [];
-  for(var i=5; i>=0; i--){
-    var d = new Date(ahora.getFullYear(), ahora.getMonth()-i, 1);
-    meses6.push({mes:d.getMonth()+1, anio:d.getFullYear(),
-      label:MES_NOMBRES[d.getMonth()].slice(0,3)+" '"+(String(d.getFullYear()).slice(2))});
-  }
-  var tendPEN = meses6.map(function(m){
-    return v.filter(function(r){return r.mes===m.mes&&r.anio===m.anio&&r.moneda==='PEN';}).reduce(function(s,r){return s+r.total;},0);
-  });
-  var tendUSD = meses6.map(function(m){
-    return v.filter(function(r){return r.mes===m.mes&&r.anio===m.anio&&r.moneda==='USD';}).reduce(function(s,r){return s+r.total;},0);
-  });
-  var tendTix = meses6.map(function(m){
-    return t.filter(function(r){return r.mes===m.mes&&r.anio===m.anio;}).length;
-  });
-
-  /* ── Renderizar ── */
-  function deltaHtml(pct){
-    if(pct===null) return '<span class="ej-kpi-delta flat">vs mes anterior: sin datos</span>';
-    var cls = pct>0?'up':pct<0?'down':'flat';
-    var sym = pct>0?'▲':pct<0?'▼':'─';
-    return '<span class="ej-kpi-delta '+cls+'">'+sym+' '+Math.abs(pct)+'% vs mes anterior</span>';
-  }
-  var mesNombre = MES_NOMBRES[(mesActual-1)]+' '+anioActual;
-
-  var html = '';
-
-  /* KPIs */
-  html += '<div class="ej-kpi-grid">';
-  /* Tickets del mes */
-  html += '<div class="ej-kpi navy"><div class="ej-kpi-label">Tickets este mes</div>'
-    +'<div class="ej-kpi-value">'+tMes.length+'</div>'
-    +'<div class="ej-kpi-sub">'+tCerrados.length+' cerrados · '+tPendientes.length+' pendientes</div>'
-    +(tMesAnt.length?'<span class="ej-kpi-delta '+(tMes.length>tMesAnt.length?'up':'down')+'">'+(tMes.length>tMesAnt.length?'▲':'▼')+' vs '+(tMesAnt.length)+' mes ant.</span>':'')
-    +'</div>';
-  /* % Resolución */
-  var resColor = pctRes>=80?'green':pctRes>=60?'amber':'red';
-  html += '<div class="ej-kpi '+resColor+'"><div class="ej-kpi-label">% Resolución</div>'
-    +'<div class="ej-kpi-value" style="color:'+(pctRes>=80?'#10B981':pctRes>=60?'#F59E0B':'#EF4444')+';">'+pctRes+'%</div>'
-    +'<div class="ej-kpi-sub">'+mesNombre+'</div></div>';
-  /* Tiempo promedio */
-  html += '<div class="ej-kpi blue"><div class="ej-kpi-label">Tiempo promedio</div>'
-    +'<div class="ej-kpi-value" style="font-size:20px;">'+formatSecondsToHMS(promDurSeg)+'</div>'
-    +'<div class="ej-kpi-sub">por ticket este mes</div></div>';
-  /* Pendientes totales */
-  html += '<div class="ej-kpi '+(tPendientes.length>20?'red':'amber')+'"><div class="ej-kpi-label">Tickets Abiertos</div>'
-    +'<div class="ej-kpi-value">'+tPendientes.length+'</div>'
-    +'<div class="ej-kpi-sub">sin resolver (total)</div></div>';
-  /* Ingresos PEN */
-  if(ingPEN>0) html += '<div class="ej-kpi amber"><div class="ej-kpi-label">Ingresos S/ este mes</div>'
-    +'<div class="ej-kpi-value" style="font-size:20px;">'+fmtMoneyCompact(ingPEN,'PEN')+'</div>'
-    + deltaHtml(deltaPEN)+'</div>';
-  /* Ingresos USD */
-  if(ingUSD>0) html += '<div class="ej-kpi green"><div class="ej-kpi-label">Ingresos US$ este mes</div>'
-    +'<div class="ej-kpi-value" style="font-size:20px;">'+fmtMoneyCompact(ingUSD,'USD')+'</div>'
-    + deltaHtml(deltaUSD)+'</div>';
-  /* Conversión */
-  html += '<div class="ej-kpi purple"><div class="ej-kpi-label">Conversión Comer.</div>'
-    +'<div class="ej-kpi-value" style="color:'+(conv>=70?'#10B981':conv>=40?'#F59E0B':'#EF4444')+';">'+conv+'%</div>'
-    +'<div class="ej-kpi-sub">'+0+' cot → '+ordenes.length+' órd</div></div>';
-  /* Clientes activos */
-  html += '<div class="ej-kpi cyan"><div class="ej-kpi-label">Clientes con pedidos</div>'
-    +'<div class="ej-kpi-value">'+clientes.size+'</div>'
-    +'<div class="ej-kpi-sub">'+v.length+' pedidos en total</div></div>';
-  html += '</div>';
-
-  /* Gráficos */
-  html += '<div class="charts-grid" style="margin-bottom:20px;">';
-  if(v.length) html += '<div class="chart-card"><h4>Ingresos últimos 6 meses</h4><div class="chart-wrap"><canvas id="chartEjTend"></canvas></div></div>';
-  if(t.length) html += '<div class="chart-card"><h4>Tickets últimos 6 meses</h4><div class="chart-wrap"><canvas id="chartEjTix"></canvas></div></div>';
-  html += '</div>';
-
-  /* Top 5 clientes */
-  if(top5.length){
-    html += '<div class="ej-section"><h3>🏆 Top 5 Clientes por facturación</h3><div class="line"></div></div>'
-      +'<div class="table-card"><div class="table-scroll"><table class="ej-table"><thead><tr>'
-      +'<th>#</th><th>Cliente</th><th>Pedidos</th><th>S/ PEN</th><th>US$ USD</th><th>Participación</th>'
-      +'</tr></thead><tbody>';
-    top5.forEach(function(c,i){
-      var d=clienteMap[c];
-      var pct=Math.round((d.pen+d.usd*3.8)/maxTop5*100);
-      html+='<tr>'
-        +'<td><strong style="color:var(--navy);">'+(i+1)+'</strong></td>'
-        +'<td><strong>'+escapeHtml(c)+'</strong></td>'
-        +'<td>'+d.pedidos+'</td>'
-        +'<td>'+(d.pen>0?fmtMoneyCompact(d.pen,'PEN'):'—')+'</td>'
-        +'<td>'+(d.usd>0?fmtMoneyCompact(d.usd,'USD'):'—')+'</td>'
-        +'<td><div style="display:flex;align-items:center;gap:6px;"><div class="ej-bar-bg" style="flex:1;"><div class="ej-bar" style="width:'+pct+'%;background:#F59E0B;"></div></div><span style="font-size:11px;font-weight:700;min-width:36px;">'+pct+'%</span></div></td>'
-        +'</tr>';
-    });
-    html += '</tbody></table></div></div>';
-  }
-
-  /* Carga de técnicos */
-  if(tecRank.length){
-    html += '<div class="ej-section"><h3>👤 Carga de trabajo por Técnico</h3><div class="line"></div>'
-      +'<span style="font-size:11.5px;color:var(--ink-muted);">Tickets abiertos vs. total histórico</span></div>'
-      +'<div class="table-card"><div class="table-scroll"><table class="ej-table"><thead><tr>'
-      +'<th>Técnico</th><th>Tickets abiertos</th><th>Total histórico</th><th>% Sin resolver</th><th>Estado</th>'
-      +'</tr></thead><tbody>';
-    tecRank.forEach(function(tc){
-      var d=tecMap[tc];
-      var pctOpen=d.total>0?Math.round(d.open/d.total*100):0;
-      var semCls=d.open>10?'red':d.open>5?'amber':'green';
-      var semTxt=d.open>10?'Alta carga':d.open>5?'Carga media':'Carga normal';
-      html+='<tr>'
-        +'<td><strong>'+escapeHtml(tc)+'</strong></td>'
-        +'<td><div style="display:flex;align-items:center;gap:6px;"><div class="ej-bar-bg"><div class="ej-bar" style="width:'+Math.round(d.open/maxOpen*100)+'%;background:#EF4444;"></div></div><span style="font-weight:700;">'+d.open+'</span></div></td>'
-        +'<td>'+d.total+'</td>'
-        +'<td style="font-weight:700;">'+pctOpen+'%</td>'
-        +'<td><span class="ej-dot '+semCls+'"></span><span style="font-size:11.5px;">'+semTxt+'</span></td>'
-        +'</tr>';
-    });
-    html += '</tbody></table></div></div>';
-  }
-
-  container.innerHTML = html;
-
-  /* Gráfico tendencia ingresos */
-  if(v.length){
-    destroyChart('ejTend');
-    var ct=document.getElementById('chartEjTend');
-    if(ct) CHARTS.ejTend=new Chart(ct,{type:'bar',data:{
-      labels:meses6.map(function(m){return m.label;}),
-      datasets:[
-        {label:'S/ PEN',data:tendPEN,backgroundColor:'#152B44',borderRadius:4},
-        {label:'US$ USD',data:tendUSD,backgroundColor:'#1A86F1',borderRadius:4}
-      ]
-    },options:Object.assign(baseBarOptions(),{plugins:{legend:{display:true,position:'top',align:'end',labels:{boxWidth:10,font:{size:11}}}}})});
-  }
-
-  /* Gráfico tendencia tickets */
-  if(t.length){
-    destroyChart('ejTix');
-    var ct2=document.getElementById('chartEjTix');
-    if(ct2) CHARTS.ejTix=new Chart(ct2,{type:'line',data:{
-      labels:meses6.map(function(m){return m.label;}),
-      datasets:[{label:'Tickets',data:tendTix,borderColor:'#F59E0B',backgroundColor:'#F59E0B22',tension:.35,pointRadius:4,pointBackgroundColor:'#F59E0B'}]
-    },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'#F1F5F9'}}}}});
-  }
-}
 
 /* ============================================================
    RENTABILIDAD — Cruce horas soporte vs. ingresos
