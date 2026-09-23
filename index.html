@@ -6780,13 +6780,10 @@ function fichaRender(){
   function tktTable(rows){
     if(!rows.length) return '<div class="ficha-empty">Sin tickets para este cliente.</div>';
     var hasPed=rows.some(function(r){return r.pedido;});
-    var DOC_H=['Pedidos','COT. FIRMADA','OS Firmada','Factura','XML','Nota de Ingreso','Aceptada Portal'];
-    var DOC_K=['ped','cot','os','fac','xml','nota','portal'];
     var h='<div class="ficha-table-wrap" style="overflow-x:auto;overflow-y:hidden;transform:rotateX(180deg);"><div style="transform:rotateX(180deg);"><table class="ficha-table"><thead><tr>'
       +'<th>N° Ticket</th><th>Estado</th><th>Tipo de Servicio</th><th>Categoría</th>'
       +'<th>Fecha Inicio</th><th>Duración</th>';
     if(hasPed) h+='<th style="color:#1A86F1;background:#EFF6FF;">N° Pedido</th><th style="color:#1A86F1;background:#EFF6FF;">Monto</th>';
-    DOC_H.forEach(function(c){h+='<th style="text-align:center;font-size:9px;font-weight:800;color:#059669;background:#ECFDF5;white-space:nowrap;">'+escapeHtml(c)+'</th>';});
     h+='</tr></thead><tbody>';
     rows.slice().sort(function(a,b){
       var fa=a.fechaInicio instanceof Date?a.fechaInicio:new Date(a.fechaInicio||0);
@@ -6797,11 +6794,6 @@ function fichaRender(){
       var isCerr=/cerr|resuel|finaliz/.test(e);
       var ec=isCerr?'background:#DCFCE7;color:#166534;':'background:#FEF3C7;color:#92400E;';
       var tid=escapeHtml(r.nroTicket||'');
-      var docOv={};try{var _d=localStorage.getItem('csdoc_'+tid);if(_d)docOv=JSON.parse(_d);}catch(ex){}
-      function dv(csv,k){return k in docOv?docOv[k]:!!csv;}
-      var dvs=[dv(!!r.pedido,'ped'),dv(r.cotFirmada,'cot'),dv(r.osFirmada,'os'),
-               dv(r.facturaXml,'fac'),dv(r.xmlDoc||r.facturaXml,'xml'),
-               dv(r.notaIngreso,'nota'),dv(r.aceptadaPortal,'portal')];
       h+='<tr>';
       h+='<td>'+tid+'</td>';
       h+='<td><span style="display:inline-block;padding:2px 6px;border-radius:99px;font-size:9.5px;font-weight:700;'+ec+'">'+escapeHtml(r.estadoTicket||'—')+'</span></td>';
@@ -6814,12 +6806,6 @@ function fichaRender(){
         var mT=r.total>0?fmtMoneyCompact(r.total,r.moneda||'PEN'):'—';
         h+='<td style="font-weight:700;background:#EFF6FF;">'+mT+'</td>';
       }
-      dvs.forEach(function(val,idx){
-        var ovK=DOC_K[idx];var chk=val?' checked':'';
-        var onch="fichaDocSave('"+tid.replace(/'/g,"\\\'")+"','"+ovK+"',this.checked)";
-        h+='<td style="text-align:center;padding:3px 4px;background:#F0FDF4;">'
-          +'<input type="checkbox"'+chk+' onchange="'+onch+'" style="width:14px;height:14px;accent-color:#059669;cursor:pointer;"></td>';
-      });
       h+='</tr>';
     });
     return h+'</tbody></table></div></div>';
@@ -6827,10 +6813,13 @@ function fichaRender(){
   /* ── Tabla Pedidos ── */
   function pedTable(rows){
     if(!rows.length) return '<div class="ficha-empty">Sin pedidos registrados para este cliente.</div>';
+    var DOC_H=['COT. FIRMADA','OS FIRMADA','FACTURA','XML','NOTA DE INGRESO','ACEPTADA PORTAL'];
+    var DOC_K=['cot','os','fac','xml','nota','portal'];
     var h='<div class="ficha-table-wrap" style="overflow-x:auto;overflow-y:hidden;transform:rotateX(180deg);"><div style="transform:rotateX(180deg);"><table class="ficha-table"><thead><tr>'
       +'<th>N° Pedido</th><th>Categoría</th><th>Tipo de Servicio</th>'
-      +'<th>Vendedor</th><th>Estado</th><th>Fecha</th><th>Monto</th><th>Moneda</th>'
-      +'</tr></thead><tbody>';
+      +'<th>Vendedor</th><th>Estado</th><th>Fecha</th><th>Monto</th><th>Moneda</th>';
+    DOC_H.forEach(function(c){h+='<th style="text-align:center;font-size:9px;font-weight:800;color:#059669;background:#ECFDF5;white-space:nowrap;">'+c+'</th>';});
+    h+='</tr></thead><tbody>';
     rows.slice().sort(function(a,b){
       var fa=a.fechaPedido instanceof Date?a.fechaPedido:new Date(a.fechaPedido||0);
       var fb=b.fechaPedido instanceof Date?b.fechaPedido:new Date(b.fechaPedido||0);
@@ -6838,16 +6827,31 @@ function fichaRender(){
     }).forEach(function(r){
       var esO=/orden|venta/i.test(r.estadoPedido||'');
       var ec=esO?'background:#DCFCE7;color:#166534;':'background:#FEF3C7;color:#92400E;';
+      var pid=escapeHtml(r.pedido||'');
+      var docOv=fichaDocLoad('P_'+pid);
+      function dv(csv,k){return k in docOv?docOv[k]:!!csv;}
+      var dvs=[dv(r.cotFirmada,'cot'),dv(r.osFirmada,'os'),
+               dv(r.facturaXml,'fac'),dv(r.xmlDoc||r.facturaXml,'xml'),
+               dv(r.notaIngreso,'nota'),dv(r.aceptadaPortal,'portal')];
       h+='<tr>'
-        +'<td>'+escapeHtml(r.pedido||'—')+'</td>'
+        +'<td style="font-weight:700;color:#1A86F1;">'+pid+'</td>'
         +'<td style="font-size:10.5px;">'+escapeHtml(r.categoria||'—')+'</td>'
         +'<td style="font-size:10.5px;">'+escapeHtml(r.tipoServicio||'—')+'</td>'
         +'<td style="font-size:10.5px;">'+escapeHtml(r.vendedor||'—')+'</td>'
         +'<td><span style="display:inline-block;padding:2px 6px;border-radius:99px;font-size:9.5px;font-weight:700;'+ec+'">'+escapeHtml(r.estadoPedido||'—')+'</span></td>'
         +'<td style="white-space:nowrap;font-size:10.5px;">'+fmtDate(r.fechaPedido)+'</td>'
         +'<td style="font-weight:700;white-space:nowrap;">'+fmtMoneyCompact(r.total||0,r.moneda||'PEN')+'</td>'
-        +'<td>'+escapeHtml(r.moneda||'—')+'</td>'
-        +'</tr>';
+        +'<td>'+escapeHtml(r.moneda||'—')+'</td>';
+      dvs.forEach(function(val,di){
+        var ovK=DOC_K[di];
+        var chk=val?' checked':'';
+        h+='<td style="text-align:center;padding:3px 4px;background:#F0FDF4;">'
+          +'<input type="checkbox" class="ped-chk"'+chk
+          +' data-pid="'+pid+'" data-key="'+ovK+'"'
+          +' onchange="fichaDocSave(this.dataset.pid?(\'P_\'+this.dataset.pid):\'\',this.dataset.key,this.checked)"'
+          +' style="width:14px;height:14px;accent-color:#059669;cursor:pointer;"></td>';
+      });
+      h+='</tr>';
     });
     return h+'</tbody></table></div></div>';
   }
