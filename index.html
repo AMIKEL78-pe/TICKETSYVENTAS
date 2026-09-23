@@ -2671,6 +2671,32 @@ function applyFilters(mod){
 /* ============================================================
    RENDER: TICKETS
 ============================================================ */
+function computeAndRenderTicketsKPIs(data){
+  var total = data.length;
+  var estadoCounts = {};
+  data.forEach(function(r){ estadoCounts[r.estadoTicket] = (estadoCounts[r.estadoTicket]||0)+1; });
+
+  var abiertosLike = 0, cerradosLike = 0;
+  Object.keys(estadoCounts).forEach(function(e){
+    var el = e.toLowerCase();
+    if(el.indexOf('cerr') !== -1 || el.indexOf('resuel') !== -1 || el.indexOf('finaliz') !== -1) cerradosLike += estadoCounts[e];
+    else abiertosLike += estadoCounts[e];
+  });
+
+  var totalSeg = data.reduce(function(s,r){ return s + r.duracionSeg; }, 0);
+  var promSeg = total ? totalSeg/total : 0;
+
+  var cards = [
+    {label:'Total de tickets', value: total, sub: abiertosLike+' en otros estados · '+cerradosLike+' resueltos/cerrados', cls:'navy'},
+    {label:'Resueltos / cerrados', value: cerradosLike, sub: total ? ((cerradosLike/total*100).toFixed(1)+'% del total') : '', cls:''},
+    {label:'Duración promedio', value: formatSecondsToHMS(promSeg), sub:'por ticket', cls:''},
+    {label:'Duración total acumulada', value: formatSecondsToHMS(totalSeg), sub:'todos los tickets filtrados', cls:'navy'}
+  ];
+  document.getElementById('ticketsKpiGrid').innerHTML = cards.map(renderKpiCard).join('');
+
+  renderTicketsHighlights(data);
+}
+
 function renderTickets(){
   var container = document.getElementById('ticketsContent');
   var data = STATE.tickets.filtered;
@@ -3145,43 +3171,7 @@ function sortTickets(col){
   renderTicketsTable();
 }
 
-function renderTicketsTable(){
-  var s = STATE.tickets;
-  var sorted = sortRows(s.filtered, s.sort.col, s.sort.dir);
-  var totalPages = Math.max(1, Math.ceil(sorted.length / s.pageSize));
-  if(s.page > totalPages) s.page = totalPages;
-  var pageRows = sorted.slice((s.page-1)*s.pageSize, s.page*s.pageSize);
-
-  var html = '<div class="table-scroll-wrap"><div class="table-scroll-inner"><table class="data-table"><thead><tr>';
-  TICKET_COLUMNS.forEach(function(c){
-    var arrow = s.sort.col===c.key ? (s.sort.dir==='asc'?'▲':'▼') : '';
-    html += '<th onclick="sortTickets(\''+c.key+'\')">'+escapeHtml(c.label)+' <span class="arrow">'+arrow+'</span></th>';
-  });
-  html += '</tr></thead><tbody>';
-
-  if(pageRows.length===0){
-    html += '<tr><td colspan="'+TICKET_COLUMNS.length+'" style="text-align:center;color:var(--ink-muted);padding:24px;">Sin resultados para los filtros aplicados</td></tr>';
-  } else {
-    pageRows.forEach(function(r){
-      html += '<tr>'
-        + '<td>'+escapeHtml(r.nroTicket)+'</td>'
-        + '<td>'+estadoBadge(r.estadoTicket)+'</td>'
-        + '<td>'+escapeHtml(r.tipoServicio)+'</td>'
-        + '<td>'+escapeHtml(r.cliente)+'</td>'
-        + '<td>'+escapeHtml(r.tecnico)+'</td>'
-        + '<td>'+escapeHtml(r.tipoEquipo)+'</td>'
-        + '<td>'+escapeHtml(r.marca)+'</td>'
-        + '<td>'+escapeHtml(r.nActivo)+'</td>'
-        + '<td>'+fmtDate(r.fechaInicio)+'</td>'
-        + '<td>'+fmtDate(r.fechaFin)+'</td>'
-        + '<td>'+escapeHtml(r.duracionStr)+'</td>'
-        + '</tr>';
-    });
-  }
-  html += '</tbody></table></div></div>';
-  document.getElementById('ticketsTableWrap').innerHTML = html;
-  document.getElementById('ticketsPagination').innerHTML = buildPaginationHtml('tickets', s.page, totalPages, sorted.length);
-}
+function renderTicketsTable(){ /* tabla eliminada - ver pedTable */ }
 
 function estadoBadge(estado){
   var el = (estado||'').toLowerCase();
@@ -4192,7 +4182,7 @@ function activosSortTabla(col){
   s.dir = (s.col===col && s.dir==='asc') ? 'desc' : 'asc';
   s.col = col;
   STATE.activos.page = 1;
-  activosRenderTabla();
+  activosRender();
 }
 
 
@@ -4200,7 +4190,7 @@ function activosSortTabla(col){
 /* Reutilizar goPage para el módulo activos */
 var _goPageOrig = goPage;
 goPage = function(mod, page){
-  if(mod==='activos'){ STATE.activos.page=page; activosRenderTabla(); }
+  if(mod==='activos'){ STATE.activos.page=page; activosRender(); }
   else _goPageOrig(mod, page);
 };
 
@@ -4276,7 +4266,7 @@ function activosGuardarDatos(nActivo, serieId, notasId){
   if(a){ a.serie=serie; a.notas=notas; }
   var modal = document.getElementById('activoModal');
   if(modal) modal.remove();
-  activosRenderTabla();
+  activosRender();
 }
 
 /* ── Registrar activo nuevo manualmente ── */
@@ -4434,7 +4424,7 @@ function clientesGetFiltrado(){var sA=msGetSelected('cl-anio'),sM=msGetSelected(
 function cliSortPedidos(col){
   _cliSortPedidos.dir = _cliSortPedidos.col===col && _cliSortPedidos.dir==='desc' ? 'asc' : 'desc';
   _cliSortPedidos.col = col;
-  clientesRenderPedidos();
+  clientesRender();
 }
 
 /* ── Panel 2: Monto por cliente (separado por moneda) ── */
@@ -4443,7 +4433,7 @@ function cliSortPedidos(col){
 function cliSortMonto(col){
   _cliSortMonto.dir = _cliSortMonto.col===col && _cliSortMonto.dir==='desc' ? 'asc' : 'desc';
   _cliSortMonto.col = col;
-  clientesRenderMonto();
+  clientesRender();
 }
 
 /* ── Panel 3: Matriz cliente × categoría ── */
