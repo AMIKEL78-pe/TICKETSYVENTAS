@@ -1389,7 +1389,8 @@ footer{ display:none !important; }
   </div>
   <div class="topbar-controls">
     <!-- Odoo sync -->
-    <button class="topbar-btn" onclick="odooSyncAll()" id="odooBtnSync" title="Sincronizar con Odoo"><span id="odooBtnIcon">🔄</span> <span id="odooBtnLabel">Odoo</span></button>
+    <button class="topbar-btn" onclick="odooTestConnection()" id="odooBtnTestTopbar" title="Probar conexion Odoo" style="font-size:11px;">Test</button>
+          <button class="topbar-btn" onclick="odooSyncAll()" id="odooBtnSync" title="Sincronizar con Odoo"><span id="odooBtnIcon">🔄</span> <span id="odooBtnLabel">Odoo</span></button>
     <button class="topbar-btn" onclick="odooOpenModal()" id="odooBtnCfg" title="Configurar Odoo" style="padding:6px 9px;">⚙</button>
     <!-- Backup -->
     <button class="topbar-btn" onclick="backupExportar()" title="Exportar datos">⭳ Exportar</button>
@@ -4386,7 +4387,8 @@ async function odooRpc(service,method,args,cfg){
 var ODOO_STATE_MAP={draft:'Cotizaci\u00f3n',sent:'Cotizaci\u00f3n',sale:'\u00d3rdenes de venta',done:'\u00d3rdenes de venta',cancel:'Cancelado'};
 
 function odooMapRow(rec,tagNames){
-  var fechaDate=rec.create_date?new Date(rec.create_date.replace(' ','T')+'Z'):null;
+  var _dateRaw=rec.date_order||rec.create_date||null;
+  var fechaDate=_dateRaw?new Date(_dateRaw.replace(' ','T')+'Z'):null;
   var cliente=Array.isArray(rec.partner_id)?rec.partner_id[1]:(rec.partner_id||'Sin cliente');
   var vendedor=Array.isArray(rec.user_id)?rec.user_id[1]:(rec.user_id||'Sin asignar');
   var monedaRaw=Array.isArray(rec.currency_id)?rec.currency_id[1]:(rec.currency_id||'');
@@ -4410,6 +4412,57 @@ function odooMapRow(rec,tagNames){
   };
 }
 
+function odooSaveAndTestOnly(){
+  var url=((document.getElementById('odoo-cfg-url')||{}).value||'').trim().replace(/\/$/,'');
+  var db=((document.getElementById('odoo-cfg-db')||{}).value||'').trim();
+  var user=((document.getElementById('odoo-cfg-user')||{}).value||'').trim();
+  var apiKey=((document.getElementById('odoo-cfg-key')||{}).value||'').trim();
+  if(!url||!db||!user||!apiKey){odooToast('Completa todos los campos.','error',4000);return;}
+  odooCfgSave({url:url,db:db,user:user,apiKey:apiKey});
+  odooTestConnection();
+}
+
+function odooTestConnection(){
+  var cfg=odooCfgLoad();
+  if(!cfg||!cfg.url||!cfg.db||!cfg.user||!cfg.apiKey){
+    odooToast('Guarda la configuraci\u00f3n antes de probar.','error',4000);
+    return;
+  }
+  var setBtn=function(txt,dis){
+    ['odooBtnTest','odooBtnTestTopbar'].forEach(function(id){
+      var b=document.getElementById(id);if(b){b.disabled=dis;b.textContent=txt;}
+    });
+  };
+  setBtn('Probando\u2026',true);
+  _odooUsarProxy=null;
+  odooToast('Probando conexi\u00f3n con Odoo\u2026','info',15000);
+  odooRpc('common','authenticate',[cfg.db,cfg.user,cfg.apiKey,{}],cfg)
+  .then(function(uid){
+    if(!uid||uid===false) throw new Error('Credenciales incorrectas o BD "'+cfg.db+'" no encontrada.');
+    var modo=_odooUsarProxy?('proxy local ('+ODOO_PROXY+')'):'conexi\u00f3n directa';
+    return odooRpc('object','execute_kw',[
+      cfg.db,uid,cfg.apiKey,'sale.order','search_read',
+      [[]],{fields:['name','state','date_order'],limit:3,order:'date_order desc',context:{}}
+    ],cfg).then(function(recs){
+      var n=Array.isArray(recs)?recs.length:0;
+      var ej=n>0?(' - \u00faltimo: '+recs[0].name+(recs[0].date_order?' ('+recs[0].date_order.slice(0,10)+')'  :'')):'';
+      odooToast('[OK] uid='+uid+' | '+modo+' | sale.order: '+n+' registros'+ej,'success',8000);
+    });
+  })
+  .catch(function(err){
+    console.error('[COSEINCO Odoo Test]',err);
+    var m=err.message||String(err);
+    var hint='';
+    if(/CORS|proxy/i.test(m))              hint=' -> Activa el proxy: node odoo-proxy.js';
+    else if(/Credential|database|BD/i.test(m)) hint=' -> Revisa URL, BD, usuario y API Key';
+    else if(/abort|timeout/i.test(m))      hint=' -> Odoo no responde (timeout)';
+    odooToast('[ERROR] '+m+hint,'error',10000);
+  })
+  .finally(function(){
+    setBtn('Probar conexi\u00f3n',false);
+  });
+}
+
 async function odooSyncAll(){
   var cfg=odooCfgLoad();
   if(!cfg||!cfg.url||!cfg.db||!cfg.user||!cfg.apiKey){ odooOpenModal(); return; }
@@ -4425,8 +4478,8 @@ async function odooSyncAll(){
     var fechaFrom=hace365.toISOString().slice(0,10)+' 00:00:00';
     var records=await odooRpc('object','execute_kw',[
       cfg.db,uid,cfg.apiKey,'sale.order','search_read',
-      [[['create_date','>=',fechaFrom]]],
-      {fields:['name','partner_id','state','create_date','user_id','tag_ids','amount_total','currency_id'],limit:2000,order:'create_date desc',context:{}}
+      [[['date_order','>=',fechaFrom]]],
+      {fields:['name','partner_id','state','create_date','date_order','user_id','tag_ids','amount_total','currency_id'],limit:2000,order:'create_date desc',context:{}}
     ],cfg);
     if(!Array.isArray(records)) throw new Error('Respuesta inesperada de Odoo. Verifica los permisos del usuario.');
     var tagNames={},allTagIds=[];
@@ -4485,6 +4538,7 @@ function odooOpenModal(){
     +'<div style="margin-top:8px;font-size:11px;color:#6B7688;">\u00bfVes error CORS? Inicia el proxy en tu PC: <code>node odoo-proxy-v2.js</code></div>'
     +'<div style="display:flex;gap:10px;margin-top:18px;">'
     +  '<button onclick="odooSaveAndSync()" style="flex:1;background:#1A86F1;color:#fff;border:none;border-radius:8px;padding:10px 0;font-weight:700;font-size:13.5px;cursor:pointer;">Guardar y sincronizar</button>'
+    +  '<button id="odooBtnTest" onclick="odooSaveAndTestOnly()" style="padding:9px 18px;border-radius:8px;border:1.5px solid #1A86F1;background:#EFF6FF;color:#1A86F1;font-family:Manrope,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">Probar conexión</button>'
     +  '<button onclick="odooCloseModal()" style="background:#F5F7FA;border:1px solid #E5E9EF;border-radius:8px;padding:10px 14px;cursor:pointer;font-size:13px;color:#152B44;">Cancelar</button>'
     +'</div>'
     +'</div>';
